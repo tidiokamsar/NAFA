@@ -9,6 +9,8 @@ export default defineConfig({
   schema: '../../../database/schema/schema.prisma',
   migrations: {
     path: '../../../database/migrations',
+    // Makes `prisma db seed` work, not just the `db:seed` npm script.
+    seed: 'ts-node -P tsconfig.json src/database/seed.ts',
   },
   datasource: {
     url: env('DATABASE_URL'),
