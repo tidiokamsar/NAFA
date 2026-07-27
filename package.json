@@ -1,0 +1,19 @@
+{
+  "name": "nafa",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NAFA — Enterprise Monorepo",
+  "workspaces": [
+    "apps/web/*",
+    "apps/mobile/*",
+    "apps/ai/*",
+    "apps/whatsapp",
+    "apps/ussd",
+    "apps/api-portal",
+    "services/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}
