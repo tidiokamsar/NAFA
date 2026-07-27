@@ -1,13 +1,21 @@
+// Must stay the first import: it starts OpenTelemetry before any
+// instrumented library is loaded.
+import './tracing.bootstrap';
+
 import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { setupSwagger, type AppConfig } from '@nafa/platform';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
   app.useLogger(app.get(Logger));
+  app.enableShutdownHooks();
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -16,18 +24,18 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle('NAFA — IAM Service')
-    .setDescription(
-      'Foundation layer reference service: authentication bootstrap, health, metrics, logging.',
-    )
-    .setVersion('0.1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  setupSwagger(app, {
+    title: 'NAFA — IAM Service',
+    description:
+      'Foundation layer reference service: authentication bootstrap, health probes, telemetry.',
+    tags: [
+      { name: 'auth', description: 'Authentication bootstrap' },
+      { name: 'health', description: 'Liveness and readiness probes' },
+    ],
+  });
 
-  const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+  const config = app.get(ConfigService);
+  const { port } = config.getOrThrow<AppConfig>('app');
   await app.listen(port);
 }
 

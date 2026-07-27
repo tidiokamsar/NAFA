@@ -3,17 +3,20 @@ import {
   HealthIndicatorResult,
   HealthIndicatorService,
 } from '@nestjs/terminus';
-import { PrismaService } from '../../prisma/prisma.service';
+import type { PlatformHealthIndicator } from '@nafa/platform';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable({ scope: Scope.TRANSIENT })
-export class PrismaHealthIndicator {
+export class PrismaHealthIndicator implements PlatformHealthIndicator {
+  readonly key = 'postgres';
+
   constructor(
     private readonly healthIndicatorService: HealthIndicatorService,
     private readonly prisma: PrismaService,
   ) {}
 
-  async check(key: string): Promise<HealthIndicatorResult> {
-    const indicator = this.healthIndicatorService.check(key);
+  async isHealthy(): Promise<HealthIndicatorResult> {
+    const indicator = this.healthIndicatorService.check(this.key);
     try {
       await this.prisma.$queryRaw`SELECT 1`;
       return indicator.up();

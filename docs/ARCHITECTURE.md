@@ -46,9 +46,10 @@ tout nouveau service NestJS copie.
 
 ### `packages/`
 
-Bibliothèques partagées (`design-system`, `ui`, `auth`, `workflow`,
-`notifications`, `documents`, `maps`, `analytics`, `ai-sdk`, `shared`). Un
-package ne dépend jamais d'une app ni d'un service.
+Bibliothèques partagées. `platform` est la seule implémentée à ce jour ; les
+autres (`design-system`, `ui`, `auth`, `workflow`, `notifications`,
+`documents`, `maps`, `analytics`, `ai-sdk`, `shared`) sont des emplacements
+réservés. Un package ne dépend jamais d'une app ni d'un service.
 
 ## Décisions techniques
 
@@ -82,12 +83,21 @@ généré dans `services/foundation/iam/src/generated/prisma` (sous `src/` pour 
 `rootDir` reste `src` et que la sortie de build demeure `dist/main.js`). Le code
 généré est ignoré par Git et régénéré à chaque build via la cible `db:generate`.
 
-### Front-end : Next.js en mode `standalone`
+### Front-end : Next.js en mode `standalone` (opt-in)
 
 `output: 'standalone'` produit un bundle serveur autonome n'embarquant que les
 dépendances réellement utilisées, ce qui garde l'image de production légère. La
 sortie reproduit l'arborescence du monorepo, d'où le `CMD` du Dockerfile qui
 pointe sur `apps/web/admin-portal/server.js`.
+
+Le mode est conditionné à `NEXT_OUTPUT_STANDALONE=1`, positionné par le
+Dockerfile : le bundle contient des liens symboliques que Windows refuse de
+copier dans le cache Nx sans le privilège de mode développeur, ce qui ferait
+échouer `pnpm build` sur les postes Windows.
+
+**Piège associé** : aucun fichier `.env` ne doit définir `NODE_ENV`. Nx injecte
+ces variables dans toutes les tâches ; un `NODE_ENV=development` ferait produire
+à `next build` un bundle React de développement, qui plante au prérendu.
 
 ### Mobile : Flutter, hors workspace pnpm
 
@@ -105,20 +115,65 @@ En développement local, l'API Kafka est servie par **Redpanda** : un binaire
 unique, sans JVM ni ZooKeeper, qui démarre en quelques secondes. Le code client
 est identique face à un cluster Kafka réel en préproduction ou en production.
 
+### Socle partagé : `@nafa/platform`
+
+Les préoccupations transverses ne sont pas dupliquées service par service :
+elles vivent dans `packages/platform`, que tout service NestJS importe. Cela
+garantit que les logs, les erreurs, les sondes et les métriques ont exactement
+le même format partout — condition nécessaire pour agréger 25+ services dans un
+même outil d'observabilité.
+
+Le package couvre la configuration typée, le logging, les sondes de santé, le
+filtre d'exceptions, Redis (cache et sessions), le rate limiting et
+OpenTelemetry. Détail dans [packages/platform](../packages/platform/README.md).
+
+`services/foundation/iam` reste le service de référence : il montre comment
+assembler ces briques et n'ajoute que ce qui lui est propre (Prisma, auth).
+
 ### Observabilité
 
 Chaque service expose le même contrat :
 
-| Endpoint        | Rôle                                          |
-| --------------- | --------------------------------------------- |
-| `GET /health`   | sonde `@nestjs/terminus` (PostgreSQL + Redis) |
-| `GET /metrics`  | métriques Prometheus                          |
-| `GET /api/docs` | documentation OpenAPI (Swagger)               |
+| Endpoint                   | Rôle                                                     |
+| -------------------------- | -------------------------------------------------------- |
+| `GET /live`                | vivacité — le processus répond, aucune dépendance testée |
+| `GET /ready`               | disponibilité — dépendances joignables, 503 sinon        |
+| `GET /health`              | rapport détaillé                                         |
+| `GET /metrics` (port 9464) | métriques Prometheus                                     |
+| `GET /api/docs`            | documentation OpenAPI 3.1 (Swagger)                      |
 
-Les logs sont structurés en JSON via `nestjs-pino`, avec propagation
-automatique du contexte de requête. Le chart Helm pointe ses sondes de vivacité
-et de disponibilité sur `/health`, ce qui le rend réutilisable tel quel par tout
-service respectant ce contrat.
+La distinction vivacité/disponibilité est délibérée : une base indisponible
+doit retirer l'instance du routage (`/ready` en 503) sans provoquer son
+redémarrage (`/live` reste vert), sinon les redémarrages en boucle ajoutent de
+la charge pendant la panne.
+
+Les métriques sont exposées sur **leur propre port** (9464) par l'exporteur
+Prometheus d'OpenTelemetry, et non sur le port applicatif : elles restent
+scrapables même quand le routeur de l'application n'écoute pas encore.
+
+Les traces sont produites par l'auto-instrumentation OpenTelemetry et exportées
+en OTLP/HTTP quand `OTEL_EXPORTER_OTLP_ENDPOINT` est défini (sinon abandonnées).
+Le SDK démarre avant tout autre import — sinon il n'a rien à instrumenter.
+
+Les logs sont du JSON ligne par ligne (`nestjs-pino`). Chaque requête porte un
+`x-request-id` et un `x-correlation-id`, renvoyés en en-têtes de réponse,
+présents dans chaque ligne de log et dans chaque réponse d'erreur.
+
+### Contrat d'erreur
+
+Toute erreur sortant d'un contrôleur passe par un filtre global et prend la
+même forme (`statusCode`, `error`, `message`, `path`, `timestamp`,
+`requestId`, `correlationId`). Les 5xx ne divulguent jamais l'interne : le
+détail va aux logs, le client reçoit un identifiant à citer.
+
+### Champs d'audit
+
+Toute table porte les mêmes six colonnes : `createdAt`, `updatedAt`,
+`createdBy`, `updatedBy`, `deletedAt`, `version`. Prisma n'ayant pas d'héritage
+de modèles, elles sont recopiées par modèle — les noms et la sémantique ne
+doivent pas varier. La suppression logique (`deletedAt`) est une convention et
+non une contrainte : les requêtes doivent filtrer `deletedAt: null`
+explicitement.
 
 ### Déploiement
 
@@ -140,7 +195,8 @@ Client web / mobile
         │
         ├──────────────────────► Redis      (cache, sessions)
         ├──────────────────────► Kafka      (événements)
-        └──────────────────────► RabbitMQ   (tâches)
+        ├──────────────────────► RabbitMQ   (tâches)
+        └──────────────────────► MinIO      (stockage objet, S3)
 ```
 
 ## Limites connues
@@ -150,6 +206,13 @@ Client web / mobile
   permissions, multi-organisation) reste à construire.
 - Aucun modèle de données métier n'existe : `schema.prisma` ne contient que la
   table technique `users`.
+- Le rate limiting utilise le stockage en mémoire par défaut, donc **par
+  instance** : les limites sont sous-comptées dès qu'un service tourne en
+  plusieurs réplicas. À basculer sur Redis avant de s'y fier en production.
+- Aucune garde de rate limiting n'est installée : les limites sont déclarées,
+  chaque service décide où les appliquer.
+- Aucun collecteur OpenTelemetry n'est déployé : les traces sont produites mais
+  abandonnées tant que `OTEL_EXPORTER_OTLP_ENDPOINT` n'est pas défini.
 - `infrastructure/terraform/`, `infrastructure/monitoring/` et
   `infrastructure/security/` sont des emplacements réservés, encore vides.
 - Le déploiement continu (ArgoCD) n'est pas configuré.

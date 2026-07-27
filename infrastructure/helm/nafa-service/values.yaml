@@ -63,16 +63,18 @@ resources:
     cpu: 500m
     memory: 512Mi
 
-# Both probes hit the @nestjs/terminus endpoint every NAFA service exposes.
+# Probe paths every NAFA service exposes (see packages/platform).
+# Liveness deliberately hits /live, which checks no dependency: a database
+# outage must drain the instance (readiness 503) without restarting it.
 probes:
   liveness:
     enabled: true
-    path: /health
+    path: /live
     initialDelaySeconds: 20
     periodSeconds: 20
   readiness:
     enabled: true
-    path: /health
+    path: /ready
     initialDelaySeconds: 10
     periodSeconds: 10
 

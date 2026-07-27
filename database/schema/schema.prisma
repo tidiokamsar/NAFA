@@ -9,12 +9,37 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+/// Standard audit columns.
+///
+/// Every table in NAFA carries these six fields. Prisma has no model
+/// inheritance, so they are copied per model — keep the names and semantics
+/// identical everywhere:
+///
+///   createdAt  set once on insert
+///   updatedAt  refreshed by Prisma on every write
+///   createdBy  id of the actor that created the row (null = system)
+///   updatedBy  id of the actor that last wrote the row
+///   deletedAt  soft delete marker; non-null rows must be filtered out
+///   version    optimistic concurrency counter, incremented by the writer
+///
+/// Soft deletes are a convention, not a constraint: queries must filter on
+/// `deletedAt: null` explicitly.
 
+/// Technical account used for authentication. Not a business actor —
+/// producers, buyers and organisations are separate models owned by the
+/// masters layer.
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy String?   @db.Uuid
+  updatedBy String?   @db.Uuid
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  @@index([deletedAt])
   @@map("users")
 }

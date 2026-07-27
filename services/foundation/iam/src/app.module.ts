@@ -1,36 +1,42 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { LoggerModule } from 'nestjs-pino';
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
-import { validateEnv } from './config/env.validation';
-import { PrismaModule } from './prisma/prisma.module';
-import { RedisModule } from './redis/redis.module';
-import { HealthModule } from './health/health.module';
-import { UsersModule } from './users/users.module';
+import {
+  PlatformCacheModule,
+  PlatformConfigModule,
+  PlatformErrorsModule,
+  PlatformHealthModule,
+  PlatformLoggingModule,
+  PlatformRedisModule,
+  PlatformTelemetryModule,
+  PlatformThrottlerModule,
+  RedisHealthIndicator,
+} from '@nafa/platform';
+import { join } from 'node:path';
 import { AuthModule } from './auth/auth.module';
+import { PrismaHealthIndicator } from './health/prisma-health.indicator';
+import { PrismaModule } from './prisma/prisma.module';
+import { UsersModule } from './users/users.module';
+
+// Repo root, where the .env files live.
+const REPO_ROOT = join(__dirname, '../../../..');
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      validate: validateEnv,
-    }),
-    LoggerModule.forRoot({
-      pinoHttp: {
-        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-        transport:
-          process.env.NODE_ENV === 'production'
-            ? undefined
-            : { target: 'pino-pretty', options: { singleLine: true } },
-      },
-    }),
-    PrometheusModule.register({
-      path: '/metrics',
-      defaultMetrics: { enabled: true },
-    }),
+    // Config first: every module below reads from it.
+    PlatformConfigModule.forRoot(REPO_ROOT),
+    PlatformLoggingModule.forRoot(),
+    PlatformTelemetryModule.forRoot(),
+    PlatformErrorsModule,
+    PlatformRedisModule,
+    PlatformCacheModule.forRoot(),
+    PlatformThrottlerModule.forRoot(),
+
     PrismaModule,
-    RedisModule,
-    HealthModule,
+
+    PlatformHealthModule.forRoot({
+      imports: [PrismaModule],
+      indicators: [PrismaHealthIndicator, RedisHealthIndicator],
+    }),
+
     UsersModule,
     AuthModule,
   ],

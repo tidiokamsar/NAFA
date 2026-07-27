@@ -19,6 +19,9 @@ allowBuilds:
   nx: true
   # Next.js image optimisation uses sharp's native binaries.
   sharp: true
+  # OpenTelemetry OTLP exporters depend on protobufjs, which generates its
+  # runtime descriptors on postinstall.
+  protobufjs: true
 minimumReleaseAgeExclude:
   - "@prisma/adapter-pg@7.9.1"
   - "@prisma/client-runtime-utils@7.9.1"

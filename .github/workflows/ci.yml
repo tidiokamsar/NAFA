@@ -18,9 +18,12 @@ env:
   # only build/lint can use a placeholder.
   DATABASE_URL: postgresql://nafa:nafa_dev_password@localhost:5432/nafa_dev
   REDIS_URL: redis://localhost:6379
-  JWT_SECRET: ci-secret-not-used-for-anything-real
+  # Length matters: platform env validation requires >= 32 characters.
+  JWT_SECRET: ci-secret-not-used-for-anything-real-but-long-enough
   JWT_EXPIRES_IN: 1h
+  OTEL_ENABLED: "false"
   NEXT_TELEMETRY_DISABLED: "1"
+  # NODE_ENV is intentionally unset — see .env.example.
 
 jobs:
   commitlint:
@@ -118,8 +121,14 @@ jobs:
       - name: Generate Prisma client
         run: pnpm --filter @nafa/iam run db:generate
 
-      - name: Apply schema to the database
-        run: pnpm --filter @nafa/iam exec prisma db push --skip-generate
+      - name: Build @nafa/platform (iam imports it from dist)
+        run: pnpm --filter @nafa/platform run build
+
+      - name: Apply migrations
+        run: pnpm --filter @nafa/iam run db:deploy
+
+      - name: Seed the bootstrap admin account
+        run: pnpm --filter @nafa/iam run db:seed
 
       - name: End-to-end tests against real Postgres and Redis
         run: pnpm --filter @nafa/iam run test:e2e

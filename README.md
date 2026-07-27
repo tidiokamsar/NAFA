@@ -43,16 +43,19 @@ Lancer toute la pile (bases de données, brokers, API et portail web) :
 docker compose -f infrastructure/docker/docker-compose.dev.yml up -d --build
 ```
 
-| Service             | URL                            |
-| ------------------- | ------------------------------ |
-| API IAM (Swagger)   | http://localhost:3000/api/docs |
-| API IAM — santé     | http://localhost:3000/health   |
-| API IAM — métriques | http://localhost:3000/metrics  |
-| Admin Portal        | http://localhost:3100          |
-| Redpanda Console    | http://localhost:8080          |
-| RabbitMQ Management | http://localhost:15672         |
-| PostgreSQL          | `localhost:5432`               |
-| Redis               | `localhost:6379`               |
+| Service              | URL                            |
+| -------------------- | ------------------------------ |
+| API IAM (Swagger)    | http://localhost:3000/api/docs |
+| API IAM — liveness   | http://localhost:3000/live     |
+| API IAM — readiness  | http://localhost:3000/ready    |
+| API IAM — santé      | http://localhost:3000/health   |
+| Métriques Prometheus | http://localhost:9464/metrics  |
+| Admin Portal         | http://localhost:3100          |
+| Redpanda Console     | http://localhost:8080          |
+| RabbitMQ Management  | http://localhost:15672         |
+| MinIO Console        | http://localhost:9001          |
+| PostgreSQL           | `localhost:5432`               |
+| Redis                | `localhost:6379`               |
 
 Pour développer sans conteneuriser les applications, ne démarrer que
 l'infrastructure puis lancer les apps en local — voir
@@ -99,7 +102,9 @@ NAFA/
 │   ├── engines/        # moteurs de calcul
 │   ├── processes/      # orchestration de processus
 │   └── integrations/   # connecteurs externes
-├── packages/           # bibliothèques partagées (design-system, ui, auth, ...)
+├── packages/
+│   ├── platform/       # socle NestJS partagé (config, logs, santé, erreurs, cache, télémétrie)
+│   └── ...             # design-system, ui, auth, workflow, ...
 ├── database/           # schéma Prisma, migrations, seed, scripts
 ├── infrastructure/     # docker, kubernetes, helm, terraform, monitoring, security
 ├── docs/               # documentation projet
@@ -114,4 +119,5 @@ Chaque dossier contient un `README.md` décrivant son rôle.
 
 - [ARCHITECTURE.md](docs/ARCHITECTURE.md) — structure du monorepo et choix techniques
 - [DEVELOPMENT.md](docs/DEVELOPMENT.md) — installation, workflows, dépannage
+- [packages/platform](packages/platform/README.md) — socle technique partagé
 - [CONTRIBUTING.md](CONTRIBUTING.md) — conventions de branches, commits et revue
