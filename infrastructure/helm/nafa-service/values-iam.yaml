@@ -1,0 +1,29 @@
+# Example per-service overrides for services/foundation/iam.
+#
+#   helm install iam infrastructure/helm/nafa-service \
+#     -n nafa -f infrastructure/helm/nafa-service/values-iam.yaml
+#
+# Secrets are intentionally NOT set here — create them out-of-band and point
+# `existingSecret` at the result:
+#   kubectl create secret generic iam-secrets -n nafa \
+#     --from-literal=DATABASE_URL=... \
+#     --from-literal=REDIS_URL=... \
+#     --from-literal=JWT_SECRET=...
+
+nameOverride: iam
+
+image:
+  repository: nafa/iam
+  tag: "dev"
+
+replicaCount: 2
+
+config:
+  NODE_ENV: production
+  PORT: "3000"
+
+existingSecret: iam-secrets
+
+ingress:
+  enabled: false
+  host: iam.nafa.local

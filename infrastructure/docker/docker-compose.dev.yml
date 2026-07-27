@@ -1,0 +1,192 @@
+# NAFA — local development infrastructure.
+#
+#   docker compose -f infrastructure/docker/docker-compose.dev.yml up -d
+#
+# Credentials/ports below match the defaults documented in .env.example.
+# Development only — never reuse these values in any deployed environment.
+
+name: nafa-dev
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: nafa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: nafa
+      POSTGRES_PASSWORD: nafa_dev_password
+      POSTGRES_DB: nafa_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nafa -d nafa_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nafa-dev
+
+  redis:
+    image: redis:7-alpine
+    container_name: nafa-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nafa-dev
+
+  # Kafka-API compatible broker. Single binary, no JVM and no ZooKeeper, so it
+  # starts in seconds — client code (kafkajs, @nestjs/microservices Kafka
+  # transport) is identical against a real Kafka cluster in staging/production.
+  redpanda:
+    image: redpandadata/redpanda:v26.1.14
+    container_name: nafa-redpanda
+    restart: unless-stopped
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --overprovisioned
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
+      - --pandaproxy-addr=0.0.0.0:8082
+      - --advertise-pandaproxy-addr=localhost:8082
+      - --schema-registry-addr=0.0.0.0:8081
+    ports:
+      - "9092:9092" # Kafka API (from the host)
+      - "8081:8081" # Schema Registry
+      - "8082:8082" # HTTP proxy
+      - "9644:9644" # Admin API
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy:.*true'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    networks:
+      - nafa-dev
+
+  redpanda-console:
+    image: redpandadata/console:v3.9.0
+    container_name: nafa-redpanda-console
+    restart: unless-stopped
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKERS: redpanda:29092
+    ports:
+      - "8080:8080" # http://localhost:8080
+    networks:
+      - nafa-dev
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: nafa-rabbitmq
+    restart: unless-stopped
+    environment:
+      # The built-in `guest` account only authenticates over connections the
+      # broker considers loopback, which excludes connections arriving through
+      # Docker's published port. Defining a real user avoids that trap.
+      RABBITMQ_DEFAULT_USER: nafa
+      RABBITMQ_DEFAULT_PASS: nafa_dev_password
+    ports:
+      - "5672:5672" # AMQP
+      - "15672:15672" # management UI — http://localhost:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - nafa-dev
+
+  # ----- applications -----
+
+  # One-shot: applies the Prisma schema, then exits. `iam` waits for it.
+  iam-migrate:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/iam/Dockerfile
+      target: migrator
+    image: nafa/iam-migrate:dev
+    container_name: nafa-iam-migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://nafa:nafa_dev_password@postgres:5432/nafa_dev
+    restart: "no"
+    networks:
+      - nafa-dev
+
+  iam:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/iam/Dockerfile
+      target: runtime
+    image: nafa/iam:dev
+    container_name: nafa-iam
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      iam-migrate:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgresql://nafa:nafa_dev_password@postgres:5432/nafa_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: local-dev-secret-not-for-any-deployed-environment
+      JWT_EXPIRES_IN: 1h
+      KAFKA_BROKERS: redpanda:29092
+      RABBITMQ_URL: amqp://nafa:nafa_dev_password@rabbitmq:5672
+    ports:
+      - "3000:3000" # API + Swagger at http://localhost:3000/api/docs
+    restart: unless-stopped
+    networks:
+      - nafa-dev
+
+  admin-portal:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/admin-portal/Dockerfile
+      target: runtime
+    image: nafa/admin-portal:dev
+    container_name: nafa-admin-portal
+    depends_on:
+      - iam
+    environment:
+      NODE_ENV: production
+      PORT: "3100"
+    ports:
+      - "3100:3100" # http://localhost:3100
+    restart: unless-stopped
+    networks:
+      - nafa-dev
+
+volumes:
+  pg_data:
+  redis_data:
+  redpanda_data:
+  rabbitmq_data:
+
+networks:
+  nafa-dev:
+    driver: bridge

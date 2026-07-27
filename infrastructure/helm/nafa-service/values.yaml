@@ -1,0 +1,92 @@
+# Defaults for the nafa-service chart.
+# Every NAFA NestJS microservice deploys through this chart; override per
+# service with its own values file, e.g.
+#   helm install iam infrastructure/helm/nafa-service -f values-iam.yaml
+
+# Override the release-derived name if needed.
+nameOverride: ""
+fullnameOverride: ""
+
+replicaCount: 1
+
+image:
+  repository: nafa/iam
+  tag: "dev"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: false
+  name: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  host: iam.nafa.local
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: false
+    secretName: ""
+
+# Non-sensitive values — rendered into a ConfigMap and injected via envFrom.
+config:
+  NODE_ENV: production
+  PORT: "3000"
+
+# Sensitive values. In real environments prefer `existingSecret` and manage the
+# Secret out-of-band (sealed-secrets, External Secrets, Key Vault, ...) rather
+# than committing anything under `secrets`.
+existingSecret: ""
+secrets: {}
+  # DATABASE_URL: postgresql://...
+  # REDIS_URL: redis://...
+  # JWT_SECRET: ...
+
+# Extra plain env vars, appended after envFrom.
+extraEnv: []
+  # - name: LOG_LEVEL
+  #   value: debug
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Both probes hit the @nestjs/terminus endpoint every NAFA service exposes.
+probes:
+  liveness:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 20
+    periodSeconds: 20
+  readiness:
+    enabled: true
+    path: /health
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+podAnnotations: {}
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,76 +1,117 @@
 # NAFA — Enterprise Monorepo
 
-Monorepo NAFA : ensemble des applications web et mobiles, services back-end,
-packages partagés, infrastructure et documentation de la plateforme.
+Monorepo de la plateforme NAFA : applications web et mobiles, services back-end,
+packages partagés, infrastructure et documentation.
+
+Ce dépôt est aujourd'hui une **software factory** : la chaîne d'outillage
+(build, lint, tests, conteneurs, CI) est en place et vérifiée, mais **aucun
+module métier n'est encore développé**. Deux applications de référence
+(`@nafa/iam`, `@nafa/admin-portal`) existent uniquement pour prouver que la
+chaîne fonctionne de bout en bout ; les équipes les copient pour démarrer un
+nouveau service ou portail.
+
+|                         |                                                        |
+| ----------------------- | ------------------------------------------------------ |
+| Gestionnaire de paquets | pnpm 11 (via Corepack)                                 |
+| Orchestrateur monorepo  | Nx 23                                                  |
+| Back-end                | NestJS 11 · TypeScript · Prisma 7 · PostgreSQL · Redis |
+| Front-end               | Next.js 16 · React 19 · TypeScript                     |
+| Mobile                  | Flutter · Riverpod · GoRouter · Dio · Drift            |
+| Messagerie              | Kafka (Redpanda en local) · RabbitMQ                   |
+| Infrastructure          | Docker · Kubernetes · Helm · Terraform                 |
+| CI                      | GitHub Actions                                         |
+
+## Démarrage rapide
+
+Prérequis : **Node.js ≥ 22.14**, **Docker** (avec Compose v2), et Corepack activé.
+
+```bash
+corepack enable
+```
+
+```bash
+pnpm install
+```
+
+```bash
+cp .env.example .env
+```
+
+Lancer toute la pile (bases de données, brokers, API et portail web) :
+
+```bash
+docker compose -f infrastructure/docker/docker-compose.dev.yml up -d --build
+```
+
+| Service             | URL                            |
+| ------------------- | ------------------------------ |
+| API IAM (Swagger)   | http://localhost:3000/api/docs |
+| API IAM — santé     | http://localhost:3000/health   |
+| API IAM — métriques | http://localhost:3000/metrics  |
+| Admin Portal        | http://localhost:3100          |
+| Redpanda Console    | http://localhost:8080          |
+| RabbitMQ Management | http://localhost:15672         |
+| PostgreSQL          | `localhost:5432`               |
+| Redis               | `localhost:6379`               |
+
+Pour développer sans conteneuriser les applications, ne démarrer que
+l'infrastructure puis lancer les apps en local — voir
+[DEVELOPMENT.md](docs/DEVELOPMENT.md).
+
+## Commandes
+
+Toutes les tâches passent par Nx et s'exécutent sur l'ensemble des projets :
+
+```bash
+pnpm build
+```
+
+```bash
+pnpm lint
+```
+
+```bash
+pnpm typecheck
+```
+
+```bash
+pnpm test
+```
+
+Cibler un seul projet :
+
+```bash
+pnpm exec nx run @nafa/iam:build
+```
 
 ## Structure
 
 ```
 NAFA/
 ├── apps/
-│   ├── web/              # 11 portails (executive-center, admin-portal, marketplace, ...)
-│   ├── mobile/            # 4 apps mobiles (super-app, driver, warehouse, inspector)
-│   ├── ai/                 # copilot, agents, rag
-│   ├── whatsapp/
-│   ├── ussd/
-│   └── api-portal/
-│
+│   ├── web/            # portails Next.js (admin-portal = référence)
+│   ├── mobile/         # applications Flutter (super-app = référence)
+│   ├── ai/             # copilot, agents, rag
+│   ├── whatsapp/ ussd/ api-portal/
 ├── services/
-│   ├── foundation/         # identité, auth, config
-│   ├── masters/            # référentiels (données maîtres)
-│   ├── engines/             # pricing, matching, scoring...
-│   ├── processes/           # orchestration de workflows
-│   └── integrations/        # paiement, banques, douanes, partenaires
-│
-├── packages/
-│   ├── design-system/
-│   ├── ui/
-│   ├── auth/
-│   ├── workflow/
-│   ├── notifications/
-│   ├── documents/
-│   ├── maps/
-│   ├── analytics/
-│   ├── ai-sdk/
-│   └── shared/
-│
-├── infrastructure/
-│   ├── docker/
-│   ├── kubernetes/
-│   ├── helm/
-│   ├── terraform/
-│   ├── monitoring/
-│   └── security/
-│
-├── database/
-│   ├── schema/
-│   ├── migrations/
-│   ├── seed/
-│   └── scripts/
-│
-├── docs/            # stratégie, étude marché, cahier des charges, design, investisseurs
-├── prompts/
-├── tests/
-└── tools/
+│   ├── foundation/     # socle technique (iam = service de référence)
+│   ├── masters/        # référentiels
+│   ├── engines/        # moteurs de calcul
+│   ├── processes/      # orchestration de processus
+│   └── integrations/   # connecteurs externes
+├── packages/           # bibliothèques partagées (design-system, ui, auth, ...)
+├── database/           # schéma Prisma, migrations, seed, scripts
+├── infrastructure/     # docker, kubernetes, helm, terraform, monitoring, security
+├── docs/               # documentation projet
+├── prompts/            # prompts des fonctionnalités IA
+├── tests/              # tests transverses
+└── tools/              # outillage interne
 ```
 
-Chaque dossier contient un `README.md` décrivant son rôle. Cette V1 est un
-**squelette** : les dossiers sont en place mais ne contiennent pas encore de
-code applicatif — chaque équipe peut initialiser son app/service avec la
-stack de son choix.
+Chaque dossier contient un `README.md` décrivant son rôle.
 
-## Démarrage
+## Documentation
 
-Ce dépôt est configuré comme un workspace [pnpm](https://pnpm.io/) (voir
-`pnpm-workspace.yaml` et `package.json`). Une fois du code ajouté dans les
-packages/apps :
-
-```bash
-pnpm install
-```
-
-## Origine
-
-Les catégories sous `docs/` (stratégie, étude marché, cahier des charges,
-design, investisseurs) reprennent l'organisation documentaire initiale du
-projet NAFA, à réintégrer au fil de l'eau.
+- [ARCHITECTURE.md](docs/ARCHITECTURE.md) — structure du monorepo et choix techniques
+- [DEVELOPMENT.md](docs/DEVELOPMENT.md) — installation, workflows, dépannage
+- [CONTRIBUTING.md](CONTRIBUTING.md) — conventions de branches, commits et revue

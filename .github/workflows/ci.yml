@@ -1,0 +1,180 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # `prisma generate` resolves DATABASE_URL but never connects, so jobs that
+  # only build/lint can use a placeholder.
+  DATABASE_URL: postgresql://nafa:nafa_dev_password@localhost:5432/nafa_dev
+  REDIS_URL: redis://localhost:6379
+  JWT_SECRET: ci-secret-not-used-for-anything-real
+  JWT_EXPIRES_IN: 1h
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  commitlint:
+    name: Commit messages
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: corepack enable
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Validate commit messages
+        run: |
+          pnpm exec commitlint \
+            --from ${{ github.event.pull_request.base.sha }} \
+            --to ${{ github.event.pull_request.head.sha }} \
+            --verbose
+
+  lint-build-test:
+    name: Lint, typecheck, build, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Formatting
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm exec nx run-many -t lint
+
+      - name: Typecheck
+        run: pnpm exec nx run-many -t typecheck
+
+      - name: Build
+        run: pnpm exec nx run-many -t build
+
+      - name: Unit tests
+        run: pnpm exec nx run-many -t test
+
+  integration:
+    name: Integration (Postgres + Redis)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: nafa
+          POSTGRES_PASSWORD: nafa_dev_password
+          POSTGRES_DB: nafa_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nafa -d nafa_dev"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @nafa/iam run db:generate
+
+      - name: Apply schema to the database
+        run: pnpm --filter @nafa/iam exec prisma db push --skip-generate
+
+      - name: End-to-end tests against real Postgres and Redis
+        run: pnpm --filter @nafa/iam run test:e2e
+
+  infra-manifests:
+    name: Helm chart, Kubernetes manifests, Compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+
+      - name: helm lint
+        run: helm lint infrastructure/helm/nafa-service
+
+      - name: helm template (default values)
+        run: helm template test infrastructure/helm/nafa-service > /dev/null
+
+      - name: helm template (iam values)
+        run: |
+          helm template iam infrastructure/helm/nafa-service \
+            -f infrastructure/helm/nafa-service/values-iam.yaml > /dev/null
+
+      - name: Validate Kubernetes manifests
+        run: kubectl apply --dry-run=client -f infrastructure/kubernetes/
+
+      - name: Validate docker compose file
+        run: docker compose -f infrastructure/docker/docker-compose.dev.yml config > /dev/null
+
+  docker-images:
+    name: Build container images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build IAM service image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infrastructure/docker/iam/Dockerfile
+          target: runtime
+          push: false
+          tags: nafa/iam:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Admin Portal image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infrastructure/docker/admin-portal/Dockerfile
+          target: runtime
+          push: false
+          tags: nafa/admin-portal:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

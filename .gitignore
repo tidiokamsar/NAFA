@@ -14,10 +14,13 @@ dist/
 build/
 out/
 .next/
-.turbo/
+.nx/
 .expo/
 .expo-shared/
 *.tsbuildinfo
+
+# Prisma generated client
+generated/
 
 # Environment & secrets
 .env

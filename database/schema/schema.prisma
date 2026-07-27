@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../../services/foundation/iam/src/generated/prisma"
+}
+
+// The connection URL lives in services/foundation/iam/prisma.config.ts
+// (Prisma 7 moved `url` out of the schema file).
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
