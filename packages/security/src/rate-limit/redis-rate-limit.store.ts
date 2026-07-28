@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { REDIS_CLIENT } from '@nafa/platform';
 import type Redis from 'ioredis';
 import {
   RateLimitStore,
@@ -7,6 +6,19 @@ import {
   type RateLimitConfig,
   type RateLimitResult,
 } from './rate-limit.types';
+
+/**
+ * Injection token for the Redis connection this store uses.
+ *
+ * Declared here rather than imported from `@nafa/platform` so that
+ * `@nafa/security` depends on no other NAFA package except `@nafa/shared`
+ * (AR-0003). The consuming service binds it to whatever client it already has:
+ *
+ * ```ts
+ * { provide: RATE_LIMIT_REDIS, useExisting: REDIS_CLIENT }
+ * ```
+ */
+export const RATE_LIMIT_REDIS = Symbol('RATE_LIMIT_REDIS');
 
 /**
  * Redis-backed fixed-window counter, shared across every replica.
@@ -23,7 +35,7 @@ import {
  */
 @Injectable()
 export class RedisRateLimitStore extends RateLimitStore {
-  constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {
+  constructor(@Inject(RATE_LIMIT_REDIS) private readonly redis: Redis) {
     super();
   }
 

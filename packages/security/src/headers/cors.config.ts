@@ -1,4 +1,13 @@
-import { CORRELATION_ID_HEADER, REQUEST_ID_HEADER } from '@nafa/platform';
+import {
+  ACCEPT_LANGUAGE_HEADER,
+  CHANNEL_HEADER,
+  CORRELATION_ID_HEADER,
+  DEVICE_ID_HEADER,
+  REQUEST_ID_HEADER,
+  TENANT_ID_HEADER,
+  TIMEZONE_HEADER,
+  TRACE_ID_HEADER,
+} from '@nafa/shared';
 
 export interface CorsOptions {
   origin: boolean | string | RegExp | (string | RegExp)[];
@@ -32,12 +41,18 @@ export function corsOptions(
     allowedHeaders: [
       'Content-Type',
       'Authorization',
-      'Accept-Language',
+      ACCEPT_LANGUAGE_HEADER,
       REQUEST_ID_HEADER,
       CORRELATION_ID_HEADER,
-      'X-Timezone',
+      TRACE_ID_HEADER,
+      TENANT_ID_HEADER,
+      TIMEZONE_HEADER,
+      CHANNEL_HEADER,
+      DEVICE_ID_HEADER,
     ],
-    exposedHeaders: [REQUEST_ID_HEADER, CORRELATION_ID_HEADER],
+    // Exposed so a browser client can read the ids the server assigned and
+    // quote them in a support request.
+    exposedHeaders: [REQUEST_ID_HEADER, CORRELATION_ID_HEADER, TRACE_ID_HEADER],
     maxAge: 86_400,
     ...overrides,
   };

@@ -1,7 +1,10 @@
 /**
- * `x-request-id` identifies a single HTTP request.
- * `x-correlation-id` identifies a business transaction that may span several
- * requests and services — it is propagated unchanged across service hops.
+ * Re-exported from `@nafa/shared`, which is now the single home for constants
+ * shared across packages (AR-0003).
+ *
+ * Kept as a re-export so existing imports from `@nafa/platform` keep working;
+ * new code should import from `@nafa/shared` directly.
+ *
+ * @deprecated Import from `@nafa/shared`.
  */
-export const REQUEST_ID_HEADER = 'x-request-id';
-export const CORRELATION_ID_HEADER = 'x-correlation-id';
+export { CORRELATION_ID_HEADER, REQUEST_ID_HEADER } from '@nafa/shared';

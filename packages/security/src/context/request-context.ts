@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
+import type { Channel } from '@nafa/shared';
 import type { AuthenticatedUser } from '../auth/auth.types';
 
 /**
@@ -11,10 +12,26 @@ import type { AuthenticatedUser } from '../auth/auth.types';
 export interface RequestContext {
   readonly requestId: string;
   readonly correlationId: string;
+  /** Distributed-trace id. Falls back to the correlation id when absent. */
+  readonly traceId: string;
   readonly ip?: string;
   readonly userAgent?: string;
+  /** Surface the request arrived through. */
+  readonly channel?: Channel;
+  /** Opaque device identifier supplied by mobile clients. */
+  readonly device?: string;
+  /** BCP 47 language tag, e.g. `fr-GN`. */
   readonly locale?: string;
+  /** IANA timezone, e.g. `Africa/Conakry`. */
   readonly timezone?: string;
+  /** ISO 4217 currency, e.g. `GNF`. Set once pricing is in play. */
+  readonly currency?: string;
+  /**
+   * Tenant from the header, for callers that are not yet authenticated.
+   * Once a user is attached, `user.tenantId` is authoritative — a header is
+   * caller-supplied and must never override a value that came from a token.
+   */
+  readonly headerTenantId?: string;
   /** Set after authentication; absent on public routes. */
   user?: AuthenticatedUser;
   readonly startedAt: number;
@@ -63,8 +80,17 @@ export function getCurrentUserId(): string | undefined {
   return storage.getStore()?.user?.id;
 }
 
+/**
+ * The tenant in effect: the authenticated user's, falling back to the header
+ * for unauthenticated calls. Token wins — a header is caller-controlled.
+ */
 export function getCurrentTenantId(): string | undefined {
-  return storage.getStore()?.user?.tenantId;
+  const context = storage.getStore();
+  return context?.user?.tenantId ?? context?.headerTenantId;
+}
+
+export function getTraceId(): string | undefined {
+  return storage.getStore()?.traceId;
 }
 
 /**
