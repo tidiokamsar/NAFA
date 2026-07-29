@@ -27,7 +27,7 @@ Le relais est le composant que le kit initial laissait à écrire : c'est lui qu
    - Autorisation Graph/SharePoint `Sites.Selected`, accordée uniquement au site du portail (moindre privilège, CDC §7.3).
    - Procédure détaillée : `INSCRIPTION-APPLICATION-ENTRA-ID.md`. Cette étape est **bloquante** : aucune application Microsoft de première partie (Azure CLI, PnP Management Shell) n'est utilisable à sa place, elles échouent en `AADSTS65002`.
 4. **Poste d'administration** : PowerShell 7 + module `PnP.PowerShell` (`Install-Module PnP.PowerShell -Scope CurrentUser`).
-5. **Hébergement web public** pour `opportunites.ageroute.gov.gn` : serveur web de l'Agence, ou Azure Static Web Apps / stockage + CDN. Certificat TLS valide obligatoire.
+5. **Hébergement web public** pour `opportunites.ageroute.gov.gn` : le serveur 102.211.199.131 de l'Agence, dont le routeur de bord est Traefik. Procédure et configuration : `HEBERGEMENT.md`.
 6. **Exécution Node.js 20 ou plus** pour le relais (conteneur, App Service, ou service systemd sur le serveur web de l'Agence) et **compte CAPTCHA** (Cloudflare Turnstile, reCAPTCHA ou hCaptcha).
 
 ## Phase 1 — Provisioning du back-office SharePoint
