@@ -81,6 +81,9 @@ Convention de nommage des flux : `AGR-PRT-WFxx-<intitulé>`.
 
 **Déclencheur** : *Lors de la réception d'une requête HTTP* (méthode POST).
 
+> **Feuille de construction détaillée** : `CONSTRUCTION-WF-05-PAS-A-PAS.md` reprend ce flux
+> action par action, avec les expressions à recopier et la recette associée.
+
 > ⚠️ L'URL du déclencheur est un **secret d'exploitation** : elle n'apparaît jamais dans le code du front public. Le formulaire public appelle le **relais** (`services/integrations/relais-portail`), qui vérifie le CAPTCHA, applique une limitation de débit, contrôle les pièces et ajoute la clé partagée avant de relayer. Réf. CDC §7.3.
 
 **Première condition du flux — contrôle de la clé partagée** :
