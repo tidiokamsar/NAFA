@@ -8,7 +8,8 @@ packages partagés, infrastructure et documentation de la plateforme.
 ```
 NAFA/
 ├── apps/
-│   ├── web/              # 11 portails (executive-center, admin-portal, marketplace, ...)
+│   ├── web/              # portails métier (executive-center, admin-portal, marketplace,
+│   │                     #   portail-opportunites, ...)
 │   ├── mobile/            # 4 apps mobiles (super-app, driver, warehouse, inspector)
 │   ├── ai/                 # copilot, agents, rag
 │   ├── whatsapp/
@@ -40,7 +41,8 @@ NAFA/
 │   ├── helm/
 │   ├── terraform/
 │   ├── monitoring/
-│   └── security/
+│   ├── security/
+│   └── sharepoint/        # provisioning et publication SharePoint Online
 │
 ├── database/
 │   ├── schema/
@@ -54,10 +56,31 @@ NAFA/
 └── tools/
 ```
 
-Chaque dossier contient un `README.md` décrivant son rôle. Cette V1 est un
-**squelette** : les dossiers sont en place mais ne contiennent pas encore de
-code applicatif — chaque équipe peut initialiser son app/service avec la
-stack de son choix.
+Chaque dossier contient un `README.md` décrivant son rôle. La V1 était un
+**squelette** ; les dossiers restants sont toujours en place et vides —
+chaque équipe peut initialiser son app/service avec la stack de son choix.
+
+## Portail des opportunités AGEROUTE
+
+Premier composant applicatif livré. Portail public des appels d'offres et des
+recrutements de l'AGEROUTE Guinée, adossé à un back-office SharePoint Online
+et à des flux Power Automate.
+
+| Composant | Emplacement |
+|---|---|
+| Front public (statique, sans build) | `apps/web/portail-opportunites/` |
+| Relais sécurisé candidatures / abonnements | `services/integrations/relais-portail/` |
+| Provisioning et publication SharePoint | `infrastructure/sharepoint/portail-opportunites/` |
+| Guide de déploiement et spécification des flux | `docs/cahier-des-charges/portail-opportunites/` |
+
+Le guide de déploiement décrit l'ensemble de la procédure, de la création du
+site SharePoint à la recette. Les deux composants Node fonctionnent sans
+dépendance externe :
+
+```bash
+cd services/integrations/relais-portail && npm test   # contrôles serveur et relais
+cd apps/web/portail-opportunites && npm run demo && npm run dev
+```
 
 ## Démarrage
 

@@ -1,0 +1,79 @@
+{
+  "exemple": true,
+  "genereLe": "2026-07-29T06:15:00",
+  "stats": {
+    "aoOuverts": 2,
+    "rhOuverts": 1,
+    "daoDisponibles": 3,
+    "cloturesSemaine": 1,
+    "marchesAttribues": 1,
+    "recrutTermines": 1
+  },
+  "appelsOffres": [
+    {
+      "ref": "AO/2026/015",
+      "titre": "Construction de la Route Nationale RN7",
+      "desc": "Travaux de construction et de bitumage de la RN7 sur 86 km, y compris ouvrages d'assainissement et signalisation. Marché en deux lots.",
+      "type": "Travaux",
+      "region": "Kankan",
+      "bailleur": "Banque mondiale",
+      "pub": "2026-07-15",
+      "cloture": "2026-08-20T12:00",
+      "statut": "Publié",
+      "dao": "documents/DAO/AO-2026-015.pdf",
+      "resultat": null
+    },
+    {
+      "ref": "AO/2026/018",
+      "titre": "Réhabilitation de la voirie urbaine de Labé",
+      "desc": "Réhabilitation de 12 km de voirie urbaine avec drainage, trottoirs et éclairage public dans la commune urbaine de Labé.",
+      "type": "Travaux",
+      "region": "Labé",
+      "bailleur": "BAD",
+      "pub": "2026-07-10",
+      "cloture": "2026-08-03T12:00",
+      "statut": "Publié",
+      "dao": "documents/DAO/AO-2026-018.pdf",
+      "resultat": null
+    },
+    {
+      "ref": "AO/2026/011",
+      "titre": "Entretien périodique — axe Kankan–Kérouané",
+      "desc": "Marché attribué le 12 juillet 2026 à l'issue de l'évaluation. Rapport d'attribution disponible en téléchargement.",
+      "type": "Travaux",
+      "region": "Kankan",
+      "bailleur": "Budget national",
+      "pub": "2026-05-02",
+      "cloture": "2026-06-10T12:00",
+      "statut": "Attribué",
+      "dao": "documents/DAO/AO-2026-011.pdf",
+      "resultat": "documents/Attributions/AO-2026-011-attribution.pdf"
+    }
+  ],
+  "recrutements": [
+    {
+      "ref": "RH/2026/012",
+      "titre": "Coordinateur de Projet",
+      "desc": "Coordination des projets routiers financés par les partenaires techniques et financiers : planification, suivi des entreprises, reporting bailleurs.",
+      "type": "CDD",
+      "direction": "Direction Technique",
+      "lieu": "Conakry",
+      "pub": "2026-07-08",
+      "cloture": "2026-08-15T17:00",
+      "statut": "Publié",
+      "tdr": "documents/RecrutementTDR/RH-2026-012.pdf"
+    },
+    {
+      "ref": "RH/2026/009",
+      "titre": "Contrôleur de travaux — région de Boké",
+      "desc": "Recrutement terminé. La liste des candidats retenus a été publiée le 17 juillet 2026.",
+      "type": "CDD",
+      "direction": "Direction Technique",
+      "lieu": "Boké",
+      "pub": "2026-05-20",
+      "cloture": "2026-06-20T17:00",
+      "statut": "Résultats publiés",
+      "tdr": "documents/RecrutementTDR/RH-2026-009.pdf"
+    }
+  ]
+}

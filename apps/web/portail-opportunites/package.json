@@ -1,0 +1,14 @@
+{
+  "name": "@nafa/portail-opportunites",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AGEROUTE Guinée — front public du portail des opportunités (appels d'offres et recrutements)",
+  "scripts": {
+    "dev": "node outils/serveur-dev.js",
+    "demo": "node -e \"require('node:fs').copyFileSync('public/data/opportunites.exemple.json','public/data/opportunites.json')\"",
+    "verifier": "node --check public/assets/portail.js && node --check public/assets/abonnement.js && node --check public/assets/config.js && node --check outils/serveur-dev.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
