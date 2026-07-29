@@ -22,12 +22,17 @@
    - Identité : application Entra ID avec certificat (aucun
      compte nominatif), autorisation Sites.Selected limitée au site.
 
- USAGE
+ USAGE — exécution planifiée (production)
    .\02-export-publication.ps1 `
       -SiteUrl   "https://ageroutegn.sharepoint.com/sites/AGR-PRT-Opportunites" `
       -ClientId  "<GUID>" -Thumbprint "<empreinte certificat>" `
       -Tenant    "ageroutegn.onmicrosoft.com" `
       -Sortie    "C:\publication\www"
+
+ USAGE — export manuel de recette
+   .\02-export-publication.ps1 `
+      -SiteUrl "https://ageroutegn.sharepoint.com/sites/AGR-PRT-Opportunites-Recette" `
+      -ClientId "<GUID>" -Interactif -Sortie "C:\publication\recette"
 
  Code de sortie : 0 si l'export a abouti, 1 sinon (le runbook et le
  contrôle quotidien CDC §9.2 s'appuient dessus).
@@ -36,12 +41,18 @@
 param(
     [Parameter(Mandatory=$true)] [string] $SiteUrl,
     [Parameter(Mandatory=$true)] [string] $ClientId,
-    [Parameter(Mandatory=$true)] [string] $Thumbprint,
-    [Parameter(Mandatory=$true)] [string] $Tenant,
+    [string] $Thumbprint,
+    [string] $Tenant,
     [Parameter(Mandatory=$true)] [string] $Sortie,
-    [switch] $SansDocuments
+    [switch] $SansDocuments,
+    [switch] $Interactif
 )
 $ErrorActionPreference = "Stop"
+
+if (-not $Interactif -and (-not $Thumbprint -or -not $Tenant)) {
+    throw "Fournir -Thumbprint et -Tenant pour l'exécution automatisée, " +
+          "ou -Interactif pour un export manuel de recette."
+}
 
 # ---------------------------------------------------------------
 # Lecture défensive : un champ vide ne doit pas interrompre tout
@@ -82,7 +93,14 @@ $maintenant = Get-Date
 $journal = Join-Path $Sortie "journal-synchronisation.log"
 
 try {
-    Connect-PnPOnline -Url $SiteUrl -ClientId $ClientId -Thumbprint $Thumbprint -Tenant $Tenant
+    if ($Interactif) {
+        # Export manuel de recette : une fenêtre de connexion s'ouvre.
+        # À proscrire pour l'exécution planifiée, qui ne doit dépendre
+        # d'aucun compte nominatif (CDC §7.3).
+        Connect-PnPOnline -Url $SiteUrl -ClientId $ClientId -Interactive
+    } else {
+        Connect-PnPOnline -Url $SiteUrl -ClientId $ClientId -Thumbprint $Thumbprint -Tenant $Tenant
+    }
 
     $statutsPublicsAO = @("Publié","Clôturé","Attribué","Archivé")
     $statutsPublicsRH = @("Publié","Clôturé","Résultats publiés","Archivé")

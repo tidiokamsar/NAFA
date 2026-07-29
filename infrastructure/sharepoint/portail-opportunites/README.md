@@ -48,10 +48,19 @@ La procédure complète (ordre des phases, recette, mise en production) figure d
 - Les candidatures ne sont **jamais** exportées : ni la liste, ni la bibliothèque ne sont dans le périmètre du script (EXG-25).
 
 ```powershell
+# Exécution planifiée (production) — identité applicative par certificat
 ./02-export-publication.ps1 `
    -SiteUrl "https://ageroutegn.sharepoint.com/sites/AGR-PRT-Opportunites" `
    -ClientId "<GUID>" -Thumbprint "<empreinte>" `
    -Tenant "ageroutegn.onmicrosoft.com" -Sortie "C:\publication\www"
+
+# Export manuel de recette — connexion interactive, aucun certificat
+./02-export-publication.ps1 `
+   -SiteUrl "https://ageroutegn.sharepoint.com/sites/AGR-PRT-Opportunites-Recette" `
+   -ClientId "<GUID>" -Interactif -Sortie "C:\publication\recette"
 ```
+
+`-Interactif` est réservé aux essais : l'exécution planifiée ne doit dépendre
+d'aucun compte nominatif (CDC §7.3).
 
 `-SansDocuments` limite l'export au JSON — utile pour un rafraîchissement rapide déclenché par WF-07 lorsque seuls des métadonnées ont changé.
