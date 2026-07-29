@@ -18,6 +18,13 @@
    .\00-demarrage.ps1 -Tenant "ageroutegn" -Production `
                       -ClientId "<GUID obtenu à la première exécution>"
 
+ OPTIONS
+   -CodeAppareil            authentification par code à saisir dans un
+                            navigateur, si aucun navigateur ne s'ouvre
+                            automatiquement sur le poste.
+   -SauterProvisionnement   crée l'application sans provisionner.
+   -ConserverPartageExterne transmis au script 01.
+
  Le script ne détruit rien : le provisionnement est idempotent et
  l'inscription d'application est réutilisée si son identifiant est
  fourni.
@@ -29,7 +36,8 @@ param(
     [string] $ClientId,
     [string] $NomSite = "AGR-PRT-Opportunites",
     [switch] $Production,
-    [switch] $SauterProvisionnement
+    [switch] $SauterProvisionnement,
+    [switch] $CodeAppareil
 )
 
 $ErrorActionPreference = "Stop"
@@ -87,17 +95,30 @@ if ($ClientId) {
     Note "obligatoire (voir INSCRIPTION-APPLICATION-ENTRA-ID.md)."
     Note "Une fenêtre de connexion va s'ouvrir : accepter le consentement."
 
-    $app = Register-PnPEntraIDAppForInteractiveLogin `
-              -ApplicationName "AGR-PRT-Publication" `
-              -Tenant "$Tenant.onmicrosoft.com" `
-              -Interactive
+    # La connexion interactive est le comportement par défaut de cette
+    # applet ; -DeviceLogin bascule sur un code à saisir dans un
+    # navigateur, utile sur un poste sans navigateur par défaut.
+    $arguments = @{
+        ApplicationName = "AGR-PRT-Publication"
+        Tenant          = "$Tenant.onmicrosoft.com"
+    }
+    if ($CodeAppareil) { $arguments["DeviceLogin"] = $true }
 
-    $ClientId = $app.'AzureAppId/ClientId'
-    if (-not $ClientId) { $ClientId = $app.AppId }
+    $app = Register-PnPEntraIDAppForInteractiveLogin @arguments
+
+    # Le nom de la propriété a changé selon les versions de PnP :
+    # on essaie les formes connues avant d'abandonner.
+    $ClientId = $null
+    foreach ($propriete in @("AzureAppId/ClientId", "AppId", "ClientId", "ApplicationId")) {
+        $valeur = $app.PSObject.Properties[$propriete]
+        if ($valeur -and $valeur.Value) { $ClientId = [string]$valeur.Value; break }
+    }
     if (-not $ClientId) {
-        throw "L'inscription n'a pas renvoyé d'identifiant d'application. " +
-              "Créer l'application manuellement (voir la voie B du document) " +
-              "puis relancer avec -ClientId."
+        Write-Host "`nObjet renvoyé par l'inscription :" -ForegroundColor Yellow
+        $app | Format-List | Out-String | Write-Host
+        throw "L'identifiant d'application n'a pas pu être lu dans la réponse. " +
+              "Relever le GUID ci-dessus (ou dans le portail Entra) et relancer " +
+              "avec -ClientId `"<GUID>`"."
     }
     Ok "Application créée : $ClientId"
 
