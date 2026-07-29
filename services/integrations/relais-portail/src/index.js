@@ -18,7 +18,10 @@ avertissements(config).forEach((m) => console.warn('  ! ' + m));
 const serveur = creerServeur(config);
 
 serveur.listen(config.port, () => {
-  console.log(`Relais du portail à l'écoute sur le port ${config.port}`);
+  /* Le port effectif, et non celui demandé : avec PORT=0 le noyau
+     en attribue un, et l'exploitation doit savoir lequel. */
+  const port = serveur.address().port;
+  console.log(`Relais du portail à l'écoute sur le port ${port}`);
   console.log(`  CAPTCHA        : ${config.captcha.fournisseur}`);
   console.log(`  Catalogue      : ${config.catalogue.source || 'non configuré'}`);
   console.log(`  Statique       : ${config.racineStatique || 'désactivé'}`);

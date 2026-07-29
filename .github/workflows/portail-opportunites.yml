@@ -1,0 +1,110 @@
+name: Portail des opportunités
+
+# Contrôles du portail public AGEROUTE et de son relais sécurisé.
+# Les deux composants n'ont aucune dépendance npm : ni installation,
+# ni cache, ni verrou de versions à gérer.
+
+on:
+  push:
+    branches: ["main", "claude/**"]
+    paths:
+      - "apps/web/portail-opportunites/**"
+      - "services/integrations/relais-portail/**"
+      - ".github/workflows/portail-opportunites.yml"
+  pull_request:
+    paths:
+      - "apps/web/portail-opportunites/**"
+      - "services/integrations/relais-portail/**"
+      - ".github/workflows/portail-opportunites.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  relais:
+    name: Relais — contrôles serveur et parcours de bout en bout
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 20 est la version plancher déclarée ; 22 celle visée en
+        # production. Les deux doivent passer.
+        node: ["20", "22"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Tests du relais
+        working-directory: services/integrations/relais-portail
+        run: npm test
+
+  front:
+    name: Front public — contrôle syntaxique
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Contrôle syntaxique des scripts
+        working-directory: apps/web/portail-opportunites
+        run: npm run verifier
+
+      - name: Le jeu d'exemple doit rester marqué comme tel
+        # Un jeu de démonstration publié sans ce marqueur serait
+        # présenté au public comme un avis officiel.
+        run: |
+          node -e "
+            const d = require('./apps/web/portail-opportunites/public/data/opportunites.exemple.json');
+            if (d.exemple !== true) {
+              console.error('opportunites.exemple.json doit porter \"exemple\": true');
+              process.exit(1);
+            }
+          "
+
+      - name: Aucun secret ni URL de déclencheur dans le front
+        # Les URL des flux Power Automate sont des secrets
+        # d'exploitation (CDC §7.3) : elles ne doivent jamais être
+        # servies au navigateur.
+        run: |
+          if grep -rniE "logic\.azure\.com|powerautomate|triggers/manual/paths/invoke" \
+               apps/web/portail-opportunites/public; then
+            echo "::error::Une URL de déclencheur Power Automate figure dans le front public."
+            exit 1
+          fi
+          echo "Aucune URL de déclencheur trouvée."
+
+  image:
+    name: Relais — construction de l'image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Construire l'image
+        working-directory: services/integrations/relais-portail
+        run: docker build -t relais-portail:${{ github.sha }} .
+
+      - name: Démarrer et interroger la sonde de santé
+        working-directory: services/integrations/relais-portail
+        run: |
+          docker run -d --name relais -p 8080:8080 \
+            -e URL_FLUX_CANDIDATURES=https://exemple.invalid/wf05 \
+            -e CAPTCHA_FOURNISSEUR=aucun \
+            relais-portail:${{ github.sha }}
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8080/api/sante > /dev/null; then
+              echo "Sonde de santé OK"
+              docker rm -f relais
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Le relais n'a pas répondu sur /api/sante."
+          docker logs relais
+          docker rm -f relais
+          exit 1

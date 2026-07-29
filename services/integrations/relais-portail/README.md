@@ -35,8 +35,10 @@ Un refus **métier** du flux (4xx) est retransmis tel quel au candidat ; une err
 ```bash
 cp .env.example .env    # puis renseigner les valeurs issues du coffre
 npm start
-npm test                # 36 tests, sans réseau
+npm test                # 37 tests, sans réseau
 ```
+
+La suite comprend un test de bout en bout (`test/bout-en-bout.test.js`) qui démarre le vrai point d'entrée devant un faux déclencheur Power Automate et sert le vrai front : il couvre le démarrage, la configuration, le service des fichiers statiques, la CSP, le dépôt de candidature et le refus d'une offre clôturée.
 
 Le service refuse de démarrer si `URL_FLUX_CANDIDATURES` manque, ou si un fournisseur CAPTCHA est déclaré sans secret. Les fonctions non configurées (abonnements par exemple) répondent proprement `503` au lieu de tomber en erreur.
 
@@ -47,6 +49,18 @@ Le service refuse de démarrer si `URL_FLUX_CANDIDATURES` manque, ou si un fourn
 `RACINE_STATIQUE` permet à ce service de servir aussi le front (déploiement mono-serveur) avec les en-têtes de sécurité et la CSP déjà posés.
 
 `PROXY_DE_CONFIANCE=true` uniquement derrière un proxy maîtrisé : sinon un client peut forger `X-Forwarded-For` et contourner la limitation de débit.
+
+### Artefacts fournis
+
+| Fichier | Usage |
+|---|---|
+| `Dockerfile` | Image d'exécution (Node 22 alpine, utilisateur non privilégié, sonde de santé). Aucune dépendance à installer. |
+| `deploiement/relais-portail.service` | Unité systemd durcie pour un déploiement sur serveur de l'Agence. Le fichier d'environnement est en mode 600. |
+| `deploiement/nginx-opportunites.conf` | Reverse proxy de référence : front et relais sous la même origine, en-têtes de sécurité, plafond de corps à 48 Mo, limitation de débit de premier rideau. |
+
+Ces trois fichiers sont construits et éprouvés par le workflow CI `portail-opportunites.yml`
+pour l'image ; la configuration Nginx et l'unité systemd dépendent de l'hôte et
+doivent être validées sur place (`nginx -t`, `systemd-analyze verify`).
 
 ## Choix explicites
 
