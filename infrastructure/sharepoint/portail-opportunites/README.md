@@ -33,9 +33,9 @@ La procédure complète (ordre des phases, recette, mise en production) figure d
 
 ```powershell
 ./02-export-publication.ps1 `
-   -SiteUrl "https://ageroute.sharepoint.com/sites/AGR-PRT-Opportunites" `
+   -SiteUrl "https://ageroutegn.sharepoint.com/sites/AGR-PRT-Opportunites" `
    -ClientId "<GUID>" -Thumbprint "<empreinte>" `
-   -Tenant "ageroute.onmicrosoft.com" -Sortie "C:\publication\www"
+   -Tenant "ageroutegn.onmicrosoft.com" -Sortie "C:\publication\www"
 ```
 
 `-SansDocuments` limite l'export au JSON — utile pour un rafraîchissement rapide déclenché par WF-07 lorsque seuls des métadonnées ont changé.

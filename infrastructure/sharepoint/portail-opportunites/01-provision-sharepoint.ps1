@@ -16,8 +16,8 @@
 
  USAGE
    .\01-provision-sharepoint.ps1 `
-       -AdminUrl  "https://ageroute-admin.sharepoint.com" `
-       -SiteUrl   "https://ageroute.sharepoint.com/sites/AGR-PRT-Opportunites" `
+       -AdminUrl  "https://ageroutegn-admin.sharepoint.com" `
+       -SiteUrl   "https://ageroutegn.sharepoint.com/sites/AGR-PRT-Opportunites" `
        -ClientId  "<GUID application Entra ID>"
 
  Le script est IDEMPOTENT : ré-exécutable sans dommage, il ne

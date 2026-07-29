@@ -24,9 +24,9 @@
 
  USAGE
    .\02-export-publication.ps1 `
-      -SiteUrl   "https://ageroute.sharepoint.com/sites/AGR-PRT-Opportunites" `
+      -SiteUrl   "https://ageroutegn.sharepoint.com/sites/AGR-PRT-Opportunites" `
       -ClientId  "<GUID>" -Thumbprint "<empreinte certificat>" `
-      -Tenant    "ageroute.onmicrosoft.com" `
+      -Tenant    "ageroutegn.onmicrosoft.com" `
       -Sortie    "C:\publication\www"
 
  Code de sortie : 0 si l'export a abouti, 1 sinon (le runbook et le

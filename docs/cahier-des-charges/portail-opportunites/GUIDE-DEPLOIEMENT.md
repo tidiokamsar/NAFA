@@ -36,8 +36,8 @@ Exécuter (d'abord sur l'environnement de **recette**, jamais directement en pro
 ```powershell
 cd infrastructure/sharepoint/portail-opportunites
 ./01-provision-sharepoint.ps1 `
-    -AdminUrl "https://ageroute-admin.sharepoint.com" `
-    -SiteUrl  "https://ageroute.sharepoint.com/sites/AGR-PRT-Opportunites" `
+    -AdminUrl "https://ageroutegn-admin.sharepoint.com" `
+    -SiteUrl  "https://ageroutegn.sharepoint.com/sites/AGR-PRT-Opportunites" `
     -ClientId "<GUID de l'application Entra ID>"
 ```
 
