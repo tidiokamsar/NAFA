@@ -7,6 +7,7 @@ Scripts PnP.PowerShell du back-office SharePoint Online du portail des opportuni
 | `00-demarrage.ps1` | Démarrage assisté : installe le module, crée l'inscription d'application Entra ID, enchaîne le provisionnement. **Point d'entrée conseillé.** |
 | `01-provision-sharepoint.ps1` | Provisionne le site de gestion : jeux de termes, bibliothèques, listes typées, validations, indexation, groupes et permissions. **Idempotent.** |
 | `02-export-publication.ps1` | Extrait les contenus publiables et génère `data/opportunites.json` + la copie des documents publics pour le front. |
+| `03-jeu-essai.ps1` | Insère un jeu d'essai couvrant tous les états d'affichage. Recette uniquement, réversible par `-Supprimer`. |
 
 ## Démarrage
 
