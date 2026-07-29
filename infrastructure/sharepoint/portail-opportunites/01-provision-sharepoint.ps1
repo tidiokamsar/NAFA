@@ -145,13 +145,45 @@ $jeux = [ordered]@{
     "Bailleurs"  = @("Budget national","Banque mondiale","BAD","BID","Union européenne","Autre")
     "Directions" = @("Direction Générale","Direction Technique","DAF","Passation des Marchés","Ressources Humaines","Communication","DSI")
 }
+# La langue des jeux de termes ne peut pas être devinée : selon la
+# configuration du magasin, la valeur déduite par PnP est hors plage
+# et l'appel échoue sur « Parameter name: lcid ». On lit donc la
+# langue de travail du magasin, avec repli sur celle du site puis sur
+# l'anglais, présent dans tout magasin SharePoint.
+$lcidTermes = $null
+try {
+    $magasin = Get-PnPTermStore -ErrorAction Stop
+    if ($magasin -and $magasin.DefaultLanguage) { $lcidTermes = [int]$magasin.DefaultLanguage }
+} catch {
+    Info "Langue par défaut du magasin de termes illisible."
+}
+if (-not $lcidTermes -or $lcidTermes -le 0) { $lcidTermes = [int]$Langue }
+Info "Langue des jeux de termes : $lcidTermes"
+
+function NouveauJeu($nom, $grp, $lcid) {
+    try {
+        New-PnPTermSet -Name $nom -TermGroup $grp -Lcid $lcid -ErrorAction Stop | Out-Null
+    } catch {
+        # La langue demandée n'est pas une langue de travail du
+        # magasin : l'anglais l'est toujours.
+        New-PnPTermSet -Name $nom -TermGroup $grp -Lcid 1033 | Out-Null
+    }
+}
+function NouveauTerme($nom, $jeu, $grp, $lcid) {
+    try {
+        New-PnPTerm -Name $nom -TermSet $jeu -TermGroup $grp -Lcid $lcid -ErrorAction Stop | Out-Null
+    } catch {
+        New-PnPTerm -Name $nom -TermSet $jeu -TermGroup $grp -Lcid 1033 | Out-Null
+    }
+}
+
 foreach ($jeu in $jeux.Keys) {
     if (-not (Get-PnPTermSet -Identity $jeu -TermGroup $groupe -ErrorAction SilentlyContinue)) {
-        New-PnPTermSet -Name $jeu -TermGroup $groupe | Out-Null
+        NouveauJeu $jeu $groupe $lcidTermes
     }
     foreach ($t in $jeux[$jeu]) {
         if (-not (Get-PnPTerm -Identity $t -TermSet $jeu -TermGroup $groupe -ErrorAction SilentlyContinue)) {
-            New-PnPTerm -Name $t -TermSet $jeu -TermGroup $groupe | Out-Null
+            NouveauTerme $t $jeu $groupe $lcidTermes
         }
     }
     Ok "Jeu de termes '$jeu' provisionné"
