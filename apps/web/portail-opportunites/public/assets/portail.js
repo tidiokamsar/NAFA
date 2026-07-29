@@ -115,12 +115,14 @@
       ? '<span class="compte ' + (j > 7 ? 'large' : '') + '">J−' + j + '</span>'
       : '';
 
+    /* Seules les métadonnées réellement renseignées donnent une puce. */
+    function puce(valeur, neutre) {
+      if (!valeur) return '';
+      return '<span class="puce' + (neutre ? ' neutre' : '') + '">' + echapper(valeur) + '</span>';
+    }
     var puces = type === 'ao'
-      ? '<span class="puce">' + echapper(item.region) + '</span>' +
-        '<span class="puce neutre">' + echapper(item.bailleur) + '</span>'
-      : '<span class="puce">' + echapper(item.type) + '</span>' +
-        '<span class="puce neutre">' + echapper(item.direction) + '</span>' +
-        '<span class="puce neutre">' + echapper(item.lieu) + '</span>';
+      ? puce(item.region) + puce(item.bailleur, true)
+      : puce(item.type) + puce(item.direction, true) + puce(item.lieu, true);
 
     var doc = type === 'ao' ? resoudreDocument(item.dao) : resoudreDocument(item.tdr);
     var libelleDoc = type === 'ao' ? '📄 Télécharger le DAO' : '📄 Télécharger les TDR';
@@ -486,10 +488,13 @@
      Chargement des données publiées
      ============================================================ */
 
+  /* Une métadonnée absente reste absente : lui substituer une valeur
+     par défaut reviendrait à afficher au public une information que
+     l'Agence n'a pas saisie. */
   function normaliserAO(x) {
     return {
       ref: x.ref, titre: x.titre, desc: x.desc || '',
-      type: x.type || '—', region: x.region || 'National', bailleur: x.bailleur || '—',
+      type: x.type || null, region: x.region || null, bailleur: x.bailleur || null,
       pub: x.pub, cloture: x.cloture, statut: x.statut || 'Publié',
       dao: x.dao || null, resultat: x.resultat || null
     };
@@ -498,7 +503,7 @@
   function normaliserRH(x) {
     return {
       ref: x.ref, titre: x.titre, desc: x.desc || '',
-      type: x.type || '—', direction: x.direction || '—', lieu: x.lieu || '—',
+      type: x.type || null, direction: x.direction || null, lieu: x.lieu || null,
       pub: x.pub, cloture: x.cloture, statut: x.statut || 'Publié',
       tdr: x.tdr || null
     };
