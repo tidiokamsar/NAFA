@@ -42,6 +42,14 @@ if ($SiteUrl -notmatch "Recette" -and -not $ForcerProduction) {
 
 $maintenant = Get-Date
 
+# Sur un poste en français, la conversion implicite d'une date produit
+# « 29/07/2026 10:15:00 », que SharePoint refuse. On impose donc le
+# format ISO 8601 en UTC, indépendant de la culture du poste.
+function DateIso($d) {
+    return $d.ToUniversalTime().ToString(
+        "yyyy-MM-ddTHH:mm:ss'Z'", [System.Globalization.CultureInfo]::InvariantCulture)
+}
+
 $avis = @(
     @{ Ref = "AO/2026/001"; Titre = "Essai — Bitumage de la RN1, section Coyah-Kindia"
        Desc = "Avis de test : travaux de bitumage sur 42 km, y compris assainissement et signalisation."
@@ -102,8 +110,8 @@ foreach ($a in $avis) {
         ReferenceAO     = $a.Ref
         DescriptionAO   = $a.Desc
         TypeMarche      = $a.Type
-        DatePublication = $maintenant
-        DateCloture     = $a.Cloture
+        DatePublication = DateIso $maintenant
+        DateCloture     = DateIso $a.Cloture
         StatutAO        = $a.Statut
     } | Out-Null
     Ok "$($a.Ref) — $($a.Statut)"
@@ -120,8 +128,8 @@ foreach ($o in $offres) {
         ReferenceRH     = $o.Ref
         DescriptionRH   = $o.Desc
         TypeContrat     = $o.Type
-        DatePublication = $maintenant
-        DateLimite      = $o.Limite
+        DatePublication = DateIso $maintenant
+        DateLimite      = DateIso $o.Limite
         StatutRH        = $o.Statut
     } | Out-Null
     Ok "$($o.Ref) — $($o.Statut)"
