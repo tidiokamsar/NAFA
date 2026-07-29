@@ -8,6 +8,9 @@ Scripts PnP.PowerShell du back-office SharePoint Online du portail des opportuni
 | `01-provision-sharepoint.ps1` | Provisionne le site de gestion : jeux de termes, bibliothèques, listes typées, validations, indexation, groupes et permissions. **Idempotent.** |
 | `02-export-publication.ps1` | Extrait les contenus publiables et génère `data/opportunites.json` + la copie des documents publics pour le front. |
 | `03-jeu-essai.ps1` | Insère un jeu d'essai couvrant tous les états d'affichage. Recette uniquement, réversible par `-Supprimer`. |
+| `04-peupler-groupes.ps1` | Applique les habilitations décrites dans un CSV aux six groupes de sécurité. `-Etat` affiche les membres actuels. |
+| `05-recette-wf05.ps1` | Joue les essais du CDC §12.2 directement contre le déclencheur de WF-05. |
+| `06-preparer-publication.ps1` | Assemble le dossier prêt à déposer sur l'hébergement public. Consultation seule par défaut. |
 
 ## Démarrage
 
