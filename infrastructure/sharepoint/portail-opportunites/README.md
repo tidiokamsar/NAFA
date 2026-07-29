@@ -4,8 +4,24 @@ Scripts PnP.PowerShell du back-office SharePoint Online du portail des opportuni
 
 | Script | Rôle |
 |---|---|
+| `00-demarrage.ps1` | Démarrage assisté : installe le module, crée l'inscription d'application Entra ID, enchaîne le provisionnement. **Point d'entrée conseillé.** |
 | `01-provision-sharepoint.ps1` | Provisionne le site de gestion : jeux de termes, bibliothèques, listes typées, validations, indexation, groupes et permissions. **Idempotent.** |
 | `02-export-publication.ps1` | Extrait les contenus publiables et génère `data/opportunites.json` + la copie des documents publics pour le front. |
+
+## Démarrage
+
+```powershell
+# Recette d'abord — le site créé porte le suffixe -Recette
+./00-demarrage.ps1 -Tenant "ageroutegn"
+
+# Production, une fois la recette validée
+./00-demarrage.ps1 -Tenant "ageroutegn" -Production -ClientId "<GUID>"
+```
+
+Ces scripts s'exécutent depuis un poste de l'Agence : ils exigent une
+authentification interactive auprès d'Entra ID et le rôle Administrateur
+SharePoint. Aucun outil externe ne peut s'y substituer — voir
+`docs/cahier-des-charges/portail-opportunites/INSCRIPTION-APPLICATION-ENTRA-ID.md`.
 
 Prérequis : PowerShell 7 et `Install-Module PnP.PowerShell -Scope CurrentUser`.
 
