@@ -340,20 +340,43 @@ Ok "Liste Abonnes complète"
 # 7. Groupes de sécurité et permissions — CDC §7.1
 # ---------------------------------------------------------------
 Etape "Groupes et permissions"
+
+# Les définitions de rôles portent le nom de la langue du site
+# (« Full Control » / « Contrôle total »…). Les nommer en dur rend le
+# script dépendant de cette langue : on les résout par leur type, qui
+# lui est invariant.
+function RoleDeType($types) {
+    $definitions = Get-PnPRoleDefinition
+    foreach ($type in $types) {
+        $trouve = $definitions | Where-Object { $_.RoleTypeKind -eq $type } | Select-Object -First 1
+        if ($trouve) { return $trouve.Name }
+    }
+    return $null
+}
+$roleTotal  = RoleDeType @("Administrator")
+$roleContrib = RoleDeType @("Contributor", "Editor")
+if (-not $roleTotal -or -not $roleContrib) {
+    throw "Impossible de résoudre les définitions de rôles du site. " +
+          "Rôles disponibles : " + ((Get-PnPRoleDefinition).Name -join ", ")
+}
+Info "Rôles résolus : « $roleTotal » et « $roleContrib »"
+
 $groupes = @(
-    @{Nom="AGR-PRT-Admins";          Role="Contrôle total"},
-    @{Nom="AGR-PRT-DPMP-Contrib";    Role="Collaboration"},
-    @{Nom="AGR-PRT-RH-Contrib";      Role="Collaboration"},
-    @{Nom="AGR-PRT-Valideurs";       Role="Collaboration"},
-    @{Nom="AGR-PRT-Comm";            Role="Collaboration"},
-    @{Nom="AGR-PRT-RH-Candidatures"; Role="Collaboration"}
+    @{Nom="AGR-PRT-Admins";          Role=$roleTotal},
+    @{Nom="AGR-PRT-DPMP-Contrib";    Role=$roleContrib},
+    @{Nom="AGR-PRT-RH-Contrib";      Role=$roleContrib},
+    @{Nom="AGR-PRT-Valideurs";       Role=$roleContrib},
+    @{Nom="AGR-PRT-Comm";            Role=$roleContrib},
+    @{Nom="AGR-PRT-RH-Candidatures"; Role=$roleContrib}
 )
 foreach ($g in $groupes) {
     if (-not (Get-PnPGroup -Identity $g.Nom -ErrorAction SilentlyContinue)) {
         New-PnPGroup -Title $g.Nom | Out-Null
-        Set-PnPGroupPermissions -Identity $g.Nom -AddRole $g.Role
     }
-    Ok "Groupe '$($g.Nom)'"
+    # Hors du test d'existence : une exécution précédente peut avoir
+    # créé le groupe sans lui attribuer son rôle.
+    Set-PnPGroupPermissions -Identity $g.Nom -AddRole $g.Role
+    Ok "Groupe '$($g.Nom)' — $($g.Role)"
 }
 
 # RUPTURE D'HÉRITAGE sur les candidatures — exigence EXG-25.
@@ -362,8 +385,8 @@ foreach ($g in $groupes) {
 Etape "Sécurisation des données personnelles (rupture d'héritage)"
 foreach ($cible in @($lCand, "Candidatures", $lAbo)) {
     Set-PnPList -Identity $cible -BreakRoleInheritance -CopyRoleAssignments:$false | Out-Null
-    Set-PnPListPermission -Identity $cible -Group "AGR-PRT-Admins"          -AddRole "Contrôle total"
-    Set-PnPListPermission -Identity $cible -Group "AGR-PRT-RH-Candidatures" -AddRole "Collaboration"
+    Set-PnPListPermission -Identity $cible -Group "AGR-PRT-Admins"          -AddRole $roleTotal
+    Set-PnPListPermission -Identity $cible -Group "AGR-PRT-RH-Candidatures" -AddRole $roleContrib
     Ok "Héritage rompu et droits restreints sur '$cible'"
 }
 
