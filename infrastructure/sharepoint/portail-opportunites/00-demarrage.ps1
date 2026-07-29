@@ -106,13 +106,32 @@ if ($ClientId) {
 
     $app = Register-PnPEntraIDAppForInteractiveLogin @arguments
 
-    # Le nom de la propriété a changé selon les versions de PnP :
-    # on essaie les formes connues avant d'abandonner.
+    # L'applet écrit plusieurs objets dans le pipeline : des messages
+    # d'avancement sous forme de chaînes, puis l'objet portant
+    # l'identifiant. Il faut donc parcourir chaque élément — interroger
+    # les propriétés de la collection elle-même ne donne rien.
+    # Le nom de la propriété varie par ailleurs selon les versions.
     $ClientId = $null
-    foreach ($propriete in @("AzureAppId/ClientId", "AppId", "ClientId", "ApplicationId")) {
-        $valeur = $app.PSObject.Properties[$propriete]
-        if ($valeur -and $valeur.Value) { $ClientId = [string]$valeur.Value; break }
+    foreach ($element in @($app)) {
+        if ($null -eq $element) { continue }
+        foreach ($propriete in @("AzureAppId/ClientId", "AppId", "ClientId", "ApplicationId")) {
+            $valeur = $element.PSObject.Properties[$propriete]
+            if ($valeur -and $valeur.Value) { $ClientId = [string]$valeur.Value; break }
+        }
+        if ($ClientId) { break }
     }
+
+    # Dernier recours : l'identifiant figure de toute façon en clair
+    # dans le texte renvoyé.
+    if (-not $ClientId) {
+        $motifGuid = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'
+        $trouve = [regex]::Match(($app | Out-String), $motifGuid)
+        if ($trouve.Success) {
+            $ClientId = $trouve.Value
+            Note "Identifiant extrait du texte de sortie."
+        }
+    }
+
     if (-not $ClientId) {
         Write-Host "`nObjet renvoyé par l'inscription :" -ForegroundColor Yellow
         $app | Format-List | Out-String | Write-Host
