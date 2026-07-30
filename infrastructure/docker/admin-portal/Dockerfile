@@ -4,21 +4,32 @@
 #
 #   docker build -f infrastructure/docker/admin-portal/Dockerfile -t nafa/admin-portal:dev .
 
-# ---------- deps ----------
-FROM node:22-alpine AS deps
-WORKDIR /repo
+# ---------- base toolchain ----------
+FROM node:22-alpine AS pnpm-base
 RUN corepack enable
+WORKDIR /repo
+# See the iam Dockerfile: pnpm's default 5-minute fetch timeout cannot survive
+# a slow link, and store-dir must be set explicitly for the cache mount below
+# to actually be the store pnpm writes to.
+RUN printf '%s\n' \
+      'store-dir=/pnpm/store' \
+      'fetch-timeout=1800000' \
+      'fetch-retries=8' \
+      'fetch-retry-mintimeout=10000' \
+      'fetch-retry-maxtimeout=120000' \
+      'network-concurrency=4' \
+      > /repo/.npmrc
+
+# ---------- deps ----------
+FROM pnpm-base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/admin-portal/package.json apps/web/admin-portal/
-RUN pnpm install --frozen-lockfile
+# See the iam Dockerfile for why --trust-lockfile is correct here.
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --frozen-lockfile --trust-lockfile --store-dir=/pnpm/store
 
 # ---------- build ----------
-FROM node:22-alpine AS build
-WORKDIR /repo
-RUN corepack enable
-COPY --from=deps /repo/node_modules ./node_modules
-COPY --from=deps /repo/apps/web/admin-portal/node_modules ./apps/web/admin-portal/node_modules
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+FROM deps AS build
 COPY apps/web/admin-portal ./apps/web/admin-portal
 WORKDIR /repo/apps/web/admin-portal
 ENV NEXT_TELEMETRY_DISABLED=1
