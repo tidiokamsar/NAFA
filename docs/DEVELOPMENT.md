@@ -167,25 +167,28 @@ docker compose -f infrastructure/docker/docker-compose.dev.yml up -d postgres re
 ```
 
 ```bash
-pnpm exec nx run @nafa/iam:db:push
-```
-
-```bash
 pnpm exec nx run @nafa/iam:test:e2e
 ```
+
+Aucun `db:push` préalable n'est nécessaire : la suite crée `nafa_test` si elle
+manque, met le schéma en phase et vide les tables avant de démarrer.
 
 Ils sont volontairement exclus de `pnpm test` pour que la suite unitaire reste
 exécutable sans infrastructure — en local comme en CI.
 
-> **Validation différée — Sprint 0.** Le refactoring DDD du sprint 0 a été
-> livré sans exécution des tests e2e : le moteur Docker de la machine de
-> développement était hors service (`docker version` répondait 500 sur
-> `dockerDesktopLinuxEngine`). Lint, typecheck, build et tests unitaires sont
-> passés à chaque étape, et le test de câblage ci-dessus couvre la principale
-> classe de régression restante. Les trois commandes ci-dessus restent à
-> passer une fois Docker rétabli, avant toute fusion vers `main` — elles seules
-> vérifient le comportement HTTP réel de `POST /auth/register` et
-> `POST /auth/login`.
+### Pourquoi les e2e ont leur propre base
+
+Ils tournent sur `nafa_test`, jamais sur `nafa_dev`. Ce n'est pas
+automatique : Nx injecte le `.env` racine dans l'environnement de chaque tâche,
+et `@nestjs/config` n'écrase jamais une variable déjà présente dans
+`process.env` — `.env.test` était donc lu puis systématiquement perdu.
+`test/e2e-env.ts` recharge `.env.test` avec `override: true`, ce qui est la
+seule façon de reprendre la main, et refuse de démarrer si le nom de la base
+ne se termine pas par `_test`.
+
+Le nettoyage se fait **avant** la suite, pas après : une exécution qui échoue
+laisse ses lignes en place pour inspection, et la suivante repart malgré tout
+d'un état connu.
 
 ## Ajouter un projet
 
