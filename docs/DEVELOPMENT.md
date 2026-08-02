@@ -155,7 +155,20 @@ externes (Prisma, Redis) sont remplacées par des doubles.
 pnpm test
 ```
 
+Cette suite inclut `services/foundation/iam/src/app.module.spec.ts`, qui
+compile le graphe d'injection complet de NestJS avec seulement `PrismaService`
+et `REDIS_CLIENT` remplacés. Il attrape les erreurs de câblage — jeton lié dans
+le mauvais module, `exports:` oublié — que `tsc` et le build ne voient pas.
+
 Les tests de bout en bout nécessitent PostgreSQL et Redis démarrés :
+
+```bash
+docker compose -f infrastructure/docker/docker-compose.dev.yml up -d postgres redis
+```
+
+```bash
+pnpm exec nx run @nafa/iam:db:push
+```
 
 ```bash
 pnpm exec nx run @nafa/iam:test:e2e
@@ -163,6 +176,16 @@ pnpm exec nx run @nafa/iam:test:e2e
 
 Ils sont volontairement exclus de `pnpm test` pour que la suite unitaire reste
 exécutable sans infrastructure — en local comme en CI.
+
+> **Validation différée — Sprint 0.** Le refactoring DDD du sprint 0 a été
+> livré sans exécution des tests e2e : le moteur Docker de la machine de
+> développement était hors service (`docker version` répondait 500 sur
+> `dockerDesktopLinuxEngine`). Lint, typecheck, build et tests unitaires sont
+> passés à chaque étape, et le test de câblage ci-dessus couvre la principale
+> classe de régression restante. Les trois commandes ci-dessus restent à
+> passer une fois Docker rétabli, avant toute fusion vers `main` — elles seules
+> vérifient le comportement HTTP réel de `POST /auth/register` et
+> `POST /auth/login`.
 
 ## Ajouter un projet
 

@@ -46,10 +46,49 @@ tout nouveau service NestJS copie.
 
 ### `packages/`
 
-Bibliothèques partagées. `platform` est la seule implémentée à ce jour ; les
-autres (`design-system`, `ui`, `auth`, `workflow`, `notifications`,
-`documents`, `maps`, `analytics`, `ai-sdk`, `shared`) sont des emplacements
-réservés. Un package ne dépend jamais d'une app ni d'un service.
+Bibliothèques partagées. Quatre sont implémentées, chacune répondant à une
+question différente :
+
+| Package      | Question à laquelle il répond                                  | Tag              |
+| ------------ | -------------------------------------------------------------- | ---------------- |
+| `shared`     | « de quoi tout code a besoin » — `Result`, erreurs, pagination | `layer:util`     |
+| `foundation` | « ce que le métier NAFA manipule » — modèles et ports          | `layer:domain`   |
+| `platform`   | « comment un service NestJS démarre » — config, logs, santé    | `layer:platform` |
+| `sdk`        | « comment un client appelle les API »                          | `layer:client`   |
+
+`security` complète `platform` sur le volet chiffrement et secrets. Les autres
+(`design-system`, `ui`, `auth`, `workflow`, `notifications`, `documents`,
+`maps`, `analytics`, `ai-sdk`) sont des emplacements réservés.
+
+Un package ne dépend jamais d'une app ni d'un service. Cette règle, comme
+toutes celles du tableau ci-dessus, est appliquée au lint — voir
+[ADR-0004](adr/0004-enforce-architecture-boundaries-with-nx-tags.md).
+
+### Organisation DDD des services
+
+Chaque service NestJS découpe son `src/` en quatre couches, avec une seule
+direction de dépendance autorisée :
+
+| Couche            | Rôle                                     | Peut dépendre de                  |
+| ----------------- | ---------------------------------------- | --------------------------------- |
+| `domain/`         | modèles et ports métier                  | `@nafa/foundation`                |
+| `application/`    | cas d'usage                              | `domain/`                         |
+| `infrastructure/` | adaptateurs Prisma, JWT, sondes de santé | `domain/`, `@nafa/platform`       |
+| `api/`            | contrôleurs, DTO, gardes HTTP            | `application/`, `infrastructure/` |
+
+`api/` est la seule couche autorisée à connaître les deux côtés : c'est la
+**racine de composition**, celle qui branche les adaptateurs sur les cas
+d'usage. L'inverse est interdit — `application/` ne référence jamais
+`infrastructure/`, ce qui oblige les cas d'usage à passer par un port.
+
+`services/foundation/iam` est le service de référence. Ses deux cas d'usage
+(`RegisterUserUseCase`, `LoginUserUseCase`) dépendent du port
+`IdentityUserRepository` ; l'adaptateur Prisma y est lié dans
+`InfrastructureModule` ; `AuthApiModule` injecte l'un dans l'autre.
+
+Détail des décisions : [ADR-0001](adr/0001-ddd-layering-for-services.md),
+[ADR-0002](adr/0002-foundation-package-for-business-contracts.md),
+[ADR-0003](adr/0003-ports-and-adapters-for-persistence.md).
 
 ## Décisions techniques
 
