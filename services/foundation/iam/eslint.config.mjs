@@ -26,4 +26,45 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'warn',
     },
   },
+  // Architecture boundaries. The authoritative, cross-project rule lives in the
+  // root config (`@nx/enforce-module-boundaries`); these in-service rules guard
+  // the layer split *inside* IAM, which Nx tags cannot see.
+  {
+    files: ['src/domain/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['@nestjs/*', '@prisma/*', '@nafa/platform', 'bcryptjs'],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/application/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            '@prisma/*',
+            '../infrastructure/**',
+            '../../infrastructure/**',
+            '../../../infrastructure/**',
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/infrastructure/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: ['../api/**', '../../api/**', '../../../api/**'],
+        },
+      ],
+    },
+  },
 );
