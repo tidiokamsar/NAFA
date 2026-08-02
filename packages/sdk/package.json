@@ -50,5 +50,11 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "nx": {
+    "tags": [
+      "scope:shared",
+      "layer:client"
+    ]
   }
 }

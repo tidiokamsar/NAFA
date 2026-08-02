@@ -73,5 +73,11 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "testEnvironment": "node"
+  },
+  "nx": {
+    "tags": [
+      "scope:platform",
+      "layer:platform"
+    ]
   }
 }

@@ -2,11 +2,13 @@
 import eslint from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import moduleBoundaries from '../../../tools/eslint/module-boundaries.mjs';
 
 export default tseslint.config(
   {
     ignores: ['eslint.config.mjs', 'dist/**', '**/generated/**', 'coverage/**'],
   },
+  ...moduleBoundaries,
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -26,9 +28,9 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'warn',
     },
   },
-  // Architecture boundaries. The authoritative, cross-project rule lives in the
-  // root config (`@nx/enforce-module-boundaries`); these in-service rules guard
-  // the layer split *inside* IAM, which Nx tags cannot see.
+  // Nx tags (spread above) police dependencies *between* projects. These rules
+  // police the layer split *inside* this one, which the project graph cannot
+  // see: to Nx, all four layers are the same node.
   {
     files: ['src/domain/**/*.ts'],
     rules: {

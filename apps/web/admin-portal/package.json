@@ -24,5 +24,11 @@
     "globals": "^17.8.0",
     "typescript": "5.9.3",
     "typescript-eslint": "^8.65.0"
+  },
+  "nx": {
+    "tags": [
+      "scope:web",
+      "layer:app"
+    ]
   }
 }
