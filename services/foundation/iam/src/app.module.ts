@@ -11,10 +11,9 @@ import {
   RedisHealthIndicator,
 } from '@nafa/platform';
 import { join } from 'node:path';
-import { AuthModule } from './auth/auth.module';
-import { PrismaHealthIndicator } from './health/prisma-health.indicator';
-import { PrismaModule } from './prisma/prisma.module';
-import { UsersModule } from './users/users.module';
+import { AuthApiModule } from './api/auth/auth-api.module';
+import { PrismaHealthIndicator } from './infrastructure/health/prisma-health.indicator';
+import { InfrastructureModule } from './infrastructure/infrastructure.module';
 
 // Repo root, where the .env files live.
 const REPO_ROOT = join(__dirname, '../../../..');
@@ -30,15 +29,14 @@ const REPO_ROOT = join(__dirname, '../../../..');
     PlatformCacheModule.forRoot(),
     PlatformThrottlerModule.forRoot(),
 
-    PrismaModule,
+    InfrastructureModule,
 
     PlatformHealthModule.forRoot({
-      imports: [PrismaModule],
+      imports: [InfrastructureModule],
       indicators: [PrismaHealthIndicator, RedisHealthIndicator],
     }),
 
-    UsersModule,
-    AuthModule,
+    AuthApiModule,
   ],
 })
 export class AppModule {}

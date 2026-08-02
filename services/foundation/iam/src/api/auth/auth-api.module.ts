@@ -3,16 +3,15 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import type { AuthConfig } from '@nafa/platform';
-import { UsersModule } from '../users/users.module';
+import { AuthService } from '../../application';
+import { InfrastructureModule } from '../../infrastructure/infrastructure.module';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
 
 type SignOptions = NonNullable<JwtModuleOptions['signOptions']>;
 
 @Module({
   imports: [
-    UsersModule,
+    InfrastructureModule,
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
@@ -21,8 +20,6 @@ type SignOptions = NonNullable<JwtModuleOptions['signOptions']>;
         return {
           secret: auth.jwtSecret,
           signOptions: {
-            // `expiresIn` is typed as the `ms` StringValue union; the value is
-            // validated as a plain string at boot (platform env validation).
             expiresIn: auth.jwtExpiresIn as SignOptions['expiresIn'],
           },
         };
@@ -30,6 +27,6 @@ type SignOptions = NonNullable<JwtModuleOptions['signOptions']>;
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService],
 })
-export class AuthModule {}
+export class AuthApiModule {}

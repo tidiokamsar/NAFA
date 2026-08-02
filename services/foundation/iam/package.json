@@ -19,6 +19,7 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@nafa/foundation": "workspace:*",
     "@nafa/platform": "workspace:*",
     "@nestjs/common": "^11.1.28",
     "@nestjs/config": "^4.0.4",
@@ -81,5 +82,11 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "nx": {
+    "tags": [
+      "scope:foundation",
+      "layer:service"
+    ]
   }
 }

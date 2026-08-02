@@ -4,22 +4,18 @@ import { PassportStrategy } from '@nestjs/passport';
 import type { AuthConfig } from '@nafa/platform';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-export interface JwtPayload {
-  sub: string;
-  email: string;
-}
-
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(config: ConfigService) {
+    const auth = config.getOrThrow<AuthConfig>('auth');
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: config.getOrThrow<AuthConfig>('auth').jwtSecret,
+      secretOrKey: auth.jwtSecret,
     });
   }
 
-  validate(payload: JwtPayload): JwtPayload {
-    return payload;
+  validate(payload: { sub: string; email: string }) {
+    return { userId: payload.sub, email: payload.email };
   }
 }

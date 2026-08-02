@@ -4,7 +4,7 @@ import {
   HealthIndicatorService,
 } from '@nestjs/terminus';
 import type { PlatformHealthIndicator } from '@nafa/platform';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../persistence/prisma/prisma.service';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class PrismaHealthIndicator implements PlatformHealthIndicator {
