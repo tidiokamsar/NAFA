@@ -3,7 +3,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { REDIS_CLIENT } from '@nafa/platform';
 import { AppModule } from './app.module';
 import { AuthController } from './api/auth/auth.controller';
-import { AuthService } from './application';
+import { LoginUserUseCase, RegisterUserUseCase } from './application';
+// Imported by path, not through the barrel: the issuer is internal to the
+// application layer and this test asserts exactly that.
+import { AccessTokenIssuer } from './application/auth/access-token.issuer';
 import { IDENTITY_USER_REPOSITORY } from './domain';
 import { PrismaIdentityUserRepository } from './infrastructure/persistence/prisma/prisma-identity-user.repository';
 import { PrismaService } from './infrastructure/persistence/prisma/prisma.service';
@@ -47,11 +50,12 @@ describe('AppModule wiring', () => {
     await moduleRef?.close();
   });
 
-  it('resolves the auth controller with its use case collaborator', () => {
+  it('resolves the auth controller with both use cases', () => {
     const controller = moduleRef.get(AuthController, { strict: false });
 
     expect(controller).toBeInstanceOf(AuthController);
-    expect(controller['authService']).toBeInstanceOf(AuthService);
+    expect(controller['registerUser']).toBeInstanceOf(RegisterUserUseCase);
+    expect(controller['loginUser']).toBeInstanceOf(LoginUserUseCase);
   });
 
   it('binds the identity port to the Prisma adapter', () => {
@@ -62,23 +66,41 @@ describe('AppModule wiring', () => {
     expect(repository).toBeInstanceOf(PrismaIdentityUserRepository);
   });
 
-  it('hands the application layer the port, not the adapter class', () => {
-    // AuthService is constructed with @Inject(IDENTITY_USER_REPOSITORY): if the
-    // adapter were injected by class, swapping the implementation would mean
-    // editing the use case.
-    const authService = moduleRef.get(AuthService, { strict: false });
+  it('hands the use cases the port, not the adapter class', () => {
+    // The use cases are constructed with @Inject(IDENTITY_USER_REPOSITORY): if
+    // the adapter were injected by class, swapping the implementation would
+    // mean editing them.
     const repository = moduleRef.get(IDENTITY_USER_REPOSITORY, {
       strict: false,
     });
 
-    expect(authService['users']).toBe(repository);
+    expect(moduleRef.get(RegisterUserUseCase, { strict: false })['users']).toBe(
+      repository,
+    );
+    expect(moduleRef.get(LoginUserUseCase, { strict: false })['users']).toBe(
+      repository,
+    );
   });
 
-  it('exposes a single JwtService to the layer that signs tokens', () => {
+  it('mints both tokens from one issuer over one JwtService', () => {
+    // Register and login must not drift apart in how they sign.
     const jwtService = moduleRef.get(JwtService, { strict: false });
-    const authService = moduleRef.get(AuthService, { strict: false });
+    const registerIssuer = moduleRef.get(RegisterUserUseCase, {
+      strict: false,
+    })['tokens'];
+    const loginIssuer = moduleRef.get(LoginUserUseCase, { strict: false })[
+      'tokens'
+    ];
 
     expect(jwtService).toBeInstanceOf(JwtService);
-    expect(authService['jwtService']).toBe(jwtService);
+    expect(registerIssuer).toBeInstanceOf(AccessTokenIssuer);
+    expect(registerIssuer).toBe(loginIssuer);
+    expect(registerIssuer['jwtService']).toBe(jwtService);
+  });
+
+  it('keeps the token issuer out of reach of the API layer', () => {
+    // AccessTokenIssuer is provided but deliberately not exported: the HTTP
+    // layer signs nothing of its own.
+    expect(() => moduleRef.get(AccessTokenIssuer, { strict: true })).toThrow();
   });
 });

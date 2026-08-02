@@ -1,4 +1,4 @@
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import * as bcrypt from 'bcryptjs';
@@ -6,8 +6,9 @@ import {
   IDENTITY_USER_REPOSITORY,
   type IdentityUser,
   type IdentityUserRepository,
-} from '../../domain';
-import { AuthService } from './auth.service';
+} from '../../../domain';
+import { AccessTokenIssuer } from '../access-token.issuer';
+import { LoginUserUseCase } from './login-user.use-case';
 
 function userFixture(overrides: Partial<IdentityUser> = {}): IdentityUser {
   return {
@@ -18,15 +19,16 @@ function userFixture(overrides: Partial<IdentityUser> = {}): IdentityUser {
   };
 }
 
-describe('AuthService', () => {
-  let authService: AuthService;
+describe('LoginUserUseCase', () => {
+  let loginUser: LoginUserUseCase;
   let usersRepository: jest.Mocked<IdentityUserRepository>;
   let jwtService: jest.Mocked<JwtService>;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
-        AuthService,
+        LoginUserUseCase,
+        AccessTokenIssuer,
         {
           provide: IDENTITY_USER_REPOSITORY,
           useValue: {
@@ -43,47 +45,16 @@ describe('AuthService', () => {
       ],
     }).compile();
 
-    authService = moduleRef.get(AuthService);
+    loginUser = moduleRef.get(LoginUserUseCase);
     usersRepository = moduleRef.get(IDENTITY_USER_REPOSITORY);
     jwtService = moduleRef.get(JwtService);
-  });
-
-  it('rejects an email that is already registered', async () => {
-    usersRepository.findByEmail.mockResolvedValue(
-      userFixture({ id: 'u1', email: 'existing@nafa.gn' }),
-    );
-
-    await expect(
-      authService.register('existing@nafa.gn', 'password123'),
-    ).rejects.toBeInstanceOf(ConflictException);
-  });
-
-  it('hashes the password, creates the user, and returns a token', async () => {
-    usersRepository.findByEmail.mockResolvedValue(null);
-    usersRepository.create.mockResolvedValue(
-      userFixture({ id: 'u2', email: 'new@nafa.gn', passwordHash: 'hashed' }),
-    );
-
-    const result = await authService.register('new@nafa.gn', 'password123');
-
-    expect(usersRepository.create).toHaveBeenCalledWith(
-      'new@nafa.gn',
-      expect.any(String),
-    );
-    const [, storedHash] = usersRepository.create.mock.calls[0];
-    expect(await bcrypt.compare('password123', storedHash)).toBe(true);
-    expect(jwtService.sign).toHaveBeenCalledWith({
-      sub: 'u2',
-      email: 'new@nafa.gn',
-    });
-    expect(result).toEqual({ accessToken: 'signed.jwt.token' });
   });
 
   it('rejects an unknown email', async () => {
     usersRepository.findByEmail.mockResolvedValue(null);
 
     await expect(
-      authService.login('ghost@nafa.gn', 'password123'),
+      loginUser.execute('ghost@nafa.gn', 'password123'),
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
@@ -96,8 +67,28 @@ describe('AuthService', () => {
     );
 
     await expect(
-      authService.login('user@nafa.gn', 'wrong-password'),
+      loginUser.execute('user@nafa.gn', 'wrong-password'),
     ).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('does not let an unknown email be told apart from a wrong password', async () => {
+    usersRepository.findByEmail.mockResolvedValue(null);
+    const unknownEmail = await loginUser
+      .execute('ghost@nafa.gn', 'password123')
+      .catch((error: UnauthorizedException) => error);
+
+    usersRepository.findByEmail.mockResolvedValue(
+      userFixture({ passwordHash: await bcrypt.hash('correct-password', 10) }),
+    );
+    const wrongPassword = await loginUser
+      .execute('user@nafa.gn', 'wrong-password')
+      .catch((error: UnauthorizedException) => error);
+
+    expect(unknownEmail).toBeInstanceOf(UnauthorizedException);
+    expect(wrongPassword).toBeInstanceOf(UnauthorizedException);
+    expect((unknownEmail as UnauthorizedException).getResponse()).toEqual(
+      (wrongPassword as UnauthorizedException).getResponse(),
+    );
   });
 
   it('returns a token for valid credentials', async () => {
@@ -109,7 +100,11 @@ describe('AuthService', () => {
     );
 
     await expect(
-      authService.login('user@nafa.gn', 'correct-password'),
+      loginUser.execute('user@nafa.gn', 'correct-password'),
     ).resolves.toEqual({ accessToken: 'signed.jwt.token' });
+    expect(jwtService.sign).toHaveBeenCalledWith({
+      sub: 'u4',
+      email: 'user@nafa.gn',
+    });
   });
 });

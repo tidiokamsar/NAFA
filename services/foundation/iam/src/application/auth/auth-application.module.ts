@@ -1,5 +1,7 @@
 import { DynamicModule, Module, ModuleMetadata } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AccessTokenIssuer } from './access-token.issuer';
+import { LoginUserUseCase } from './use-cases/login-user.use-case';
+import { RegisterUserUseCase } from './use-cases/register-user.use-case';
 
 @Module({})
 export class AuthApplicationModule {
@@ -9,7 +11,7 @@ export class AuthApplicationModule {
    * Passing the adapter modules in — rather than importing them here — is the
    * whole point. A NestJS provider resolves against its own module's imports,
    * so importing `InfrastructureModule` from this file would be the only other
-   * way to make `AuthService` resolvable, and it would put a hard dependency
+   * way to make the use cases resolvable, and it would put a hard dependency
    * from `application/` onto `infrastructure/`. The composition root (`api/`)
    * is the layer allowed to know about both.
    *
@@ -21,8 +23,10 @@ export class AuthApplicationModule {
     return {
       module: AuthApplicationModule,
       imports: adapters,
-      providers: [AuthService],
-      exports: [AuthService],
+      providers: [AccessTokenIssuer, RegisterUserUseCase, LoginUserUseCase],
+      // AccessTokenIssuer stays internal: it is an implementation detail of
+      // how the use cases answer, not something the API layer should reach for.
+      exports: [RegisterUserUseCase, LoginUserUseCase],
     };
   }
 }
