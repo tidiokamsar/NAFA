@@ -1,0 +1,36 @@
+{
+  "name": "@nafa/foundation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NAFA domain foundation: shared business contracts and ports",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.1",
+    "eslint": "^10.8.0",
+    "globals": "^17.8.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.65.0"
+  },
+  "nx": {
+    "tags": [
+      "scope:foundation",
+      "layer:domain"
+    ]
+  }
+}
