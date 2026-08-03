@@ -27,10 +27,16 @@ const depConstraints = [
     onlyDependOnLibsWithTags: [],
   },
   {
-    // Business contracts and ports. Depending on anything would drag a
-    // technology into the definition of the domain.
+    // Business contracts, ports and domain models.
+    //
+    // `layer:util` is the single allowed dependency, and only because it is
+    // itself dependency-free: importing it drags no technology into the
+    // domain, which is the property this rule exists to protect. Anything
+    // that boots, connects or serializes is a layer below and stays out.
+    //
+    // @see docs/adr/0005-domain-may-depend-on-the-shared-kernel.md
     sourceTag: 'layer:domain',
-    onlyDependOnLibsWithTags: [],
+    onlyDependOnLibsWithTags: ['layer:util'],
   },
   {
     // Technical foundation: config, logging, health, Redis, telemetry.
