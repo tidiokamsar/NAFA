@@ -2,6 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ErrorResponse } from '@nafa/platform';
 import { LoginUserUseCase, RegisterUserUseCase } from '../../application';
+import { toHttpException } from './auth-error.mapper';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
@@ -21,7 +22,9 @@ export class AuthController {
     type: ErrorResponse,
   })
   register(@Body() dto: RegisterDto) {
-    return this.registerUser.execute(dto.email, dto.password);
+    return this.registerUser
+      .execute(dto.email, dto.password)
+      .catch(toHttpException);
   }
 
   @Post('login')
@@ -33,6 +36,8 @@ export class AuthController {
     type: ErrorResponse,
   })
   login(@Body() dto: LoginDto) {
-    return this.loginUser.execute(dto.email, dto.password);
+    return this.loginUser
+      .execute(dto.email, dto.password)
+      .catch(toHttpException);
   }
 }

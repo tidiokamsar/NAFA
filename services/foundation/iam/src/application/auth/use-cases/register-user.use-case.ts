@@ -1,30 +1,28 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
-import {
-  IDENTITY_USER_REPOSITORY,
-  type IdentityUserRepository,
-} from '../../../domain';
-import { AccessTokenIssuer } from '../access-token.issuer';
-import { AuthTokens } from '../auth-tokens';
+import type { IdentityUserRepository } from '../../../domain';
+import type { AuthTokens } from '../auth-tokens';
+import { EmailAlreadyRegisteredError } from '../auth.errors';
+import type { AccessTokenIssuer } from '../ports/access-token-issuer.port';
+import type { PasswordHasher } from '../ports/password-hasher.port';
 
-/** bcrypt cost factor. Unchanged from the pre-refactor AuthService. */
-const PASSWORD_HASH_ROUNDS = 10;
-
-@Injectable()
+/**
+ * A plain class: no decorators, no container awareness, everything it needs
+ * arrives through the constructor. The composition root in `api/` is what
+ * turns it into a NestJS provider.
+ */
 export class RegisterUserUseCase {
   constructor(
-    @Inject(IDENTITY_USER_REPOSITORY)
     private readonly users: IdentityUserRepository,
+    private readonly passwords: PasswordHasher,
     private readonly tokens: AccessTokenIssuer,
   ) {}
 
   async execute(email: string, password: string): Promise<AuthTokens> {
     const existing = await this.users.findByEmail(email);
     if (existing) {
-      throw new ConflictException('Email already registered');
+      throw new EmailAlreadyRegisteredError();
     }
 
-    const passwordHash = await bcrypt.hash(password, PASSWORD_HASH_ROUNDS);
+    const passwordHash = await this.passwords.hash(password);
     const user = await this.users.create(email, passwordHash);
 
     return this.tokens.issueFor(user);

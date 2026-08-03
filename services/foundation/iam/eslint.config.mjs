@@ -43,16 +43,47 @@ export default tseslint.config(
     },
   },
   {
+    // The application layer holds use cases and ports, and nothing else may
+    // leak in: no framework, no crypto library, no adapter. It depends on
+    // `domain/` and on its own ports — that is the whole allowed surface.
+    //
+    // The relative patterns are listed at every depth that exists rather than
+    // globbed: `no-restricted-imports` matches the literal specifier, so
+    // `**/infrastructure/**` would not catch `../infrastructure/x`.
     files: ['src/application/**/*.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           patterns: [
+            // Frameworks. A use case that imports these can only ever run
+            // behind an HTTP server.
+            '@nestjs/*',
+            '@nafa/platform',
+            // Password hashing is behind the PasswordHasher port.
+            'bcryptjs',
+            // Persistence is behind the IdentityUserRepository port.
             '@prisma/*',
+            'prisma',
+            '**/generated/**',
+            // Adapters. The dependency arrow points inwards, never out.
+            '../infrastructure',
             '../infrastructure/**',
+            '../../infrastructure',
             '../../infrastructure/**',
+            '../../../infrastructure',
             '../../../infrastructure/**',
+            '../../../../infrastructure',
+            '../../../../infrastructure/**',
+            // Same for the layer above.
+            '../api',
+            '../api/**',
+            '../../api',
+            '../../api/**',
+            '../../../api',
+            '../../../api/**',
+            '../../../../api',
+            '../../../../api/**',
           ],
         },
       ],
