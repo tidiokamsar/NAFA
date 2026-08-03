@@ -74,3 +74,17 @@ Thumbs.db
 ios/Pods/
 android/.gradle/
 android/app/build/
+
+# Worktrees des agents — voir docs/PARALLEL-AGENTS.md
+.worktrees/
+
+# pnpm est le seul gestionnaire de paquets de ce dépôt. Un package-lock.json
+# ou un yarn.lock ici signifie qu'un `npm install` ou `yarn` a été lancé par
+# erreur : il aplatit node_modules et fait résoudre NestJS en plusieurs
+# instances. Le supprimer, puis `pnpm install --frozen-lockfile`.
+package-lock.json
+yarn.lock
+
+# Sorties de génération documentaire, hors périmètre du monorepo
+output/
+tmp/

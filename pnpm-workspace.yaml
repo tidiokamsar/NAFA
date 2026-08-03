@@ -1,5 +1,11 @@
 packages:
   - "apps/web/*"
+  # Exclusion temporaire — voir docs/tickets/SPR-0010-integration-ageroute.md
+  # `apps/web/ageroute` (ageroute-guinee) est un portail à intégrer, arrivé
+  # avec sa propre chaîne npm + Supabase. Tant qu'il n'est pas converti, le
+  # laisser dans le workspace fait échouer `pnpm install --frozen-lockfile`.
+  # À retirer d'ici dès que le ticket d'intégration est mergé.
+  - "!apps/web/ageroute"
   - "apps/mobile/*"
   - "apps/ai/*"
   - "apps/whatsapp"
