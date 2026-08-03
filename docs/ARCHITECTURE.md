@@ -92,6 +92,33 @@ Détail des décisions : [ADR-0001](adr/0001-ddd-layering-for-services.md),
 
 ## Décisions techniques
 
+### Actor Master
+
+ACTOR-001 ajoute le premier Master métier dans `@nafa/foundation`. Il expose
+des contrats de domaine purs : aucun service NestJS, aucun schéma Prisma,
+aucune implémentation de persistance.
+
+- `Actor` porte l'identité juridique, les rôles économiques, le statut et le
+  niveau de vérification. Les rôles sont un **ensemble**, jamais une
+  hiérarchie : une coopérative est simultanément productrice, acheteuse et
+  grossiste.
+- `CooperativeMembership` est un agrégat distinct qui relie deux `ActorId`
+  sans charger une coopérative entière.
+- Les futurs Masters (Agriculture, Logistics, Compliance) et Engines (Finance,
+  Trust) référencent `ActorId` sans dépendance inverse.
+
+Les ports de repository appartiennent au **domaine**, conformément à
+[ADR-0001](adr/0001-ddd-layering-for-services.md), et portent une version
+attendue pour les écritures optimistes. Adaptateurs, transactions et Outbox
+restent dans les futurs services qui consommeront ces contrats.
+
+Les agrégats conservent leurs événements dans un tampon privé ; le repository
+les persistera avec le snapshot dans une même transaction, avant qu'un relais
+Outbox ne les publie. Voir
+[ADR-0006](adr/0006-actor-and-cooperative-membership-boundaries.md),
+[ADR-0007](adr/0007-actor-regulatory-boundaries.md) et
+[ADR-0008](adr/0008-domain-event-buffer-and-outbox.md).
+
 ### Monorepo : pnpm workspaces + Nx (mode _package-based_)
 
 Nx s'ajoute par-dessus les workspaces pnpm sans imposer sa propre structure de

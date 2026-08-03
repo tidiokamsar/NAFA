@@ -12,6 +12,9 @@ vrai, et pourquoi on a changé d'avis, vaut autant que la décision elle-même.
 | [0003](0003-ports-and-adapters-for-persistence.md)           | Ports et adaptateurs pour la persistance             | Acceptée |
 | [0004](0004-enforce-architecture-boundaries-with-nx-tags.md) | Frontières d'architecture appliquées par les tags Nx | Acceptée |
 | [0005](0005-domain-may-depend-on-the-shared-kernel.md)       | Le domaine peut dépendre du noyau partagé            | Acceptée |
+| [0006](0006-actor-and-cooperative-membership-boundaries.md)  | Frontières d'Actor et de CooperativeMembership       | Acceptée |
+| [0007](0007-actor-regulatory-boundaries.md)                  | Frontières réglementaires et opérationnelles d'Actor | Acceptée |
+| [0008](0008-domain-event-buffer-and-outbox.md)               | Tampon d'événements de domaine et future Outbox      | Acceptée |
 
 ## Format
 
