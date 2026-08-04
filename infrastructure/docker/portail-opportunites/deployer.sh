@@ -13,6 +13,17 @@
 #  supposer, et n'écrit rien tant qu'un contrôle échoue.
 #
 #  Idempotent : relançable autant de fois que nécessaire.
+#
+#  GOUVERNANCE — à lire avant d'exécuter
+#  Le guide de la DSI (« Site web institutionnel », août 2026, §8)
+#  précise que le docker-compose.yml du serveur est en lecture seule
+#  et que les étiquettes de routage Traefik sont posées par la DSI.
+#  Ajouter un service et une route relève donc d'elle, non d'un
+#  intervenant. Ce script suppose ce droit : il est destiné à être
+#  exécuté PAR la DSI, ou après qu'elle a accordé un périmètre
+#  incluant le portail.
+#  La demande correspondante est rédigée dans
+#  docs/cahier-des-charges/portail-opportunites/DEMANDE-DSI-DEPLOIEMENT.md
 # =================================================================
 set -euo pipefail
 

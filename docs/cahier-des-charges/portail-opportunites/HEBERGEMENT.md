@@ -35,6 +35,20 @@ reliquat à nettoyer.
 
 ---
 
+## Gouvernance — à lire d'abord
+
+Le *Guide de déploiement — Site web institutionnel* (DSI, août 2026) fixe les
+règles d'intervention sur 102.211.199.131 :
+
+- le `docker-compose.yml` du serveur est **en lecture seule** ; toute
+  modification passe par la DSI après revue (§8) ;
+- les **étiquettes de routage Traefik** sont posées par la DSI (§2) ;
+- l'accès se fait par **compte dédié et clé SSH**, au périmètre restreint (§3).
+
+Ajouter le portail — un service, une route, un répertoire — relève donc de la
+DSI. La demande correspondante, rédigée selon les conventions de ce guide, est
+`DEMANDE-DSI-DEPLOIEMENT.md`.
+
 ## Déploiement du portail
 
 > **Cible retenue : 102.211.199.132**, celui auquel l'exploitation a accès
