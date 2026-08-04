@@ -82,24 +82,16 @@ button[disabled]{cursor:not-allowed;opacity:.5}
 header.principal{background:var(--nuit);position:sticky;top:0;z-index:50;box-shadow:0 1px 0 rgba(255,255,255,.07)}
 .entete{display:flex;align-items:center;gap:18px;min-height:78px}
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none}
-/* Emblème : plaque sombre, chaussée en perspective et axe doré,
-   transposition en CSS de la marque de l'intranet. */
+/* Emblème officiel : triangle bleu nuit, chaussée blanche à axe
+   pointillé, éclat doré. Posé sur une plaque blanche, sans quoi le
+   triangle disparaîtrait dans l'en-tête sombre. */
 .logo .embleme{
-  width:48px;height:48px;border-radius:10px;flex:none;
-  background:linear-gradient(160deg,#24394C,#16232F);
-  border:1px solid rgba(255,255,255,.18);
-  position:relative;overflow:hidden;
+  width:54px;height:54px;border-radius:10px;flex:none;
+  background:var(--blanc);
+  display:flex;align-items:center;justify-content:center;
+  padding:3px;
 }
-.logo .embleme::before{
-  content:"";position:absolute;left:50%;bottom:5px;transform:translateX(-50%);
-  border-left:15px solid transparent;border-right:15px solid transparent;
-  border-bottom:30px solid rgba(255,255,255,.9);
-}
-.logo .embleme::after{
-  content:"";position:absolute;left:50%;bottom:7px;transform:translateX(-50%);
-  width:3px;height:22px;
-  background:repeating-linear-gradient(var(--or) 0 5px, transparent 5px 9px);
-}
+.logo .embleme svg{width:100%;height:100%;display:block}
 .logo-texte b{
   font-family:'Barlow Condensed','Barlow',sans-serif;font-size:1.55rem;font-weight:700;
   letter-spacing:.03em;line-height:1.05;display:block;

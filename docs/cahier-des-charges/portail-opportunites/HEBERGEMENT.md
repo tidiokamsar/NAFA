@@ -138,11 +138,47 @@ Constatés en préparant ce déploiement. Ils relèvent de l'exploitation couran
 
 ---
 
-## Alternative — serveur sans Traefik
+## Variante — déploiement sur 102.211.199.132 (Apache)
 
-Si le portail devait être déployé sur une machine dont le frontal est nginx,
-la configuration correspondante est fournie dans
-`services/integrations/relais-portail/deploiement/` :
+Si le portail est déployé sur le serveur GLPI plutôt que sur `.131` — parce
+que c'est celui auquel l'exploitation a accès — deux points changent.
+
+**1. Repointer le DNS.** L'enregistrement A vise aujourd'hui `.131` :
+
+```
+opportunites.ageroute.gov.gn.  IN A  102.211.199.132
+```
+
+**2. Utiliser la configuration Apache.**
+`services/integrations/relais-portail/deploiement/apache-opportunites.conf`.
+
+```bash
+sudo a2enmod ssl headers rewrite
+sudo mkdir -p /var/www/opportunites
+sudo unzip portail.zip -d /var/www/opportunites
+sudo cp apache-opportunites.conf /etc/apache2/sites-available/opportunites.conf
+sudo a2ensite opportunites
+sudo apache2ctl configtest && sudo systemctl reload apache2
+sudo certbot --apache -d opportunites.ageroute.gov.gn
+```
+
+Le port 80 de `.132` répond de l'extérieur, y compris sur
+`/.well-known/acme-challenge/` : l'émission du certificat aboutira. La
+configuration exclut d'ailleurs ce chemin de la redirection vers HTTPS, qui
+est la cause la plus fréquente d'échec.
+
+> Si l'émission échoue malgré tout, basculer sur un **challenge DNS-01**, qui
+> ne demande aucun port entrant. C'est aussi la solution au certificat
+> manquant de `glpi` sur la même machine.
+
+**Ce que cette variante coûte** : le portail public partage alors sa machine
+avec l'outil interne de gestion de parc. Deux services aux exigences de
+disponibilité et aux surfaces d'exposition différentes. Acceptable pour
+ouvrir, à revoir quand l'accès à `.131` sera rétabli.
+
+## Alternative — serveur nginx sans Traefik
+
+Configurations fournies dans `services/integrations/relais-portail/deploiement/` :
 `nginx-opportunites-consultation.conf` pour le mode consultation seule, et
 `nginx-opportunites.conf` une fois le relais en service. Le certificat se
 demande alors par `certbot --nginx -d opportunites.ageroute.gov.gn`.
