@@ -20,7 +20,7 @@ Sondage des noms publics, 29 juillet 2026.
 | `traefik` | HTTP 401, `WWW-Authenticate: Basic realm="traefik"` |
 | `geoportail`, `collecte`, `routes` | **certificat auto-signé** |
 | `flux` | **HTTP 503** — routeur défini, aucun backend disponible |
-| `opportunites` | ne pointe plus ici — repointé sur `.132` |
+| `opportunites` | pointe ici depuis le 4 août 2026 — **HTTP 404 nu** : Traefik reçoit la requête, aucun routeur ne porte ce nom |
 
 L'existence de `traefik.ageroute.gov.gn` et le comportement des hôtes dépourvus
 de certificat valide établissent que **Traefik est le routeur de bord**. Le
@@ -51,20 +51,25 @@ DSI. La demande correspondante, rédigée selon les conventions de ce guide, est
 
 ## Déploiement du portail
 
-> **Cible retenue : 102.211.199.132**, celui auquel l'exploitation a accès
-> aujourd'hui. Il tourne sous Apache : suivre la section « Déploiement sur
-> 102.211.199.132 » plus bas. La procédure Traefik ci-dessous vaut pour `.131`,
-> le jour où l'accès y sera rétabli.
+> **Cible retenue : 102.211.199.131**, derrière Traefik. Le DNS y a été
+> repointé le 4 août 2026. Suivre les étapes ci-dessous. La variante Apache
+> pour `.132`, conservée plus bas, ne vaut plus que comme solution de repli.
 
 ### Étape 1 — DNS
 
-Fait le 29 juillet 2026 :
+Fait le 4 août 2026 :
 
 ```
-opportunites.ageroute.gov.gn.  IN A  102.211.199.132
+opportunites.ageroute.gov.gn.  IN A  102.211.199.131
 ```
 
 Vérification : `dig +short opportunites.ageroute.gov.gn`
+
+**État constaté le 4 août 2026, 19 h 15 UTC** : le nom résout bien vers `.131`
+et Traefik répond — mais `HTTP/2 404`, corps `404 page not found`, sans en-tête
+`Server`. C'est la réponse de Traefik pour un hôte qu'aucun routeur ne réclame.
+Autrement dit : le DNS est fait, **le service et la route ne le sont pas**. Les
+étapes 2 et 3 restent entièrement à exécuter.
 
 ### Étape 2 — Fichiers
 
@@ -160,9 +165,13 @@ Constatés en préparant ce déploiement. Ils relèvent de l'exploitation couran
 
 ---
 
-## Déploiement sur 102.211.199.132 (Apache) — procédure retenue
+## Repli — déploiement sur 102.211.199.132 (Apache)
 
-Le DNS pointe désormais ici. Le serveur héberge déjà GLPI sous Apache 2.4.
+> Conservé pour mémoire. Le DNS ne pointe plus ici depuis le 4 août 2026 ;
+> n'appliquer cette section que si le déploiement sur `.131` devait être
+> abandonné, et repointer le DNS d'abord.
+
+Le serveur héberge déjà GLPI sous Apache 2.4.
 
 Configuration fournie :
 `services/integrations/relais-portail/deploiement/apache-opportunites.conf`.
