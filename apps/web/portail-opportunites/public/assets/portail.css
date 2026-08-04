@@ -2,9 +2,9 @@
    AGEROUTE Guinée — Portail public des opportunités
    Feuille de style unique du site public.
 
-   Charte alignée sur l'intranet AGEROUTE : fond bleu nuit, accent
-   or, signature « la route » (bande sombre à pointillés dorés).
-   Le rouge et le vert ne servent plus qu'au drapeau et aux états
+   Couleurs relevées sur le logotype officiel de l'Agence : bleu
+   nuit #2B3A4C et or #F3B218. Les nuances sombres en sont dérivées.
+   Le rouge et le vert ne servent qu'au drapeau et aux états
    (ouvert / clôturé), jamais à la décoration.
 
    Externalisée du HTML pour permettre une CSP sans 'unsafe-inline'
@@ -12,12 +12,12 @@
    ================================================================= */
 
 :root{
-  --nuit:#16232F;          /* en-tête, pied de page */
-  --nuit-fonce:#0E1822;    /* barre officielle */
-  --nuit-clair:#22384B;    /* surfaces sombres secondaires */
-  --or:#E9A319;            /* accent principal */
-  --or-clair:#FFC44D;
-  --or-sombre:#8A5F00;     /* texte or sur fond clair (contraste) */
+  --nuit:#2B3A4C;          /* bleu nuit du logotype — en-tête, pied de page */
+  --nuit-fonce:#1D2833;    /* barre officielle, bas du héros */
+  --nuit-clair:#3C5068;    /* surfaces sombres secondaires */
+  --or:#F3B218;            /* or du logotype — accent principal */
+  --or-clair:#FFC94A;
+  --or-sombre:#7A5400;     /* or lisible sur fond clair (contraste AA) */
   --rouge:#CE1126;         /* drapeau, alertes */
   --vert:#1E8A4C;          /* état « ouvert » */
   --encre:#1F2C38;
@@ -27,8 +27,8 @@
   --fond:#F4F6F9;
   --blanc:#FFFFFF;
   --radius:10px;
-  --ombre:0 2px 10px rgba(22,35,47,.08);
-  --ombre-haut:0 10px 28px rgba(22,35,47,.16);
+  --ombre:0 2px 10px rgba(43,58,76,.09);
+  --ombre-haut:0 10px 28px rgba(43,58,76,.18);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -64,7 +64,7 @@ button[disabled]{cursor:not-allowed;opacity:.5}
   background:
     repeating-linear-gradient(90deg, var(--or) 0 42px, transparent 42px 74px) center/100% 4px no-repeat,
     linear-gradient(var(--nuit-clair),var(--nuit-clair));
-  border-top:2px solid #34506A;
+  border-top:2px solid var(--nuit-clair);
 }
 
 /* ---------- Barre officielle ---------- */
@@ -112,8 +112,8 @@ nav.menu a.actif{color:#fff;box-shadow:inset 0 -3px 0 var(--or)}
 /* ---------- Héros ---------- */
 .heros{
   background:
-    radial-gradient(900px 420px at 82% -15%, rgba(233,163,25,.16), transparent 62%),
-    linear-gradient(180deg,#1B2C3C 0%, #0E1822 100%);
+    radial-gradient(900px 420px at 82% -15%, rgba(243,178,24,.15), transparent 62%),
+    linear-gradient(180deg,var(--nuit) 0%, var(--nuit-fonce) 100%);
   color:#fff;position:relative;overflow:hidden;
 }
 .heros::before{ /* perspective de chaussée */
@@ -259,7 +259,7 @@ section.actus{padding:50px 0 64px}
 
 /* ---------- Abonnement ---------- */
 .abonnement{
-  background:linear-gradient(120deg,var(--nuit),#22384B);color:#fff;border-radius:var(--radius);
+  background:linear-gradient(120deg,var(--nuit),var(--nuit-clair));color:#fff;border-radius:var(--radius);
   padding:28px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:40px;
   border:1px solid rgba(255,255,255,.08);
 }
@@ -291,7 +291,7 @@ dialog{
   padding:0;box-shadow:0 24px 60px rgba(0,0,0,.35);color:var(--encre);
   max-height:calc(100vh - 48px);
 }
-dialog::backdrop{background:rgba(14,24,34,.62)}
+dialog::backdrop{background:rgba(29,40,51,.62)}
 .dlg-entete{background:var(--nuit);color:#fff;padding:18px 22px;display:flex;justify-content:space-between;align-items:start;gap:12px}
 .dlg-entete h3{font-family:'Barlow Condensed','Barlow',sans-serif;font-size:1.4rem;font-weight:600;line-height:1.15}
 .dlg-entete button{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:32px;height:32px;font-size:1rem;flex:none}

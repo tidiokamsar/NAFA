@@ -20,7 +20,7 @@ Sondage des noms publics, 29 juillet 2026.
 | `traefik` | HTTP 401, `WWW-Authenticate: Basic realm="traefik"` |
 | `geoportail`, `collecte`, `routes` | **certificat auto-signé** |
 | `flux` | **HTTP 503** — routeur défini, aucun backend disponible |
-| `opportunites` | DNS créé, aucun routeur — à faire |
+| `opportunites` | ne pointe plus ici — repointé sur `.132` |
 
 L'existence de `traefik.ageroute.gov.gn` et le comportement des hôtes dépourvus
 de certificat valide établissent que **Traefik est le routeur de bord**. Le
@@ -37,12 +37,17 @@ reliquat à nettoyer.
 
 ## Déploiement du portail
 
+> **Cible retenue : 102.211.199.132**, celui auquel l'exploitation a accès
+> aujourd'hui. Il tourne sous Apache : suivre la section « Déploiement sur
+> 102.211.199.132 » plus bas. La procédure Traefik ci-dessous vaut pour `.131`,
+> le jour où l'accès y sera rétabli.
+
 ### Étape 1 — DNS
 
-Déjà fait :
+Fait le 29 juillet 2026 :
 
 ```
-opportunites.ageroute.gov.gn.  IN A  102.211.199.131
+opportunites.ageroute.gov.gn.  IN A  102.211.199.132
 ```
 
 Vérification : `dig +short opportunites.ageroute.gov.gn`
@@ -131,25 +136,21 @@ Constatés en préparant ce déploiement. Ils relèvent de l'exploitation couran
 4. **GLPI accessible publiquement.** Un outil interne de gestion de parc
    gagnerait à être restreint au réseau de l'Agence ou placé derrière un VPN.
 
-5. **Port 80 fermé en entrée sur 102.211.199.132**, ce qui empêche le challenge
-   ACME pour `glpi`. À faire ouvrir chez l'hébergeur, ou basculer sur un
-   challenge DNS-01, qui ne demande aucun port entrant — souvent préférable
-   pour un serveur d'outils internes.
+5. **Certificat de `glpi`.** La note d'exploitation attribuait l'échec de
+   certbot à un port 80 fermé en entrée. La mesure du 29 juillet montre que ce
+   port **répond**, y compris sur `/.well-known/acme-challenge/`. La cause est
+   donc ailleurs — le plus probable étant une redirection systématique vers
+   HTTPS qui intercepte le chemin du challenge. L'hôte virtuel du portail
+   l'exclut explicitement de la redirection ; appliquer la même exclusion à
+   celui de GLPI devrait suffire.
 
 ---
 
-## Variante — déploiement sur 102.211.199.132 (Apache)
+## Déploiement sur 102.211.199.132 (Apache) — procédure retenue
 
-Si le portail est déployé sur le serveur GLPI plutôt que sur `.131` — parce
-que c'est celui auquel l'exploitation a accès — deux points changent.
+Le DNS pointe désormais ici. Le serveur héberge déjà GLPI sous Apache 2.4.
 
-**1. Repointer le DNS.** L'enregistrement A vise aujourd'hui `.131` :
-
-```
-opportunites.ageroute.gov.gn.  IN A  102.211.199.132
-```
-
-**2. Utiliser la configuration Apache.**
+Configuration fournie :
 `services/integrations/relais-portail/deploiement/apache-opportunites.conf`.
 
 ```bash
