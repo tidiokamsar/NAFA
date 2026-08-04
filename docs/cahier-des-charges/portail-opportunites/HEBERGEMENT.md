@@ -65,11 +65,27 @@ opportunites.ageroute.gov.gn.  IN A  102.211.199.131
 
 Vérification : `dig +short opportunites.ageroute.gov.gn`
 
-**État constaté le 4 août 2026, 19 h 15 UTC** : le nom résout bien vers `.131`
-et Traefik répond — mais `HTTP/2 404`, corps `404 page not found`, sans en-tête
-`Server`. C'est la réponse de Traefik pour un hôte qu'aucun routeur ne réclame.
-Autrement dit : le DNS est fait, **le service et la route ne le sont pas**. Les
-étapes 2 et 3 restent entièrement à exécuter.
+**Le portail est en ligne depuis le 4 août 2026, vers 19 h 40 UTC.** Relevé de
+recette :
+
+| Contrôle | Résultat |
+|---|---|
+| `GET /` | `HTTP/2 200`, `server: nginx/1.31.2`, 14 657 octets |
+| Certificat | **valide** — `ssl_verify_result=0` sans l'option `-k` |
+| CSP servie | `script-src 'self'` — **sans** `unsafe-inline` ni `unsafe-eval` |
+| Autres en-têtes | HSTS 1 an, `x-frame-options: DENY`, `nosniff`, `referrer-policy`, `permissions-policy` |
+| `data/opportunites.json` | `HTTP/2 200`, structure attendue, listes vides |
+| Intégrité | les **8 fichiers** servis ont l'empreinte SHA-256 du paquet de référence |
+
+La CSP stricte et les en-têtes de sécurité prouvent que la mise en service passe
+bien par les étiquettes Traefik prévues, et non par un hôte virtuel hérité : le
+site institutionnel voisin sert une CSP permissive (`unsafe-inline`,
+`unsafe-eval`), qui n'apparaît pas ici.
+
+Reste à faire : **déposer le premier export SharePoint**. Tant qu'il manque, le
+portail affiche sa structure et aucune opportunité — les listes `appelsOffres`
+et `offresEmploi` sont vides, ce qui est le comportement voulu, préférable à des
+données inventées.
 
 ### Étape 2 — Fichiers
 
