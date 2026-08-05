@@ -51,7 +51,9 @@ venv/
 crash.log
 
 # Portail des opportunités — données et documents produits par la
-# couche de publication SharePoint (script 02), jamais versionnés
+# couche de publication SharePoint (script 02), jamais versionnés.
+# Le jeu d'archives constitué à la main vit dans
+# apps/web/portail-opportunites/archives/, lui versionné.
 apps/web/portail-opportunites/public/data/opportunites.json
 apps/web/portail-opportunites/public/documents/
 
