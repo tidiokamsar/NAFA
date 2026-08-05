@@ -59,14 +59,28 @@ function Ok($m)    { Write-Host "    [OK] $m"    -ForegroundColor Green }
 function Info($m)  { Write-Host "    $m"         -ForegroundColor DarkGray }
 function Alerte($m){ Write-Host "    [!] $m"     -ForegroundColor Yellow }
 
+# Windows PowerShell 5.1 est encore le shell par défaut de Windows et
+# la confusion est facile : la fenêtre bleue « Windows PowerShell » et
+# la noire « pwsh » se ressemblent. PnP.PowerShell 2.x ne tourne que
+# sur la seconde, et l'erreur qu'on obtient sans ce contrôle survient
+# bien plus tard, sous une forme incompréhensible.
+if ($PSVersionTable.PSVersion.Major -lt 7) {
+    throw ("PnP.PowerShell 2.x exige PowerShell 7 ; cette session est en " +
+           "$($PSVersionTable.PSVersion). Fermer cette fenêtre, ouvrir « pwsh » " +
+           "et relancer. Installation : winget install --id Microsoft.PowerShell")
+}
+
 if (-not $Interactif -and (-not $Thumbprint -or -not $Tenant)) {
     throw "Fournir -Thumbprint et -Tenant, ou -Interactif."
 }
 
 # Le dossier d'archives vit quatre niveaux plus haut, dans le front.
 if (-not $Archives) {
-    $Archives = Join-Path (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")) `
-                          "apps\web\portail-opportunites\archives"
+    # Segments séparés plutôt qu'un chemin à antislashes : Join-Path
+    # pose le séparateur de la plateforme, et le chemin reste vérifiable
+    # ailleurs que sous Windows.
+    $racine = Resolve-Path (Join-Path $PSScriptRoot ".." ".." "..")
+    $Archives = Join-Path $racine "apps" "web" "portail-opportunites" "archives"
 }
 $fichier = Join-Path $Archives "data" "opportunites.json"
 if (-not (Test-Path $fichier)) { throw "Jeu d'archives introuvable : $fichier" }
