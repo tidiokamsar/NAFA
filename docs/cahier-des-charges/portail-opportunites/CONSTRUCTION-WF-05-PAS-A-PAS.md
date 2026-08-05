@@ -350,5 +350,9 @@ candidature de test sur `RH/2026/001`.
 
 Renseigner la variable `URL_FLUX_CANDIDATURES` du relais, puis construire les
 flux suivants dans l'ordre conseillé : WF-01, WF-04, WF-07, WF-08, WF-02, WF-03,
-WF-06, WF-09. Leurs spécifications figurent dans
+WF-06, WF-09.
+
+**WF-01 a sa propre feuille pas à pas** : `CONSTRUCTION-WF-01-PAS-A-PAS.md`.
+C'est lui qui fait passer un avis à « Publié » ; il conditionne donc tout ce que
+le portail affiche. Les autres restent spécifiés dans
 `CONSTRUCTION-FLUX-POWER-AUTOMATE.md`.

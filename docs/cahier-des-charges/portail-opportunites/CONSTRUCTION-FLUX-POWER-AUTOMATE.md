@@ -10,6 +10,10 @@ Convention de nommage des flux : `AGR-PRT-WFxx-<intitulé>`.
 
 ## WF-01 — Validation et publication d'un avis
 
+> **Feuille de construction détaillée : `CONSTRUCTION-WF-01-PAS-A-PAS.md`.**
+> La spécification ci-dessous dit *quoi* ; la feuille dit *comment*, avec les
+> expressions exactes et les trois pièges qui coûtent le plus de temps.
+
 **Déclencheur** : SharePoint — *Lorsqu'un élément est créé ou modifié* sur `Liste-AppelsOffres` (dupliquer le flux pour `Liste-Recrutements`).
 
 **Condition d'entrée** (Paramètres du déclencheur → Trigger Condition, évite les boucles) :
