@@ -258,6 +258,11 @@ section.actus{padding:50px 0 64px}
 .actu p{font-size:.9rem;color:var(--gris)}
 
 /* ---------- Abonnement ---------- */
+/* Un display: explicite l'emporte sur l'attribut hidden : sans ceci,
+   masquer un bloc depuis le script reste sans effet — c'est ce qui
+   laissait le bloc d'abonnement visible en consultation seule. */
+[hidden]{display:none !important}
+
 .abonnement{
   background:linear-gradient(120deg,var(--nuit),var(--nuit-clair));color:#fff;border-radius:var(--radius);
   padding:28px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-top:40px;

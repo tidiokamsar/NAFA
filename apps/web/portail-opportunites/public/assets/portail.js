@@ -57,18 +57,29 @@
   }
 
   function joursRestants(dateStr) {
+    if (dateAbsente(dateStr)) return null;
     var d = new Date(dateStr);
     if (isNaN(d.getTime())) return null;
     return Math.ceil((d - MAINTENANT) / 86400000);
   }
 
+  /* new Date(null) vaut le 1er janvier 1970, pas une date invalide :
+     sans ce garde-fou une clôture non publiée s'affiche comme une
+     date réelle. Sur un portail de marchés c'est une information
+     fausse, pas une coquille d'affichage. */
+  function dateAbsente(d) {
+    return d === null || d === undefined || d === '';
+  }
+
   function formatDate(d) {
+    if (dateAbsente(d)) return 'non publiée';
     var date = new Date(d);
     if (isNaN(date.getTime())) return '—';
     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
   function formatDateHeure(d) {
+    if (dateAbsente(d)) return 'non publiée';
     var date = new Date(d);
     if (isNaN(date.getTime())) return '—';
     return date.toLocaleString('fr-FR', {
