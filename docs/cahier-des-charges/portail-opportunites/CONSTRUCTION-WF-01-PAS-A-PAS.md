@@ -276,7 +276,9 @@ Vos agents peuvent publier. La chaîne est alors complète de bout en bout :
 saisie  →  validation (WF-01)  →  export (script 02)  →  dépôt  →  portail
 ```
 
-Suite conseillée : **WF-04** (clôture et archivage automatiques — sans lui, un
-avis clos reste affiché comme ouvert), puis **WF-08** (abonnements), puis les
-autres. Leurs spécifications figurent dans
-`CONSTRUCTION-FLUX-POWER-AUTOMATE.md`.
+Suite conseillée : **WF-04** — clôture et archivage automatiques. Sans lui, un
+avis clos reste affiché comme ouvert. Sa feuille pas à pas est écrite :
+`CONSTRUCTION-WF-04-PAS-A-PAS.md`.
+
+Puis **WF-08** (abonnements), puis les autres, dont les spécifications figurent
+dans `CONSTRUCTION-FLUX-POWER-AUTOMATE.md`.

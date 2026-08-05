@@ -69,6 +69,8 @@ Convention de nommage des flux : `AGR-PRT-WFxx-<intitulé>`.
 
 ## WF-04 — Clôture et archivage automatiques
 
+> **Feuille de construction détaillée : `CONSTRUCTION-WF-04-PAS-A-PAS.md`.**
+
 **Déclencheur** : *Périodicité* — tous les jours à 00h15.
 
 **Étapes** :
