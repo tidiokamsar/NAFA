@@ -142,13 +142,23 @@ try {
         }
     })
 
-    # Une entrée sans référence ni date de clôture serait
-    # inexploitable par le front : on l'écarte et on le signale.
-    $aoValides = @($ao | Where-Object { $_.ref -and $_.cloture })
-    $rhValides = @($rh | Where-Object { $_.ref -and $_.cloture })
+    # Sans référence, une entrée est inexploitable : on l'écarte.
+    #
+    # La date de clôture, elle, ne conditionne plus rien. Des avis
+    # réels de l'Agence n'en publient pas : les appels à candidatures
+    # UGP-BID/BAD du 17 juillet 2026 renvoient la date à « l'avis
+    # définitif ». Les écarter reviendrait à faire disparaître du
+    # portail une publication officielle parce qu'elle est incomplète —
+    # une omission, là où le front sait afficher « non publiée ».
+    $aoValides = @($ao | Where-Object { $_.ref })
+    $rhValides = @($rh | Where-Object { $_.ref })
     $ecartes = ($ao.Count - $aoValides.Count) + ($rh.Count - $rhValides.Count)
     if ($ecartes -gt 0) {
-        Write-Warning "$ecartes élément(s) écarté(s) : référence ou date de clôture manquante."
+        Write-Warning "$ecartes élément(s) écarté(s) : référence manquante."
+    }
+    $sansCloture = @($aoValides + $rhValides | Where-Object { -not $_.cloture }).Count
+    if ($sansCloture -gt 0) {
+        Write-Host "    $sansCloture élément(s) publié(s) sans date de clôture — affichés « non publiée »." -ForegroundColor DarkGray
     }
 
     # ------------------- Statistiques du tableau de bord -------------------
