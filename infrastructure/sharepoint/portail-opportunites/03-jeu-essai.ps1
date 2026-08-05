@@ -35,7 +35,11 @@ function Etape($m) { Write-Host "`n=== $m ===" -ForegroundColor Cyan }
 function Ok($m)    { Write-Host "    [OK] $m" -ForegroundColor Green }
 function Info($m)  { Write-Host "    $m" -ForegroundColor DarkGray }
 
-if ($SiteUrl -notmatch "Recette" -and -not $ForcerProduction) {
+# Le garde-fou protège l'INSERTION de données de test hors recette.
+# Il ne doit pas protéger leur retrait : nettoyer de la recette
+# égarée en production est exactement ce qu'on veut pouvoir faire
+# sans cérémonie.
+if (-not $Supprimer -and $SiteUrl -notmatch "Recette" -and -not $ForcerProduction) {
     throw "Ce script insère des données de test. L'URL ne comporte pas " +
           "« Recette » — utiliser -ForcerProduction pour passer outre."
 }

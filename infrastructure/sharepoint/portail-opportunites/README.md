@@ -11,14 +11,43 @@ Scripts PnP.PowerShell du back-office SharePoint Online du portail des opportuni
 | `04-peupler-groupes.ps1` | Applique les habilitations décrites dans un CSV aux six groupes de sécurité. `-Etat` affiche les membres actuels. |
 | `05-recette-wf05.ps1` | Joue les essais du CDC §12.2 directement contre le déclencheur de WF-05. |
 | `06-preparer-publication.ps1` | Assemble le dossier prêt à déposer sur l'hébergement public. Consultation seule par défaut. |
+| `07-mise-en-service.ps1` | Enchaîne toute la chaîne en une commande : prérequis, provisionnement, groupes, export, assemblage, dépôt et planification. **Ce qu'il ne peut pas faire, il le dit et le récapitule à la fin.** |
 
 ## Démarrage
 
-```powershell
-# Recette d'abord — le site créé porte le suffixe -Recette
-./00-demarrage.ps1 -Tenant "ageroutegn"
+`07-mise-en-service.ps1` enchaîne tout le reste. Il s'arrête à chaque étape
+qu'il ne peut pas franchir seul, l'explique, et récapitule le reste à faire.
 
-# Production, une fois la recette validée
+```powershell
+# 1er passage — enregistre l'application Entra ID puis s'arrête :
+#    le jeton doit être réémis avant de continuer.
+./07-mise-en-service.ps1 -Tenant "ageroutegn"
+
+# 2e passage — recette complète avec le ClientId obtenu
+./07-mise-en-service.ps1 -Tenant "ageroutegn" -ClientId "<GUID>" `
+   -Habilitations ".\habilitations.csv"
+
+# Production autonome — la tâche planifiée republie toutes les 15 minutes
+./07-mise-en-service.ps1 -Tenant "ageroutegn" -Production `
+   -ClientId "<GUID>" -Thumbprint "<empreinte>" `
+   -Habilitations "C:\hab\habilitations.csv" -Sortie "C:\publication\www" `
+   -CommandeDepot 'scp -r -i C:\cles\portail C:\publication\www\* depot@102.211.199.131:/opt/portail-opportunites/www/' `
+   -SansJeuEssai -Planifier
+```
+
+Deux refus volontaires, plutôt qu'une automatisation qui casserait en silence :
+
+- **sans `-Thumbprint`, pas de planification.** Une tâche s'exécute sans
+  personne devant l'écran ; elle ne peut pas ouvrir de fenêtre de connexion.
+  En installer une qui échouerait tous les quarts d'heure serait pire que
+  de ne rien installer.
+- **sans `-CommandeDepot`, pas de planification** non plus : une tâche qui
+  exporte sans déposer ne nourrit pas le portail.
+
+Les scripts individuels restent utilisables un par un :
+
+```powershell
+./00-demarrage.ps1 -Tenant "ageroutegn"
 ./00-demarrage.ps1 -Tenant "ageroutegn" -Production -ClientId "<GUID>"
 ```
 
