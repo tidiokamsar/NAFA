@@ -57,6 +57,7 @@ param(
     [string] $Sortie = "C:\publication\www",
     [string] $CommandeDepot,
     [switch] $SansJeuEssai,
+    [switch] $ImporterArchives,
     [switch] $Planifier,
     [int]    $IntervalleMinutes = 15,
     [switch] $SauterProvisionnement
@@ -98,7 +99,8 @@ Ok "PnP.PowerShell $versionPnP"
 Info "Site visé : $siteUrl"
 
 foreach ($n in @("00-demarrage.ps1","01-provision-sharepoint.ps1","02-export-publication.ps1",
-                 "03-jeu-essai.ps1","04-peupler-groupes.ps1","06-preparer-publication.ps1")) {
+                 "03-jeu-essai.ps1","04-peupler-groupes.ps1","06-preparer-publication.ps1",
+                 "08-importer-archives.ps1")) {
     if (-not (Test-Path (Join-Path $ici $n))) { Echec "Script manquant : $n" }
 }
 Ok "Scripts de la chaîne présents"
@@ -155,6 +157,20 @@ if ($SansJeuEssai) {
 } else {
     Info "Conservé. L'export les écarte de toute façon : elles ne peuvent"
     Info "pas atteindre le portail public sans -AvecJeuEssai."
+}
+
+# ---------------------------------------------------------------
+Titre "5 bis. Jeu d'archives"
+
+if ($ImporterArchives) {
+    $argsImport = @{ SiteUrl = $siteUrl; ClientId = $ClientId }
+    if ($Thumbprint) { $argsImport.Thumbprint = $Thumbprint; $argsImport.Tenant = "$Tenant.onmicrosoft.com" }
+    else             { $argsImport.Interactif = $true }
+    & (Join-Path $ici "08-importer-archives.ps1") @argsImport
+    Ok "Avis réels versés dans les listes de gestion"
+} else {
+    Info "Non demandé (-ImporterArchives)."
+    Info "Sans lui, le portail n'affichera que ce que vos agents auront saisi."
 }
 
 # ---------------------------------------------------------------

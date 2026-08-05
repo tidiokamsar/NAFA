@@ -11,6 +11,7 @@ Scripts PnP.PowerShell du back-office SharePoint Online du portail des opportuni
 | `04-peupler-groupes.ps1` | Applique les habilitations décrites dans un CSV aux six groupes de sécurité. `-Etat` affiche les membres actuels. |
 | `05-recette-wf05.ps1` | Joue les essais du CDC §12.2 directement contre le déclencheur de WF-05. |
 | `06-preparer-publication.ps1` | Assemble le dossier prêt à déposer sur l'hébergement public. Consultation seule par défaut. |
+| `08-importer-archives.ps1` | Verse dans les listes les douze avis réels réunis dans `archives/`, et téléverse les six PDF officiels. `-Simulation` montre ce qui serait fait, `-Retirer` défait. |
 | `07-mise-en-service.ps1` | Enchaîne toute la chaîne en une commande : prérequis, provisionnement, groupes, export, assemblage, dépôt et planification. **Ce qu'il ne peut pas faire, il le dit et le récapitule à la fin.** |
 
 ## Démarrage
