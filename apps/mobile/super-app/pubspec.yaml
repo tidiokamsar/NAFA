@@ -1,0 +1,38 @@
+name: nafa_super_app
+description: NAFA — reference Flutter application shell (structure only, no business code).
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # Routing
+  go_router: ^14.6.2
+
+  # HTTP client
+  dio: ^5.7.0
+
+  # Local persistence (SQLite)
+  drift: ^2.22.1
+  sqlite3_flutter_libs: ^0.5.26
+  path_provider: ^2.1.5
+  path: ^1.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.13
+  riverpod_generator: ^2.6.3
+  drift_dev: ^2.22.1
+
+flutter:
+  uses-material-design: true

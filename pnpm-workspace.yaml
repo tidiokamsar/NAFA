@@ -1,9 +1,43 @@
 packages:
   - "apps/web/*"
+  # Exclusion temporaire — voir docs/tickets/SPR-0010-integration-ageroute.md
+  # `apps/web/ageroute` (ageroute-guinee) est un portail à intégrer, arrivé
+  # avec sa propre chaîne npm + Supabase. Tant qu'il n'est pas converti, le
+  # laisser dans le workspace fait échouer `pnpm install --frozen-lockfile`.
+  # À retirer d'ici dès que le ticket d'intégration est mergé.
+  - "!apps/web/ageroute"
   - "apps/mobile/*"
   - "apps/ai/*"
   - "apps/whatsapp"
   - "apps/ussd"
   - "apps/api-portal"
-  - "services/*"
+  - "services/*/*"
   - "packages/*"
+allowBuilds:
+  # Prisma needs its postinstall to lay down the client/engine artifacts.
+  "@prisma/engines": true
+  prisma: true
+  # Native resolver used by the ESLint toolchain.
+  unrs-resolver: true
+  # Anonymous usage analytics — no build needed for anything we use.
+  "@scarf/scarf": false
+  # Nx installs its platform-specific native task runner on postinstall.
+  nx: true
+  # Next.js image optimisation uses sharp's native binaries.
+  sharp: true
+  # OpenTelemetry OTLP exporters depend on protobufjs, which generates its
+  # runtime descriptors on postinstall.
+  protobufjs: true
+minimumReleaseAgeExclude:
+  - "@prisma/adapter-pg@7.9.1"
+  - "@prisma/client-runtime-utils@7.9.1"
+  - "@prisma/client@7.9.1"
+  - "@prisma/config@7.9.1"
+  - "@prisma/debug@7.9.1"
+  - "@prisma/dev@0.24.17"
+  - "@prisma/driver-adapter-utils@7.9.1"
+  - "@prisma/engines@7.9.1"
+  - "@prisma/fetch-engine@7.9.1"
+  - "@prisma/get-platform@7.9.1"
+  - globals@17.8.0
+  - prisma@7.9.1

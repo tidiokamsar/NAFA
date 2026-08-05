@@ -14,15 +14,20 @@ dist/
 build/
 out/
 .next/
-.turbo/
+.nx/
 .expo/
 .expo-shared/
 *.tsbuildinfo
+
+# Prisma generated client
+generated/
 
 # Environment & secrets
 .env
 .env.*
 !.env.example
+# Committed on purpose: no real secrets, keeps NODE_ENV=test reproducible.
+!.env.test
 *.pem
 *.key
 
@@ -36,6 +41,9 @@ yarn-error.log*
 # Testing & coverage
 coverage/
 .nyc_output/
+
+# Husky regenerates this on every install
+.husky/_/
 
 # Python (apps/ai, tooling)
 __pycache__/
@@ -73,3 +81,17 @@ Thumbs.db
 ios/Pods/
 android/.gradle/
 android/app/build/
+
+# Worktrees des agents — voir docs/PARALLEL-AGENTS.md
+.worktrees/
+
+# pnpm est le seul gestionnaire de paquets de ce dépôt. Un package-lock.json
+# ou un yarn.lock ici signifie qu'un `npm install` ou `yarn` a été lancé par
+# erreur : il aplatit node_modules et fait résoudre NestJS en plusieurs
+# instances. Le supprimer, puis `pnpm install --frozen-lockfile`.
+package-lock.json
+yarn.lock
+
+# Sorties de génération documentaire, hors périmètre du monorepo
+output/
+tmp/

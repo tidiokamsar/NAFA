@@ -1,0 +1,83 @@
+{
+  "name": "@nafa/platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NAFA — cross-cutting NestJS infrastructure: config, logging, health, errors, cache, telemetry",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {
+    "@nafa/shared": "workspace:*",
+    "@nestjs/cache-manager": "^3.1.3",
+    "@nestjs/common": "^11.1.28",
+    "@nestjs/config": "^4.0.4",
+    "@nestjs/core": "^11.1.28",
+    "@nestjs/swagger": "^11.4.6",
+    "@nestjs/terminus": "^11.1.1",
+    "@nestjs/throttler": "^6.5.0",
+    "@keyv/redis": "^5.1.6",
+    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/auto-instrumentations-node": "^0.79.0",
+    "@opentelemetry/exporter-prometheus": "^0.221.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.221.0",
+    "@opentelemetry/resources": "^2.10.0",
+    "@opentelemetry/sdk-node": "^0.221.0",
+    "@opentelemetry/semantic-conventions": "^1.43.0",
+    "cache-manager": "^7.2.9",
+    "ioredis": "^5.11.1",
+    "joi": "^18.2.3",
+    "keyv": "^5.6.0",
+    "nestjs-otel": "^8.1.0",
+    "nestjs-pino": "^4.6.1",
+    "pino-http": "^11.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@nestjs/testing": "^11.1.28",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.20.1",
+    "eslint": "^10.8.0",
+    "globals": "^17.8.0",
+    "jest": "^30.4.2",
+    "pino-pretty": "^13.1.3",
+    "ts-jest": "^29.4.12",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.65.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "testEnvironment": "node"
+  },
+  "nx": {
+    "tags": [
+      "scope:platform",
+      "layer:platform"
+    ]
+  }
+}

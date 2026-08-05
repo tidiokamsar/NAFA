@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nafa
+  labels:
+    app.kubernetes.io/part-of: nafa
+    app.kubernetes.io/managed-by: kubectl

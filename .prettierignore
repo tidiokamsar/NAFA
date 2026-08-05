@@ -1,0 +1,14 @@
+node_modules
+dist
+.next
+.nx
+coverage
+pnpm-lock.yaml
+**/generated
+database/migrations
+# Rewritten by `next build` on every run, double-quoted, and marked "should not
+# be edited". Formatting it makes `format:check` fail after the next build.
+# Already ignored the same way in the portal's eslint.config.mjs.
+next-env.d.ts
+# Helm templates are Go templates, not valid YAML on their own.
+infrastructure/helm/**/templates

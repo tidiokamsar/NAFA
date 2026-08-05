@@ -1,0 +1,58 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/test/**/*",
+      "!{projectRoot}/eslint.config.mjs",
+      "!{projectRoot}/**/generated/**"
+    ],
+    "sharedGlobals": [
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/database/schema/schema.prisma"
+    ]
+  },
+  "targetDefaults": {
+    "db:generate": {
+      "cache": false,
+      "outputs": ["{projectRoot}/src/generated"]
+    },
+    "build": {
+      "dependsOn": ["^build", "db:generate"],
+      "inputs": ["production", "^production"],
+      "outputs": ["{projectRoot}/dist", "{projectRoot}/.next"],
+      "cache": true
+    },
+    "typecheck": {
+      "dependsOn": ["^build", "db:generate"],
+      "inputs": ["default", "^production"],
+      "cache": true
+    },
+    "lint": {
+      "inputs": ["default"],
+      "cache": true
+    },
+    "test": {
+      "dependsOn": ["db:generate"],
+      "inputs": ["default", "^production"],
+      "outputs": ["{projectRoot}/coverage"],
+      "cache": true
+    },
+    "test:e2e": {
+      "dependsOn": ["db:generate"],
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "dependsOn": ["db:generate"]
+    }
+  },
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeLockfile": false
+    }
+  },
+  "defaultBase": "main"
+}

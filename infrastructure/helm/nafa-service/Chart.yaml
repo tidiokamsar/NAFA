@@ -1,0 +1,10 @@
+apiVersion: v2
+name: nafa-service
+description: Generic chart for any NAFA NestJS microservice (deployment, service, ingress, config, secrets).
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - nafa
+  - nestjs
+  - microservice
