@@ -45,7 +45,12 @@ param(
     [string] $Tenant,
     [Parameter(Mandatory=$true)] [string] $Sortie,
     [switch] $SansDocuments,
-    [switch] $Interactif
+    [switch] $Interactif,
+    # Le jeu de 03-jeu-essai.ps1 vit dans les mêmes listes que les
+    # publications réelles et porte les mêmes statuts. Sans ce
+    # garde-fou, un export le pousserait tel quel sur un portail
+    # public de marchés. Il faut le demander explicitement.
+    [switch] $AvecJeuEssai
 )
 $ErrorActionPreference = "Stop"
 
@@ -141,6 +146,21 @@ try {
             tdr       = ValeurUrl $_ "LienTDR"
         }
     })
+
+    # Les entrées de recette portent toutes le préfixe « Essai — »
+    # posé par 03-jeu-essai.ps1. Publier « Essai — Ingénieur routier »
+    # sur opportunites.ageroute.gov.gn ferait croire à un recrutement
+    # ouvert : on les écarte, sauf demande explicite.
+    if (-not $AvecJeuEssai) {
+        $estEssai = { param($x) $x.titre -and $x.titre -match '^\s*Essai\s*[—-]' }
+        $aoEssai = @($ao | Where-Object { & $estEssai $_ }).Count
+        $rhEssai = @($rh | Where-Object { & $estEssai $_ }).Count
+        if (($aoEssai + $rhEssai) -gt 0) {
+            Write-Warning "$($aoEssai + $rhEssai) entrée(s) de recette écartée(s) (préfixe « Essai — »). Ajouter -AvecJeuEssai pour les inclure."
+        }
+        $ao = @($ao | Where-Object { -not (& $estEssai $_) })
+        $rh = @($rh | Where-Object { -not (& $estEssai $_) })
+    }
 
     # Sans référence, une entrée est inexploitable : on l'écarte.
     #
