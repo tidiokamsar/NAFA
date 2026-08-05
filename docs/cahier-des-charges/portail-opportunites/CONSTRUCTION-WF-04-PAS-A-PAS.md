@@ -223,7 +223,8 @@ sans dommage finit toujours par causer un incident, parce qu'il sera rejoué.
 Le portail devient **cohérent tout seul** : ce qui est ouvert l'est vraiment, ce
 qui est clos le montre, et les archives se rangent.
 
-Suite conseillée : **WF-08** (abonnements et double opt-in, EXG-32/33) — c'est
-lui qui prévient les entreprises d'un nouvel avis, et donc lui qui fait la
-différence entre un portail que l'on consulte et un portail qui travaille pour
-vous. Le bloc d'abonnement du front est déjà écrit et attend son point d'entrée.
+Suite conseillée : **WF-08** — abonnements et double opt-in (EXG-32/33). C'est
+lui qui prévient les entreprises d'un nouvel avis, donc la différence entre un
+portail que l'on consulte et un portail qui travaille pour vous. Le bloc
+d'abonnement du front est déjà écrit et attend son point d'entrée. Sa feuille
+pas à pas : `CONSTRUCTION-WF-08-PAS-A-PAS.md`.

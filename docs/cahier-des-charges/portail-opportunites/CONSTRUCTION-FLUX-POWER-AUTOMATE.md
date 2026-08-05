@@ -149,6 +149,11 @@ Si la condition est fausse : *Réponse* HTTP 401 puis *Terminer* en échec. Un a
 
 ## WF-08 — Gestion des abonnements (double opt-in)
 
+> **Feuille de construction détaillée : `CONSTRUCTION-WF-08-PAS-A-PAS.md`.**
+> Elle décrit le contrat tel que le relais l'applique réellement, relevé dans
+> son code. En cas de divergence avec la spécification ci-dessous, c'est le
+> code qui fait foi.
+
 **Liste support** : `Liste-Abonnes`, créée par le script 01 (colonnes `CourrielAbonne` [indexé, unique], `ThemeAbonne` [AO / Recrutement / Les deux], `StatutAbonne` [En attente / Confirmé / Désabonné], `JetonConfirmation` [indexé], `DateInscription`, `DateConsentement`). L'héritage de permissions y est rompu au même titre que sur les candidatures : ce sont des données personnelles.
 
 Les trois flux sont appelés par le relais, jamais directement par le navigateur ; ils contrôlent la clé partagée en première condition, comme WF-05.
