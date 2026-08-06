@@ -8,7 +8,7 @@ import { ErrorCode, NafaError } from '@nafa/shared';
  * one means is a breaking change.
  */
 export const GeographyRule = {
-  // --- value object format ---
+  // --- value object format (shared) ---
   INVALID_COUNTRY_CODE: 'INVALID_COUNTRY_CODE',
   INVALID_LEVEL: 'INVALID_LEVEL',
   INVALID_LABEL: 'INVALID_LABEL',
@@ -19,8 +19,26 @@ export const GeographyRule = {
   PUBLISHED_REQUIRES_LEVEL: 'PUBLISHED_REQUIRES_LEVEL',
   LEVEL_IN_USE: 'LEVEL_IN_USE',
 
-  // --- lifecycle ---
+  // --- lifecycle (shared) ---
   INVALID_STATUS_TRANSITION: 'INVALID_STATUS_TRANSITION',
+
+  // --- administrative area value objects ---
+  INVALID_AREA_ID: 'INVALID_AREA_ID',
+  INVALID_AREA_CODE: 'INVALID_AREA_CODE',
+  INVALID_AREA_NAME: 'INVALID_AREA_NAME',
+  INVALID_CENTROID: 'INVALID_CENTROID',
+  INVALID_PERIOD: 'INVALID_PERIOD',
+
+  // --- administrative area invariants ---
+  PARENT_LEVEL_MISMATCH: 'PARENT_LEVEL_MISMATCH',
+  ROOT_CANNOT_HAVE_PARENT: 'ROOT_CANNOT_HAVE_PARENT',
+  NON_ROOT_REQUIRES_PARENT: 'NON_ROOT_REQUIRES_PARENT',
+  LEVEL_NOT_DECLARED_IN_PROFILE: 'LEVEL_NOT_DECLARED_IN_PROFILE',
+  PROFILE_NOT_PUBLISHED: 'PROFILE_NOT_PUBLISHED',
+  SUCCESSORS_REQUIRED: 'SUCCESSORS_REQUIRED',
+  DISSOLVE_REQUIRES_NO_SUCCESSORS: 'DISSOLVE_REQUIRES_NO_SUCCESSORS',
+  SPLIT_REQUIRES_TWO_SUCCESSORS: 'SPLIT_REQUIRES_TWO_SUCCESSORS',
+  HAS_ACTIVE_CHILDREN: 'HAS_ACTIVE_CHILDREN',
 } as const;
 
 export type GeographyRule = (typeof GeographyRule)[keyof typeof GeographyRule];

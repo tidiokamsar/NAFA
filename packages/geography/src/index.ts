@@ -6,3 +6,4 @@
 //     ../../docs/backlog/GEO-001.md.
 
 export * from './country-profile/domain';
+export * from './administrative-area/domain';
