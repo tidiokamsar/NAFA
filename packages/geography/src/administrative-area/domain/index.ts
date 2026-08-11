@@ -45,3 +45,13 @@ export {
   type AreaCandidate,
   type ResolveAreaQuery,
 } from './services';
+
+// Ports
+export {
+  type AdministrativeAreaRepository,
+  ADMINISTRATIVE_AREA_REPOSITORY,
+  type AreaCodeUniquenessChecker,
+  AREA_CODE_UNIQUENESS_CHECKER,
+  type AreaSuccessionService,
+  AREA_SUCCESSION_SERVICE,
+} from './ports';

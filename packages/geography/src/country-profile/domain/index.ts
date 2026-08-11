@@ -30,3 +30,9 @@ export {
   type CountryProfileDependencies,
   CountryProfile,
 } from './country-profile.aggregate';
+
+// Ports
+export {
+  type CountryProfileRepository,
+  COUNTRY_PROFILE_REPOSITORY,
+} from './ports';
