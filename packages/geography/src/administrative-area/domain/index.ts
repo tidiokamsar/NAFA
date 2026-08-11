@@ -35,3 +35,13 @@ export {
   validateParentChildLevels,
   validateLevelDeclaredInProfile,
 } from './administrative-area.aggregate';
+
+// Domain services
+export {
+  normalizeAreaText,
+  scoreAreaMatch,
+  resolveAreas,
+  type AreaSummary,
+  type AreaCandidate,
+  type ResolveAreaQuery,
+} from './services';
