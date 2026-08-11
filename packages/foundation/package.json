@@ -21,6 +21,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@nafa/geography": "workspace:*",
     "@nafa/shared": "workspace:*"
   },
   "devDependencies": {
