@@ -20,7 +20,7 @@ import { PrismaService } from '../infrastructure/persistence/prisma/prisma.servi
 import { parseImportFile } from './import-types';
 import { runImport } from './import-runner';
 
-loadEnv({ path: join(__dirname, '../../../../.env') });
+loadEnv({ path: join(__dirname, '../../../../../.env') });
 
 async function main(): Promise<void> {
   const target = process.argv[2];

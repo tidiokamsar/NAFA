@@ -29,6 +29,7 @@ export interface ImportAreaInput {
 export interface ImportFile {
   readonly country: {
     readonly code: string; // ISO 3166-1 alpha-2
+    readonly name: string; // official name — becomes the COUNTRY root area
     readonly levels: readonly ImportLevelInput[];
   };
   readonly areas: readonly ImportAreaInput[];
@@ -40,15 +41,17 @@ export function parseImportFile(raw: unknown): ImportFile {
     throw new Error('Import file: expected a JSON object at the root.');
   }
   const file = raw as Record<string, unknown>;
+  const country = file.country as Record<string, unknown> | null | undefined;
 
   if (
-    typeof file.country !== 'object' ||
-    file.country === null ||
-    typeof (file.country as Record<string, unknown>).code !== 'string' ||
-    !Array.isArray((file.country as Record<string, unknown>).levels)
+    typeof country !== 'object' ||
+    country === null ||
+    typeof country.code !== 'string' ||
+    typeof country.name !== 'string' ||
+    !Array.isArray(country.levels)
   ) {
     throw new Error(
-      'Import file: country.code (string) and country.levels (array) are required.',
+      'Import file: country.code (string), country.name (string) and country.levels (array) are required.',
     );
   }
 

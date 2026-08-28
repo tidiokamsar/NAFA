@@ -31,13 +31,16 @@ const LEVEL_ORDER: readonly string[] = [
  * Order of operations, chosen so every invariant is checkable when it is
  * checked:
  *  1. Country profile — create (DRAFT → PUBLISHED) or reuse the stored one.
- *  2. Areas sorted by level ascending, so a parent is always registered (or
+ *  2. The COUNTRY root area — the country itself, code = countryCode. Invariant
+ *     9 requires every LEVEL_1 to hang off a COUNTRY-rank parent; this root is
+ *     what makes the hierarchy possible at all.
+ *  3. Areas sorted by level ascending, so a parent is always registered (or
  *     found) before its children ask for it. Parents link by code: the runner
  *     keeps a code → areaId map seeded from the database for idempotence.
  *
  * Idempotence: re-running an already-imported file skips existing profiles
  * and areas instead of failing — the natural keys (countryCode for the
- * profile, countryCode+level+code for areas) decide.
+ * profile and root, countryCode+level+code for areas) decide.
  *
  * The domain does the validation: every entity goes through its factory,
  * which enforces the numbered invariants (levels declared, parent exactly one
@@ -111,9 +114,66 @@ export async function runImport(
     });
   }
 
-  // ── 2. Areas, level ascending so parents exist first ──────────────────
-  // code → areaId, seeded from the database so re-runs link to stored rows.
+  // ── 2. The COUNTRY root area — the country itself ─────────────────────
+  // Invariant 9 requires LEVEL_1 areas to have a COUNTRY-rank parent; the
+  // root is keyed by countryCode and created (or reused) before anything
+  // else. Children reference it as parentCode = the country code.
   const codeToId = new Map<string, string>();
+  {
+    const existingRoot = await repos.areas.findByCode(
+      file.country.code,
+      file.country.code,
+    );
+    if (existingRoot) {
+      codeToId.set(file.country.code, existingRoot.areaId as unknown as string);
+      outcomes.push({
+        kind: 'area',
+        key: file.country.code,
+        action: 'skipped-existing',
+        message: 'COUNTRY root area already imported.',
+      });
+    } else {
+      const root = createAdministrativeArea({
+        area: {
+          areaId: ids.generate() as unknown as string,
+          level: AdministrativeLevel.COUNTRY,
+          code: file.country.code,
+          officialName: file.country.name,
+          aliases: [],
+          parentId: null,
+          latitude: null,
+          longitude: null,
+          startDate: clock.now().toISOString().slice(0, 10),
+          endDate: null,
+        },
+        profile,
+        parentInfo: null,
+        clock,
+        ids,
+      });
+      if (!root.ok) {
+        return [
+          ...outcomes,
+          {
+            kind: 'area',
+            key: file.country.code,
+            action: 'failed',
+            message: `COUNTRY root area could not be created: ${root.error.message}`,
+          },
+        ];
+      }
+      await repos.areas.save(root.value, 0);
+      codeToId.set(file.country.code, root.value.areaId as unknown as string);
+      outcomes.push({
+        kind: 'area',
+        key: file.country.code,
+        action: 'created',
+        message: `COUNTRY root area (${file.country.name}).`,
+      });
+    }
+  }
+
+  // ── 3. Areas, level ascending so parents exist first ──────────────────
   for (const area of file.areas) {
     const existing = await repos.areas.findByCode(file.country.code, area.code);
     if (existing) {

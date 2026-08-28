@@ -1,0 +1,393 @@
+{
+  "country": {
+    "code": "GN",
+    "name": "Guinée",
+    "levels": [
+      {
+        "level": "LEVEL_1",
+        "singular": "Région administrative",
+        "plural": "Régions administratives"
+      },
+      { "level": "LEVEL_2", "singular": "Préfecture", "plural": "Préfectures" },
+      {
+        "level": "LEVEL_3",
+        "singular": "Sous-préfecture",
+        "plural": "Sous-préfectures"
+      },
+      { "level": "LEVEL_4", "singular": "District", "plural": "Districts" }
+    ]
+  },
+  "areas": [
+    {
+      "code": "GN-B",
+      "level": "LEVEL_1",
+      "officialName": "Boké",
+      "aliases": ["Boke"],
+      "parentCode": "GN",
+      "latitude": 10.93,
+      "longitude": -14.29,
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "GN-C",
+      "level": "LEVEL_1",
+      "officialName": "Conakry",
+      "aliases": ["Konakry"],
+      "parentCode": "GN",
+      "latitude": 9.51,
+      "longitude": -13.71,
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "GN-D",
+      "level": "LEVEL_1",
+      "officialName": "Kindia",
+      "aliases": ["Kindya"],
+      "parentCode": "GN",
+      "latitude": 10.06,
+      "longitude": -12.86,
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "GN-F",
+      "level": "LEVEL_1",
+      "officialName": "Faranah",
+      "parentCode": "GN",
+      "latitude": 10.39,
+      "longitude": -10.75,
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "GN-K",
+      "level": "LEVEL_1",
+      "officialName": "Kankan",
+      "parentCode": "GN",
+      "latitude": 10.38,
+      "longitude": -9.31,
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "GN-L",
+      "level": "LEVEL_1",
+      "officialName": "Labé",
+      "aliases": ["Labe"],
+      "parentCode": "GN",
+      "latitude": 11.32,
+      "longitude": -12.28,
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "GN-M",
+      "level": "LEVEL_1",
+      "officialName": "Mamou",
+      "parentCode": "GN",
+      "latitude": 10.38,
+      "longitude": -11.86,
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "GN-N",
+      "level": "LEVEL_1",
+      "officialName": "N'Zérékoré",
+      "aliases": ["Nzerekore", "Nzérékoré"],
+      "parentCode": "GN",
+      "latitude": 7.75,
+      "longitude": -8.82,
+      "startDate": "2026-01-01"
+    },
+
+    {
+      "code": "B-BKF",
+      "level": "LEVEL_2",
+      "officialName": "Boké",
+      "parentCode": "GN-B",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "B-BFF",
+      "level": "LEVEL_2",
+      "officialName": "Boffa",
+      "parentCode": "GN-B",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "B-FRI",
+      "level": "LEVEL_2",
+      "officialName": "Fria",
+      "parentCode": "GN-B",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "B-GAU",
+      "level": "LEVEL_2",
+      "officialName": "Gaoual",
+      "parentCode": "GN-B",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "B-KND",
+      "level": "LEVEL_2",
+      "officialName": "Koundara",
+      "parentCode": "GN-B",
+      "startDate": "2026-01-01"
+    },
+
+    {
+      "code": "C-KLM",
+      "level": "LEVEL_2",
+      "officialName": "Kaloum",
+      "parentCode": "GN-C",
+      "latitude": 9.51,
+      "longitude": -13.71,
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "C-DXN",
+      "level": "LEVEL_2",
+      "officialName": "Dixinn",
+      "parentCode": "GN-C",
+      "latitude": 9.54,
+      "longitude": -13.68,
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "C-MTM",
+      "level": "LEVEL_2",
+      "officialName": "Matam",
+      "parentCode": "GN-C",
+      "latitude": 9.55,
+      "longitude": -13.65,
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "C-RTM",
+      "level": "LEVEL_2",
+      "officialName": "Ratoma",
+      "parentCode": "GN-C",
+      "latitude": 9.59,
+      "longitude": -13.63,
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "C-KIP",
+      "level": "LEVEL_2",
+      "officialName": "Kipé",
+      "parentCode": "GN-C",
+      "latitude": 9.63,
+      "longitude": -13.65,
+      "startDate": "2026-01-01"
+    },
+
+    {
+      "code": "D-KIN",
+      "level": "LEVEL_2",
+      "officialName": "Kindia",
+      "aliases": ["Kindya"],
+      "parentCode": "GN-D",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "D-COH",
+      "level": "LEVEL_2",
+      "officialName": "Coyah",
+      "parentCode": "GN-D",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "D-DUB",
+      "level": "LEVEL_2",
+      "officialName": "Dubréka",
+      "aliases": ["Dubreka"],
+      "parentCode": "GN-D",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "D-FOR",
+      "level": "LEVEL_2",
+      "officialName": "Forécariah",
+      "aliases": ["Forecariah"],
+      "parentCode": "GN-D",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "D-TEL",
+      "level": "LEVEL_2",
+      "officialName": "Télimélé",
+      "aliases": ["Telimele"],
+      "parentCode": "GN-D",
+      "startDate": "2026-01-01"
+    },
+
+    {
+      "code": "F-DAB",
+      "level": "LEVEL_2",
+      "officialName": "Dabola",
+      "parentCode": "GN-F",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "F-DIN",
+      "level": "LEVEL_2",
+      "officialName": "Dinguiraye",
+      "parentCode": "GN-F",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "F-FAR",
+      "level": "LEVEL_2",
+      "officialName": "Faranah",
+      "parentCode": "GN-F",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "F-KIS",
+      "level": "LEVEL_2",
+      "officialName": "Kissidougou",
+      "parentCode": "GN-F",
+      "startDate": "2026-01-01"
+    },
+
+    {
+      "code": "K-KAN",
+      "level": "LEVEL_2",
+      "officialName": "Kankan",
+      "parentCode": "GN-K",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "K-KER",
+      "level": "LEVEL_2",
+      "officialName": "Kérouané",
+      "aliases": ["Kerouane"],
+      "parentCode": "GN-K",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "K-KOU",
+      "level": "LEVEL_2",
+      "officialName": "Kouroussa",
+      "parentCode": "GN-K",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "K-MAN",
+      "level": "LEVEL_2",
+      "officialName": "Mandiana",
+      "parentCode": "GN-K",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "K-SIG",
+      "level": "LEVEL_2",
+      "officialName": "Siguiri",
+      "parentCode": "GN-K",
+      "startDate": "2026-01-01"
+    },
+
+    {
+      "code": "L-LAB",
+      "level": "LEVEL_2",
+      "officialName": "Labé",
+      "aliases": ["Labe"],
+      "parentCode": "GN-L",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "L-KUB",
+      "level": "LEVEL_2",
+      "officialName": "Koubia",
+      "parentCode": "GN-L",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "L-LEL",
+      "level": "LEVEL_2",
+      "officialName": "Lélouma",
+      "aliases": ["Lelouma"],
+      "parentCode": "GN-L",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "L-MAL",
+      "level": "LEVEL_2",
+      "officialName": "Mali",
+      "parentCode": "GN-L",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "L-TOU",
+      "level": "LEVEL_2",
+      "officialName": "Tougué",
+      "aliases": ["Tougue"],
+      "parentCode": "GN-L",
+      "startDate": "2026-01-01"
+    },
+
+    {
+      "code": "M-MAM",
+      "level": "LEVEL_2",
+      "officialName": "Mamou",
+      "parentCode": "GN-M",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "M-DAL",
+      "level": "LEVEL_2",
+      "officialName": "Dalaba",
+      "parentCode": "GN-M",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "M-PIT",
+      "level": "LEVEL_2",
+      "officialName": "Pita",
+      "parentCode": "GN-M",
+      "startDate": "2026-01-01"
+    },
+
+    {
+      "code": "N-NZE",
+      "level": "LEVEL_2",
+      "officialName": "N'Zérékoré",
+      "aliases": ["Nzerekore"],
+      "parentCode": "GN-N",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "N-BEY",
+      "level": "LEVEL_2",
+      "officialName": "Beyla",
+      "parentCode": "GN-N",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "N-GUE",
+      "level": "LEVEL_2",
+      "officialName": "Guékédou",
+      "aliases": ["Gueckedou", "Guéckédou"],
+      "parentCode": "GN-N",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "N-LOL",
+      "level": "LEVEL_2",
+      "officialName": "Lola",
+      "parentCode": "GN-N",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "N-MAC",
+      "level": "LEVEL_2",
+      "officialName": "Macenta",
+      "parentCode": "GN-N",
+      "startDate": "2026-01-01"
+    },
+    {
+      "code": "N-YOM",
+      "level": "LEVEL_2",
+      "officialName": "Yomou",
+      "parentCode": "GN-N",
+      "startDate": "2026-01-01"
+    }
+  ]
+}
