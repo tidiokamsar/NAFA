@@ -36,6 +36,13 @@ export {
   validateLevelDeclaredInProfile,
 } from './administrative-area.aggregate';
 
+// Factory
+export {
+  type AreaInput,
+  type ParentInfo,
+  createAdministrativeArea,
+} from './factories/administrative-area.factory';
+
 // Domain services
 export {
   normalizeAreaText,

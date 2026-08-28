@@ -31,6 +31,12 @@ export {
   CountryProfile,
 } from './country-profile.aggregate';
 
+// Factory
+export {
+  type LevelInput,
+  createCountryProfile,
+} from './factories/country-profile.factory';
+
 // Ports
 export {
   type CountryProfileRepository,
