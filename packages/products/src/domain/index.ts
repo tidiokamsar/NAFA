@@ -44,3 +44,13 @@ export {
 
 // Factory
 export { type UnitInput, createProduct } from './factories/product.factory';
+
+// Domain services
+export {
+  normalizeProductText,
+  scoreProductMatch,
+  resolveProducts,
+  type ProductSummary,
+  type ProductCandidate,
+  type ResolveProductQuery,
+} from './services';
