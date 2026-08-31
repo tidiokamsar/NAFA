@@ -45,6 +45,14 @@ export {
 // Factory
 export { type UnitInput, createProduct } from './factories/product.factory';
 
+// Ports
+export {
+  type ProductRepository,
+  PRODUCT_REPOSITORY,
+  type ProductCodeUniquenessChecker,
+  PRODUCT_CODE_UNIQUENESS_CHECKER,
+} from './ports';
+
 // Domain services
 export {
   normalizeProductText,
