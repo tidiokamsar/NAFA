@@ -1,0 +1,569 @@
+{
+  "products": [
+    {
+      "code": "RIZ",
+      "category": "CEREAL",
+      "officialName": "Riz",
+      "aliases": ["Riz local", "Riz de Guinée", "Riz importé"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "T",
+          "name": "Tonne",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 1000
+        },
+        {
+          "code": "SAC_50",
+          "name": "Sac de 50 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 50
+        }
+      ]
+    },
+    {
+      "code": "FONIO",
+      "category": "CEREAL",
+      "officialName": "Fonio",
+      "aliases": ["Findi", "Hungry rice", "Acha"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "SAC_50",
+          "name": "Sac de 50 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 50
+        }
+      ]
+    },
+    {
+      "code": "MAIS",
+      "category": "CEREAL",
+      "officialName": "Maïs",
+      "aliases": ["Mais", "Corn"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "T",
+          "name": "Tonne",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 1000
+        },
+        {
+          "code": "SAC_100",
+          "name": "Sac de 100 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 100
+        }
+      ]
+    },
+    {
+      "code": "SORGHO",
+      "category": "CEREAL",
+      "officialName": "Sorgho",
+      "aliases": ["Grand mil", "Mil"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "SAC_100",
+          "name": "Sac de 100 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 100
+        }
+      ]
+    },
+    {
+      "code": "MIL_PETIT",
+      "category": "CEREAL",
+      "officialName": "Petit mil",
+      "aliases": ["Mil pénicillaire", "Pearl millet"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "SAC_100",
+          "name": "Sac de 100 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 100
+        }
+      ]
+    },
+    {
+      "code": "MANIOC",
+      "category": "TUBER",
+      "officialName": "Manioc",
+      "aliases": ["Cassava", "Gari (transformé)"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "SAC_50",
+          "name": "Sac de 50 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 50
+        }
+      ]
+    },
+    {
+      "code": "IGNAME",
+      "category": "TUBER",
+      "officialName": "Igname",
+      "aliases": ["Yam", "Djoka"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "TUBERCULE",
+          "name": "Tubercule",
+          "kind": "COUNT",
+          "factorToBase": 1
+        }
+      ]
+    },
+    {
+      "code": "PATATE_DOUCE",
+      "category": "TUBER",
+      "officialName": "Patate douce",
+      "aliases": ["Sweet potato"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "CAISSE_20",
+          "name": "Caisse de 20 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 20
+        }
+      ]
+    },
+    {
+      "code": "ANACARDE",
+      "category": "CASH_CROP",
+      "officialName": "Anacarde",
+      "aliases": ["Cajou", "Cashew", "Noix de cajou"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "T",
+          "name": "Tonne",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 1000
+        },
+        {
+          "code": "SAC_80",
+          "name": "Sac de 80 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 80
+        }
+      ]
+    },
+    {
+      "code": "CAFE",
+      "category": "CASH_CROP",
+      "officialName": "Café",
+      "aliases": ["Café de Guinée", "Café robusta", "Coffee"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "SAC_60",
+          "name": "Sac de 60 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 60
+        }
+      ]
+    },
+    {
+      "code": "CACAO",
+      "category": "CASH_CROP",
+      "officialName": "Cacao",
+      "aliases": ["Cocoa"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "SAC_65",
+          "name": "Sac de 65 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 65
+        }
+      ]
+    },
+    {
+      "code": "PALMISTE",
+      "category": "CASH_CROP",
+      "officialName": "Palmiste",
+      "aliases": ["Noix de palme", "Palm kernel"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "SAC_50",
+          "name": "Sac de 50 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 50
+        }
+      ]
+    },
+    {
+      "code": "SESAME",
+      "category": "CASH_CROP",
+      "officialName": "Sésame",
+      "aliases": ["Sesame", "Benniseed"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "SAC_50",
+          "name": "Sac de 50 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 50
+        }
+      ]
+    },
+    {
+      "code": "COTON",
+      "category": "CASH_CROP",
+      "officialName": "Coton",
+      "aliases": ["Cotton", "Coton-graine"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "T",
+          "name": "Tonne",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 1000
+        }
+      ]
+    },
+    {
+      "code": "KARITE",
+      "category": "CASH_CROP",
+      "officialName": "Karité",
+      "aliases": ["Beurre de karité", "Shea"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "CARTON_25",
+          "name": "Carton de 25 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 25
+        }
+      ]
+    },
+    {
+      "code": "KOLA",
+      "category": "CASH_CROP",
+      "officialName": "Noix de kola",
+      "aliases": ["Kola", "Kolanut"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "SAC_40",
+          "name": "Sac de 40 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 40
+        }
+      ]
+    },
+    {
+      "code": "MANGUE",
+      "category": "HORTICULTURE",
+      "officialName": "Mangue",
+      "aliases": ["Mango"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "CAISSE_5",
+          "name": "Caisse de 5 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 5
+        }
+      ]
+    },
+    {
+      "code": "OIGNON",
+      "category": "HORTICULTURE",
+      "officialName": "Oignon",
+      "aliases": ["Onion", "Oignon violet de Galmi"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "SAC_25",
+          "name": "Sac de 25 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 25
+        }
+      ]
+    },
+    {
+      "code": "TOMATE",
+      "category": "HORTICULTURE",
+      "officialName": "Tomate",
+      "aliases": ["Tomate fraîche", "Tomato"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "CAGEOT_10",
+          "name": "Cageot de 10 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 10
+        }
+      ]
+    },
+    {
+      "code": "BANANE",
+      "category": "HORTICULTURE",
+      "officialName": "Banane",
+      "aliases": ["Banane douce", "Banane plantain", "Plantain"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "REGIME",
+          "name": "Régime",
+          "kind": "COUNT",
+          "factorToBase": 1
+        }
+      ]
+    },
+    {
+      "code": "BOVIN_VIF",
+      "category": "LIVESTOCK",
+      "officialName": "Bovin sur pied",
+      "aliases": ["Bœuf", "Vache", "Cattle"],
+      "units": [
+        {
+          "code": "TETE",
+          "name": "Tête de bétail",
+          "kind": "COUNT",
+          "factorToBase": 1
+        },
+        {
+          "code": "KG",
+          "name": "Kilogramme (poids carcasse)",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        }
+      ]
+    },
+    {
+      "code": "RUMINANT",
+      "category": "LIVESTOCK",
+      "officialName": "Petit ruminant",
+      "aliases": ["Mouton", "Chèvre", "Sheep", "Goat"],
+      "units": [
+        {
+          "code": "TETE",
+          "name": "Tête de bétail",
+          "kind": "COUNT",
+          "factorToBase": 1
+        },
+        {
+          "code": "KG",
+          "name": "Kilogramme (poids carcasse)",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        }
+      ]
+    },
+    {
+      "code": "POISSON",
+      "category": "FISHERY",
+      "officialName": "Poisson frais",
+      "aliases": ["Fish", "Poisson de mer", "Poisson d'eau douce"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "CAISSE_20",
+          "name": "Caisse de 20 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 20
+        }
+      ]
+    },
+    {
+      "code": "POISSON_FUME",
+      "category": "FISHERY",
+      "officialName": "Poisson fumé",
+      "aliases": ["Poisson braisé", "Smoked fish", "Tolga"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "CARTON_10",
+          "name": "Carton de 10 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 10
+        }
+      ]
+    },
+    {
+      "code": "HUILE_PALME",
+      "category": "PROCESSED",
+      "officialName": "Huile de palme",
+      "aliases": ["Zomi", "Palm oil"],
+      "units": [
+        { "code": "L", "name": "Litre", "kind": "VOLUME", "factorToBase": 1 },
+        {
+          "code": "BIDON_20",
+          "name": "Bidon de 20 L",
+          "kind": "VOLUME",
+          "baseUnit": "L",
+          "factorToBase": 20
+        },
+        {
+          "code": "FUT_200",
+          "name": "Fût de 200 L",
+          "kind": "VOLUME",
+          "baseUnit": "L",
+          "factorToBase": 200
+        }
+      ]
+    },
+    {
+      "code": "FMANIOC",
+      "category": "PROCESSED",
+      "officialName": "Farine de manioc",
+      "aliases": ["Gari", "Tapioca", "Attoukpou (pâte)"],
+      "units": [
+        {
+          "code": "KG",
+          "name": "Kilogramme",
+          "kind": "WEIGHT",
+          "factorToBase": 1
+        },
+        {
+          "code": "SAC_50",
+          "name": "Sac de 50 kg",
+          "kind": "WEIGHT",
+          "baseUnit": "KG",
+          "factorToBase": 50
+        }
+      ]
+    }
+  ]
+}
