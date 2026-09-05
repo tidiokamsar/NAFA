@@ -24,6 +24,9 @@ export type DeepReadonly<T> = {
  */
 export type Brand<T, TBrand extends string> = T & { readonly __brand: TBrand };
 
+/** ISO 8601 calendar date, `YYYY-MM-DD`, with no time and no zone. */
+export type IsoDate = Brand<string, 'IsoDate'>;
+
 /** ISO 8601 timestamp, e.g. `2026-07-27T10:15:30.000Z`. */
 export type IsoDateTime = Brand<string, 'IsoDateTime'>;
 

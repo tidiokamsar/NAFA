@@ -15,6 +15,8 @@ module.exports = {
         'ai',
         'services',
         'iam',
+        'foundation',
+        'geography',
         'packages',
         'database',
         'infra',

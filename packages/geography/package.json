@@ -1,8 +1,8 @@
 {
-  "name": "@nafa/foundation",
+  "name": "@nafa/geography",
   "version": "0.1.0",
   "private": true,
-  "description": "NAFA domain foundation: shared business contracts and ports",
+  "description": "NAFA Geography Master: the shared vocabulary of administrative places",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -16,12 +16,11 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "lint": "eslint \"src/**/*.ts\" --max-warnings=0 && node tools/verify-domain-boundaries.mjs",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0 && node tools/verify-inter-master-boundaries.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest"
   },
   "dependencies": {
-    "@nafa/geography": "workspace:*",
     "@nafa/shared": "workspace:*"
   },
   "devDependencies": {
@@ -50,11 +49,12 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "passWithNoTests": true
   },
   "nx": {
     "tags": [
-      "scope:foundation",
+      "scope:geography",
       "layer:domain"
     ]
   }

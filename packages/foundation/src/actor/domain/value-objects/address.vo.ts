@@ -1,4 +1,5 @@
 import { err, ok, type Result } from '@nafa/shared';
+import type { AdministrativeAreaId } from '@nafa/geography';
 import { ActorRule, ActorRuleViolation } from '../actor.errors';
 
 /**
@@ -9,13 +10,24 @@ import { ActorRule, ActorRuleViolation } from '../actor.errors';
  *
  * `region` is a free string on purpose, and it is the known migration point
  * of this context: once the geography master exists it becomes a reference to
- * an administrative area. Until then, a string that a field agent can fill
- * beats a foreign key to a table nobody has built.
+ * an administrative area. GEO-001.7 makes that reference *possible* by adding
+ * the optional `areaId` — no existing actor is invalidated, and no automatic
+ * resolution happens yet. `region` stays until the import pipeline has run
+ * and every actor has been assigned an `areaId`; then it retires (phase 3/4).
  */
 export interface Address {
   readonly line: string;
   readonly locality: string;
   readonly region: string;
+  /**
+   * Reference to the administrative area this address sits in, when known.
+   *
+   * Optional on purpose (GEO-001.7 phase 1): the geography master is empty
+   * until the import pipeline runs, so making it required would invalidate
+   * every existing actor. Callers that have resolved an area set it; callers
+   * that have not leave it unset and fall back to `region`.
+   */
+  readonly areaId?: AdministrativeAreaId;
   /** ISO 3166-1 alpha-2, uppercased. `GN` for Guinea. */
   readonly countryCode: string;
 }
@@ -31,6 +43,8 @@ export function address(input: {
   locality: string;
   region: string;
   countryCode: string;
+  /** Optional anchor to a resolved administrative area (GEO-001.7 phase 1). */
+  areaId?: AdministrativeAreaId;
 }): Result<Address, ActorRuleViolation> {
   const line = clean(input.line);
   const locality = clean(input.locality);
@@ -57,5 +71,12 @@ export function address(input: {
     );
   }
 
-  return ok({ line, locality, region, countryCode });
+  // `areaId` passes through unchecked: it is a branded type whose shape was
+  // validated at its construction in the geography master, so re-validating
+  // it here would duplicate work and couple this VO to geography's rules.
+  return ok(
+    input.areaId !== undefined
+      ? { line, locality, region, areaId: input.areaId, countryCode }
+      : { line, locality, region, countryCode },
+  );
 }
