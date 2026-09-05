@@ -92,9 +92,11 @@ const depConstraints = [
   },
   // ── scope axis — inter-Master edges (ADR-0009 §8) ───────────────────────
   //
-  // This entry is the half of the boundary rule the `layer` axis cannot
-  // express. Read with the `layer:domain` rule above: their intersection is
-  // the only thing that keeps Masters apart.
+  // This is the half of the boundary rule the `layer` axis cannot express.
+  // Read with the `layer:domain` rule above: their intersection is the only
+  // thing that keeps Masters apart. Since the grant
+  // `layer:domain → layer:domain` landed (GEO-001), each entry below is
+  // load-bearing — removing one silently opens that grant for its scope.
   //
   //   geography : allowed → layer:util only
   //
@@ -106,12 +108,20 @@ const depConstraints = [
   //
   // There is intentionally no `scope:foundation` rule: that scope spans both
   // a domain package and a service (IAM), so a single budget would not fit
-  // both. Only `scope:geography` is homogeneous enough to constrain.
-  //
-  // Removing this entry re-opens the layer rule to its literal reading and
-  // silently permits geography → foundation. Do not.
+  // both. Only homogeneous reference scopes are constrained.
   {
     sourceTag: 'scope:geography',
+    onlyDependOnLibsWithTags: ['layer:util'],
+  },
+  //   product : allowed → layer:util only
+  //
+  // Same reasoning as geography: the Product Master is reference data and
+  // owns its vocabulary alone. Without this entry the domain-to-domain
+  // grant would let it import @nafa/foundation or @nafa/geography.
+  //
+  // @see docs/adr/0010-product-master-boundaries.md
+  {
+    sourceTag: 'scope:product',
     onlyDependOnLibsWithTags: ['layer:util'],
   },
   {
