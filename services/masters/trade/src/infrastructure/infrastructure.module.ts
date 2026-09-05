@@ -1,14 +1,15 @@
 import { Module } from '@nestjs/common';
+import { OFFER_REPOSITORY, PRODUCT_CATALOG } from '@nafa/trade';
+import { Clock, IdGenerator, SystemClock, UuidGenerator } from '@nafa/shared';
+import { PrismaProductCatalog } from './persistence/prisma/prisma-product-catalog.adapter';
+import { PrismaOfferRepository } from './persistence/prisma/prisma-offer.repository';
 import { PrismaModule } from './persistence/prisma/prisma.module';
 
 /**
  * Every outbound adapter the service owns, and the single place where ports
- * are bound to implementations.
+ * are bound to implementations. Only the port tokens leave this module.
  *
- * TRA-002.2 scaffold: only the Prisma plumbing is wired. TRA-002.3 binds
- * OfferRepository and ProductCatalog.
- *
- * Deliberately NOT bound yet: SELLER_REGISTRY. There is no actors table
+ * Deliberately NOT bound: SELLER_REGISTRY. There is no actors table
  * anywhere — the Actor Master's persistence does not exist (its domain
  * lives in @nafa/foundation, its storage is an open item from the ACTOR-001
  * review). Binding a stub that always refuses would brick offer creation
@@ -19,6 +20,19 @@ import { PrismaModule } from './persistence/prisma/prisma.module';
  */
 @Module({
   imports: [PrismaModule],
-  exports: [PrismaModule],
+  providers: [
+    // Domain dependencies — real clock and UUID generator at runtime.
+    { provide: Clock, useClass: SystemClock },
+    { provide: IdGenerator, useClass: UuidGenerator },
+
+    // Adapters
+    PrismaOfferRepository,
+    PrismaProductCatalog,
+
+    // Port bindings
+    { provide: OFFER_REPOSITORY, useExisting: PrismaOfferRepository },
+    { provide: PRODUCT_CATALOG, useExisting: PrismaProductCatalog },
+  ],
+  exports: [PrismaModule, OFFER_REPOSITORY, PRODUCT_CATALOG],
 })
 export class InfrastructureModule {}
