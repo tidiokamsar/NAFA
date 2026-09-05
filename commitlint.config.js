@@ -15,8 +15,16 @@ module.exports = {
         'ai',
         'services',
         'iam',
+        // Workspace packages — scope = package name (AGENTS.md §4).
+        'shared',
+        'platform',
+        'security',
+        'sdk',
         'foundation',
         'geography',
+        'products',
+        // First Masters service; distinct from the geography domain package.
+        'geography-service',
         'packages',
         'database',
         'infra',
