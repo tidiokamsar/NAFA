@@ -11,22 +11,35 @@ ou dans la même base.
 Une _lane_ = un agent actif = un worktree + une plage de ports + une base + un index Redis.
 Tenir ce tableau à jour est la responsabilité de la personne qui lance l'agent.
 
-| Lane | Agent       | Ticket | Worktree                  | Périmètre exclusif | Ports | Base     | Redis |
-| ---- | ----------- | ------ | ------------------------- | ------------------ | ----- | -------- | ----- |
-| A    | Claude Code | —      | `.worktrees/…`            | —                  | 40xx  | `nafa_a` | db 1  |
-| B    | Codex       | —      | `.worktrees/ai-readiness` | —                  | 41xx  | `nafa_b` | db 2  |
-| C    | Copilot     | —      | —                         | —                  | 42xx  | `nafa_c` | db 3  |
-| D    | —           | —      | —                         | —                  | 43xx  | `nafa_d` | db 4  |
+| Lane | Agent       | Ticket                        | Worktree                                                                                  | Périmètre exclusif                                                                                                   | Ports | Base     | Redis |
+| ---- | ----------- | ----------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----- | -------- | ----- |
+| A    | Claude Code | portails candidature / relais | `.worktrees/portail`, `.worktrees/relais`                                                 | docs portails                                                                                                        | 40xx  | `nafa_a` | db 1  |
+| B    | Codex       | —                             | `.worktrees/ai-readiness`                                                                 | —                                                                                                                    | 41xx  | `nafa_b` | db 2  |
+| C    | Copilot     | —                             | —                                                                                         | —                                                                                                                    | 42xx  | `nafa_c` | db 3  |
+| D    | —           | —                             | —                                                                                         | —                                                                                                                    | 43xx  | `nafa_d` | db 4  |
+| E    | ZCode       | GEO-001, GEO-002, PROD-001    | `.worktrees/GEO-001`, `.worktrees/GEO-001-2`, `.worktrees/GEO-002`, `.worktrees/PROD-001` | `packages/geography`, `packages/products`, `services/masters/geography`, `database/schema` (une migration à la fois) | 44xx  | `nafa_e` | db 5  |
 
 > Lane libre = cellules vides. **Ne jamais démarrer un agent sans lui attribuer une ligne.**
+> Lane E : les branches GEO-001 (PR #16), GEO-002 (PR #17, empilée) et
+> PROD-001 (PR #18) sont en revue — toute nouvelle migration Prisma attend
+> le merge de GEO-002 (règle « une migration en vol », AGENTS.md §2).
 
 Worktrees actuellement ouverts (`git worktree list`) :
 
-| Worktree                          | Branche                                                   |
-| --------------------------------- | --------------------------------------------------------- |
-| `F:/NAFA`                         | `main` — **intégration uniquement, pas de développement** |
-| `F:/NAFA/.worktrees/ai-readiness` | `codex/ai-ready-development`                              |
-| `F:/NAFA/.worktrees/pr-8`         | `feature/actor-001-domain`                                |
+| Worktree                            | Branche                                                   | Remarque                     |
+| ----------------------------------- | --------------------------------------------------------- | ---------------------------- |
+| `F:/NAFA`                           | `main` — **intégration uniquement, pas de développement** |                              |
+| `F:/NAFA/.worktrees/ai-readiness`   | `codex/ai-ready-development`                              | lane B                       |
+| `F:/NAFA/.worktrees/pr-8`           | `feature/actor-001-domain`                                | PR #15 en revue              |
+| `F:/NAFA/.worktrees/GEO-001`        | `feature/geo-001-geography`                               | lane E, PR #16               |
+| `F:/NAFA/.worktrees/GEO-001-2`      | `feature/geo-001-2-shared-isodate`                        | lane E, absorbée par GEO-001 |
+| `F:/NAFA/.worktrees/GEO-002`        | `feature/geo-002-import-pipeline`                         | lane E, PR #17               |
+| `F:/NAFA/.worktrees/PROD-001`       | `feature/prod-001-products`                               | lane E, PR #18               |
+| `F:/NAFA/.worktrees/portail`        | `travail/portail-candidatures`                            | lane A                       |
+| `F:/NAFA/.worktrees/relais`         | `travail/portail-partage-et-referencement`                | lane A                       |
+| `F:/NAFA/.worktrees/SPR-0004`       | `fix/SPR-0004-docker-pnpm-cache`                          | posé sur `main`, rien en vol |
+| `F:/NAFA/.worktrees/SPR-0010`       | `feature/SPR-0010-ageroute-phase0`                        | posé sur `main`, rien en vol |
+| `F:/NAFA/.worktrees/CHORE-REGISTRY` | `chore/parallel-agents-registry-and-scopes`               | lane E, hygiène              |
 
 ### Règle de recouvrement
 
