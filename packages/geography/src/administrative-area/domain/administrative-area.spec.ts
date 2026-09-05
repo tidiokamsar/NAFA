@@ -464,18 +464,15 @@ describe('validateLevelDeclaredInProfile', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('rejects COUNTRY (never declared in registerable levels)', () => {
-    // COUNTRY is never in the registerable levels list
+  it('accepts COUNTRY even though it is never declared (implicit root)', () => {
+    // The root area IS the country — invariant 9 requires every LEVEL_1 to
+    // hang off a COUNTRY-rank parent, so the root must be creatable without
+    // being declared in the profile's registerable levels.
     const result = validateLevelDeclaredInProfile(
       AdministrativeLevel.COUNTRY,
       profile.levels,
     );
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.rule).toBe(
-        GeographyRule.LEVEL_NOT_DECLARED_IN_PROFILE,
-      );
-    }
+    expect(result.ok).toBe(true);
   });
 });
 

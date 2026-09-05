@@ -566,12 +566,20 @@ export function validateParentChildLevels(
 /**
  * Validates that a level is declared in a country profile.
  *
- * Invariant 11.
+ * Invariant 11. COUNTRY is exempt: the root area *is* the country — it is
+ * implicit in every profile and therefore never part of the declared
+ * registerable levels (LEVEL_1..LEVEL_4). Without this exemption no country
+ * could ever grow a hierarchy, since invariant 9 requires every LEVEL_1 to
+ * hang off a COUNTRY-rank parent that nothing could create.
  */
 export function validateLevelDeclaredInProfile(
   level: AdministrativeLevel,
   profileLevels: readonly LevelDefinition[],
 ): Result<void, GeographyRuleViolation> {
+  if (level === AdministrativeLevel.COUNTRY) {
+    return ok(undefined);
+  }
+
   const declared = profileLevels.some((def) => def.level === level);
   if (!declared) {
     return err(
