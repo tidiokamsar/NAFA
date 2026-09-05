@@ -29,3 +29,17 @@ export {
   type OfferDependencies,
   Offer,
 } from './offer.aggregate';
+
+// Factory
+export { createOffer } from './factories/offer.factory';
+
+// Ports
+export {
+  type OfferRepository,
+  OFFER_REPOSITORY,
+  type PublishedProduct,
+  type ProductCatalog,
+  PRODUCT_CATALOG,
+  type SellerRegistry,
+  SELLER_REGISTRY,
+} from './ports';
