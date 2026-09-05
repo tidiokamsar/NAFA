@@ -90,13 +90,22 @@ export class PrismaAdministrativeAreaRepository implements AdministrativeAreaRep
     // The domain's AreaResolutionService does the precise scoring and ranking.
     // Here we do a broad string match on the JSON column — Postgres searches
     // the serialised text, so it catches both official names and aliases.
-    const rows = await this.prisma.administrativeArea.findMany({
-      where: {
-        countryCode,
-        deletedAt: null,
-        name: { string_contains: name },
-      },
-    });
+    //
+    // Raw SQL rather than a Prisma JSON filter: `string_contains` on a Json
+    // column only matches when the column holds a top-level string, not the
+    // { official, aliases } object we store — verified by the e2e suite.
+    // ILIKE keeps it case-insensitive so "kindya" finds the alias "Kindya".
+    // The mapper's structural row type describes exactly what comes back:
+    // pg parses jsonb columns into objects, and quoted camelCase columns
+    // keep their names.
+    const rows = await this.prisma.$queryRaw<AdministrativeAreaPrismaRow[]>(
+      Prisma.sql`
+        SELECT * FROM administrative_areas
+        WHERE "countryCode" = ${countryCode}
+          AND "deletedAt" IS NULL
+          AND "name"::text ILIKE ${'%' + name + '%'}
+      `,
+    );
     return rows.map((r) => this.rehydrate(r));
   }
 
