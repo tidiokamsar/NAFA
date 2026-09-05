@@ -12,6 +12,13 @@ generator geographyClient {
   output   = "../../services/masters/geography/src/generated/prisma"
 }
 
+// Third generator — same pattern for the products service. See
+// docs/adr/0010-product-master-boundaries.md.
+generator productsClient {
+  provider = "prisma-client"
+  output   = "../../services/masters/products/src/generated/prisma"
+}
+
 // The connection URL lives in services/foundation/iam/prisma.config.ts
 // (Prisma 7 moved `url` out of the schema file).
 datasource db {
@@ -149,4 +156,59 @@ model AdministrativeArea {
   @@index([countryCode, parentId])
   @@index([countryCode, level])
   @@map("administrative_areas")
+}
+
+// ---------------------------------------------------------------------------
+// Product Master — PROD-002
+//
+// See docs/adr/0010-product-master-boundaries.md and
+//     packages/products (the domain layer).
+//
+// The domain aggregate exposes snapshot()/rehydrate(); the Prisma adapter maps
+// between snapshots and rows. Brand types (ProductId, ProductCode) are plain
+// strings at the persistence layer — the mapper casts them.
+// ---------------------------------------------------------------------------
+
+/// The generic taxonomy of tradeable products.
+/// Mirrors `ProductCategory` in @nafa/products.
+enum ProductCategory {
+  CEREAL
+  TUBER
+  CASH_CROP
+  HORTICULTURE
+  LIVESTOCK
+  FISHERY
+  PROCESSED
+}
+
+/// Lifecycle of a catalogue product.
+/// Mirrors `ProductStatus` in @nafa/products.
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  DEPRECATED
+}
+
+/// A tradeable product — the species itself, not a variety, a lot or an offer
+/// (ADR-0010). The code is globally unique: the cashew is the cashew
+/// everywhere, unlike an area code which is scoped per country.
+model Product {
+  id       String         @id @default(uuid()) @db.Uuid
+  code     String         @unique
+  category ProductCategory
+  name     Json
+  units    Json
+  status   ProductStatus  @default(DRAFT)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy String?   @db.Uuid
+  updatedBy String?   @db.Uuid
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  @@index([deletedAt])
+  @@index([status])
+  @@index([category])
+  @@map("products")
 }
