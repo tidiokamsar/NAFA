@@ -5,3 +5,4 @@
 // (ProductId with one of its declared units) and, when known, the pickup
 // area (AdministrativeAreaId). See ../../docs/adr/0011-trade-master-boundaries.md
 // and ../../docs/backlog/TRA-001.md.
+export * from './domain';
