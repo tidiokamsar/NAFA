@@ -124,6 +124,28 @@ const depConstraints = [
     sourceTag: 'scope:product',
     onlyDependOnLibsWithTags: ['layer:util'],
   },
+  //   trade : allowed → the shared kernel + the three reference Masters
+  //
+  // The scope revision ADR-0009 §8 promised, and the FIRST rule that
+  // grants rather than closes. Trade is the first consuming Master: an
+  // offer cannot exist without naming a seller (foundation), a product
+  // (products) and, when known, a pickup area (geography). Every edge is
+  // named and justified in ADR-0011 §3, and the package carries a probe
+  // asserting both directions — the three granted imports pass, everything
+  // else (platform, SDK, a future Master) is rejected. Adding an edge is a
+  // tag added to this list: an act visible in review and justifiable by an
+  // ADR — not a convention.
+  //
+  // @see docs/adr/0011-trade-master-boundaries.md
+  {
+    sourceTag: 'scope:trade',
+    onlyDependOnLibsWithTags: [
+      'layer:util',
+      'scope:foundation',
+      'scope:geography',
+      'scope:product',
+    ],
+  },
   {
     // Catch-all: an untagged project may not be depended upon, which turns a
     // forgotten tag into a lint error instead of a silent hole.
