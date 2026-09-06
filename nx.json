@@ -17,16 +17,26 @@
   "targetDefaults": {
     "db:generate": {
       "cache": false,
-      "outputs": ["{projectRoot}/src/generated"]
+      "outputs": [
+        "{workspaceRoot}/services/foundation/iam/src/generated",
+        "{workspaceRoot}/services/masters/geography/src/generated",
+        "{workspaceRoot}/services/masters/products/src/generated"
+      ]
     },
     "build": {
-      "dependsOn": ["^build", "db:generate"],
+      "dependsOn": [
+        "^build",
+        { "projects": ["@nafa/database"], "target": "db:generate" }
+      ],
       "inputs": ["production", "^production"],
       "outputs": ["{projectRoot}/dist", "{projectRoot}/.next"],
       "cache": true
     },
     "typecheck": {
-      "dependsOn": ["^build", "db:generate"],
+      "dependsOn": [
+        "^build",
+        { "projects": ["@nafa/database"], "target": "db:generate" }
+      ],
       "inputs": ["default", "^production"],
       "cache": true
     },
@@ -35,18 +45,22 @@
       "cache": true
     },
     "test": {
-      "dependsOn": ["db:generate"],
+      "dependsOn": [
+        { "projects": ["@nafa/database"], "target": "db:generate" }
+      ],
       "inputs": ["default", "^production"],
       "outputs": ["{projectRoot}/coverage"],
       "cache": true
     },
     "test:e2e": {
-      "dependsOn": ["db:generate"],
+      "dependsOn": [
+        { "projects": ["@nafa/database"], "target": "db:generate" }
+      ],
       "cache": false
     },
     "dev": {
       "cache": false,
-      "dependsOn": ["db:generate"]
+      "dependsOn": [{ "projects": ["@nafa/database"], "target": "db:generate" }]
     }
   },
   "pluginsConfig": {

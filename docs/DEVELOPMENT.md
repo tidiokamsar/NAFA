@@ -122,7 +122,7 @@ lit le `.env` de la racine.
 Régénérer le client après modification du schéma :
 
 ```bash
-pnpm exec nx run @nafa/iam:db:generate
+pnpm exec nx run @nafa/database:db:generate
 ```
 
 Créer une migration versionnée (nécessite une base démarrée) :

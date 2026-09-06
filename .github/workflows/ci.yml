@@ -119,7 +119,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma client
-        run: pnpm --filter @nafa/iam run db:generate
+        run: pnpm --filter @nafa/database run db:generate
 
       - name: Build @nafa/platform (iam imports it from dist)
         run: pnpm --filter @nafa/platform run build
