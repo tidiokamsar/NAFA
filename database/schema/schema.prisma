@@ -26,6 +26,13 @@ generator tradeClient {
   output   = "../../services/masters/trade/src/generated/prisma"
 }
 
+// Fifth generator — the Actor Master finally gets its adapters. See
+// docs/adr/0012-actor-persistence-boundaries.md.
+generator actorClient {
+  provider = "prisma-client"
+  output   = "../../services/masters/actor/src/generated/prisma"
+}
+
 // The connection URL lives in services/foundation/iam/prisma.config.ts
 // (Prisma 7 moved `url` out of the schema file).
 datasource db {
@@ -268,4 +275,133 @@ model Offer {
   @@index([pickupAreaId])
   @@index([status])
   @@map("offers")
+}
+
+// ---------------------------------------------------------------------------
+// ACTOR MASTER — economic actors and cooperative membership (ACTOR-002)
+//
+// The physical form of the aggregates in packages/foundation/src/actor.
+// See docs/adr/0006-actor-and-cooperative-membership-boundaries.md,
+//     docs/adr/0007-actor-regulatory-boundaries.md and
+//     docs/adr/0012-actor-persistence-boundaries.md.
+//
+// Shape: the three-variant identity, the contacts, the address and the roles
+// are JSON columns, because they are inside the aggregate's transactional
+// boundary — they are never read or written without the actor they belong to,
+// and joining four tables to load one actor would buy nothing.
+//
+// The exception is what has to be *searched*. `ActorRepository` asks three
+// questions no aggregate can answer about itself — who holds this RCCM, this
+// NIF, this phone number — so those three values are also stored as indexed
+// columns. They are a projection of the JSON, written by the mapper on every
+// save and never read back into the aggregate: the JSON stays the source of
+// truth, the columns exist only so the database can answer.
+// ---------------------------------------------------------------------------
+
+/// Whether an actor is a natural person or a legal entity, and which kind.
+/// Mirrors `ActorNature` in @nafa/foundation.
+enum ActorNature {
+  PERSON
+  COMPANY
+  COOPERATIVE
+}
+
+/// The actor lifecycle. CLOSED is terminal — see invariant 8.
+/// Mirrors `ActorStatus` in @nafa/foundation.
+enum ActorStatus {
+  DRAFT
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+/// How far identity checks have gone. Gates which roles may be held.
+/// Mirrors `VerificationLevel` in @nafa/foundation.
+enum VerificationLevel {
+  NONE
+  BASIC
+  ENHANCED
+}
+
+/// An economic actor: a producer, a merchant, a transporter, a cooperative.
+///
+/// Distinct from `User`, which is a login. One person may have both, or a
+/// User and no Actor, or an Actor recorded by an agent and no login at all.
+model Actor {
+  id           String            @id @default(uuid()) @db.Uuid
+  nature       ActorNature
+  identity     Json
+  address      Json
+  contacts     Json
+  roles        Json
+  status       ActorStatus       @default(DRAFT)
+  verification VerificationLevel @default(NONE)
+
+  /// Commercial register number, projected from `identity` for lookup.
+  /// Unique across the registry: this is the database-level backstop behind
+  /// ActorUniquenessChecker, not a replacement for it.
+  rccm String? @unique
+
+  /// Tax identifier, projected from `identity`. Optional for a person,
+  /// required for a company or a cooperative — the domain enforces which.
+  nif String? @unique
+
+  /// Every phone number in `contacts`, projected for lookup. An array and
+  /// not a unique column on purpose: sharing a handset is ordinary here, so
+  /// `findByPhoneNumber` returns a list rather than treating it as a clash.
+  phoneNumbers String[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy String?   @db.Uuid
+  updatedBy String?   @db.Uuid
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  @@index([deletedAt])
+  @@index([status])
+  @@index([nature])
+  @@index([phoneNumbers], type: Gin)
+  @@map("actors")
+}
+
+/// How a membership ended, or that it has not.
+/// Mirrors `MembershipStatus` in @nafa/foundation.
+enum MembershipStatus {
+  ACTIVE
+  RESIGNED
+  EXCLUDED
+}
+
+/// One actor's membership of one cooperative.
+///
+/// Its own aggregate, hence its own table and its own version counter: a
+/// cooperative may have thousands of members, and a member joining must not
+/// collide with a contact being corrected (ADR-0006).
+///
+/// Both references are plain UUIDs with no foreign key. They point at rows in
+/// `actors`, the same Master, but the aggregate holds ActorIds and never
+/// Actors — the constraint that matters, at most one ACTIVE membership per
+/// pair, is not expressible as a unique index and lives in the domain.
+model CooperativeMembership {
+  id            String           @id @default(uuid()) @db.Uuid
+  cooperativeId String           @db.Uuid
+  memberId      String           @db.Uuid
+  status        MembershipStatus @default(ACTIVE)
+  admittedAt    String
+  endedAt       String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy String?   @db.Uuid
+  updatedBy String?   @db.Uuid
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  @@index([deletedAt])
+  @@index([cooperativeId, memberId])
+  @@index([memberId])
+  @@index([status])
+  @@map("cooperative_memberships")
 }
