@@ -13,6 +13,8 @@ packages:
   - "apps/api-portal"
   - "services/*/*"
   - "packages/*"
+  # Schema owner: holds the single schema.prisma and the one db:generate task.
+  - "database"
 allowBuilds:
   # Prisma needs its postinstall to lay down the client/engine artifacts.
   "@prisma/engines": true

@@ -1,0 +1,19 @@
+{
+  "name": "@nafa/database",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Owns the single Prisma schema, its migrations, and the one task that generates every service client.",
+  "scripts": {
+    "db:generate": "prisma generate"
+  },
+  "devDependencies": {
+    "prisma": "7.9.1",
+    "typescript": "5.9.3"
+  },
+  "nx": {
+    "tags": [
+      "scope:database",
+      "layer:util"
+    ]
+  }
+}
