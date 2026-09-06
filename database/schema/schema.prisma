@@ -19,6 +19,13 @@ generator productsClient {
   output   = "../../services/masters/products/src/generated/prisma"
 }
 
+// Fourth generator — same pattern for the trade service. See
+// docs/adr/0011-trade-master-boundaries.md.
+generator tradeClient {
+  provider = "prisma-client"
+  output   = "../../services/masters/trade/src/generated/prisma"
+}
+
 // The connection URL lives in services/foundation/iam/prisma.config.ts
 // (Prisma 7 moved `url` out of the schema file).
 datasource db {
@@ -211,4 +218,54 @@ model Product {
   @@index([status])
   @@index([category])
   @@map("products")
+}
+
+// ---------------------------------------------------------------------------
+// Trade Master — TRA-002
+//
+// See docs/adr/0011-trade-master-boundaries.md and
+//     packages/trade (the domain layer).
+//
+// Cross-Master references (sellerId, productId, pickupAreaId) are plain
+// UUIDs with NO foreign keys: an offer references the other Masters by
+// identity (ADR-0011 §3), it does not enforce their integrity — referential
+// checks across Masters are the ports' questions, not the database's.
+// ---------------------------------------------------------------------------
+
+/// The lifecycle of an offer. Mirrors `OfferStatus` in @nafa/trade.
+enum OfferStatus {
+  DRAFT
+  PUBLISHED
+  WITHDRAWN
+  CLOSED
+}
+
+/// An offer — a seller proposing a quantity of a product at a unit price,
+/// available over a window, optionally located (ADR-0011).
+model Offer {
+  id             String      @id @default(uuid()) @db.Uuid
+  sellerId       String      @db.Uuid
+  productId      String      @db.Uuid
+  quantityValue  Float
+  unitCode       String
+  priceAmountMinor Int
+  currency       String
+  pickupAreaId   String?     @db.Uuid
+  availableFrom  String
+  availableTo    String?
+  status         OfferStatus @default(DRAFT)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy String?   @db.Uuid
+  updatedBy String?   @db.Uuid
+  deletedAt DateTime?
+  version   Int       @default(1)
+
+  @@index([deletedAt])
+  @@index([sellerId])
+  @@index([productId])
+  @@index([pickupAreaId])
+  @@index([status])
+  @@map("offers")
 }

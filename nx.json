@@ -20,7 +20,8 @@
       "outputs": [
         "{workspaceRoot}/services/foundation/iam/src/generated",
         "{workspaceRoot}/services/masters/geography/src/generated",
-        "{workspaceRoot}/services/masters/products/src/generated"
+        "{workspaceRoot}/services/masters/products/src/generated",
+        "{workspaceRoot}/services/masters/trade/src/generated"
       ]
     },
     "build": {
