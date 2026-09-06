@@ -56,7 +56,10 @@ async function truncateTestData(): Promise<void> {
   const client = new Client({ connectionString: E2E_DATABASE_URL });
   await client.connect();
   try {
-    await client.query('TRUNCATE TABLE offers CASCADE');
+    // actors too: since ACTOR-002 this suite seeds two of them for the real
+    // SellerRegistry, and a run that dies before afterAll would leave rows
+    // whose unique RCCM blocks the next one.
+    await client.query('TRUNCATE TABLE offers, actors CASCADE');
   } finally {
     await client.end();
   }
