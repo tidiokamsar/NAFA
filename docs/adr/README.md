@@ -16,6 +16,9 @@ vrai, et pourquoi on a changé d'avis, vaut autant que la décision elle-même.
 | [0007](0007-actor-regulatory-boundaries.md)                  | Frontières réglementaires et opérationnelles d'Actor | Acceptée |
 | [0008](0008-domain-event-buffer-and-outbox.md)               | Tampon d'événements de domaine et future Outbox      | Acceptée |
 | [0009](0009-geography-master-boundaries.md)                  | Frontières du Geography Master                       | Acceptée |
+| [0010](0010-product-master-boundaries.md)                    | Frontières du Product Master                         | Acceptée |
+| [0011](0011-trade-master-boundaries.md)                      | Frontières du Trade Master                           | Acceptée |
+| [0012](0012-actor-persistence-boundaries.md)                 | Frontières de persistance du Master Actor            | Acceptée |
 
 ## Format
 

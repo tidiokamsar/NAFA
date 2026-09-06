@@ -2,22 +2,17 @@
 // Run via `pnpm test:e2e` — never part of the default `pnpm test` (unit) task.
 //
 // The integration test this Master deserves: the full createOffer path —
-// factory asking the REAL PrismaProductCatalog (a product row seeded in the
-// test database), a test-double SellerRegistry (no actors table exists;
-// invariant 2's adapter is deferred to the Actor Master's persistence),
-// then the aggregate through PrismaOfferRepository, lifecycle included.
+// the factory asking the REAL PrismaProductCatalog and, since ACTOR-002, the
+// REAL PrismaSellerRegistry over a seeded actors row, then the aggregate
+// through PrismaOfferRepository, lifecycle included. No doubles remain: both
+// cross-Master questions are answered by the database the services share.
 import { StaleVersionError, SystemClock, UuidGenerator } from '@nafa/shared';
-import type { ActorId } from '@nafa/foundation';
+import { ActorNature, ActorStatus, type ActorId } from '@nafa/foundation';
 import type { ProductId } from '@nafa/products';
-import {
-  createOffer,
-  Offer,
-  OfferStatus,
-  money,
-  type SellerRegistry,
-} from '@nafa/trade';
+import { createOffer, Offer, OfferStatus, money } from '@nafa/trade';
 import { PrismaOfferRepository } from '../src/infrastructure/persistence/prisma/prisma-offer.repository';
 import { PrismaProductCatalog } from '../src/infrastructure/persistence/prisma/prisma-product-catalog.adapter';
+import { PrismaSellerRegistry } from '../src/infrastructure/persistence/prisma/prisma-seller-registry.adapter';
 import { PrismaService } from '../src/infrastructure/persistence/prisma/prisma.service';
 import { E2E_DATABASE_URL } from './e2e-env';
 
@@ -33,19 +28,44 @@ function expectOk<T>(
 }
 
 const SELLER = '660e8400-e29b-41d4-a716-446655440001' as ActorId;
+/** Registered but never verified — the registry must refuse it. */
+const PENDING_SELLER = '660e8400-e29b-41d4-a716-446655440004' as ActorId;
 const PRODUCT_ID = '770e8400-e29b-41d4-a716-446655440002' as ProductId;
 
-/** The deferred adapter's stand-in: the only honest double in the suite. */
-const inMemorySellers: SellerRegistry = {
-  async isActive() {
-    return true;
-  },
-};
+/** The identity JSON is not what the registry reads; the status column is. */
+function actorRow(id: ActorId, status: string, rccmSuffix: string) {
+  return {
+    id: id as string,
+    nature: ActorNature.COMPANY as never,
+    identity: {
+      nature: 'COMPANY',
+      legalName: `Seller ${rccmSuffix}`,
+      legalForm: 'SARL',
+      rccm: `GN-CKY-2024-B-${rccmSuffix}`,
+      nif: `2000000${rccmSuffix.slice(-2)}`,
+      incorporationDate: '2019-06-01',
+    } as never,
+    address: {
+      line: 'Quartier Almamya',
+      locality: 'Conakry',
+      region: 'Conakry',
+      countryCode: 'GN',
+    } as never,
+    contacts: [{ channel: 'PHONE', value: '+224620000000' }] as never,
+    roles: [] as never,
+    status: status as never,
+    rccm: `GN-CKY-2024-B-${rccmSuffix}`,
+    nif: `2000000${rccmSuffix.slice(-2)}`,
+    phoneNumbers: ['+224620000000'],
+    version: 1,
+  };
+}
 
 describe('trade adapters (e2e)', () => {
   let prisma: PrismaService;
   let offers: PrismaOfferRepository;
   let catalog: PrismaProductCatalog;
+  let sellers: PrismaSellerRegistry;
   const clock = new SystemClock();
   const ids = new UuidGenerator();
 
@@ -56,6 +76,15 @@ describe('trade adapters (e2e)', () => {
     await prisma.$connect();
     offers = new PrismaOfferRepository(prisma, clock, ids);
     catalog = new PrismaProductCatalog(prisma);
+    sellers = new PrismaSellerRegistry(prisma);
+
+    // Two actors: one that may sell, one that may not.
+    await prisma.actor.create({
+      data: actorRow(SELLER, ActorStatus.ACTIVE, '02001'),
+    });
+    await prisma.actor.create({
+      data: actorRow(PENDING_SELLER, ActorStatus.PENDING_VERIFICATION, '02002'),
+    });
 
     // Seed one PUBLISHED product (fonio, KG + SAC_50) for the catalog reads.
     await prisma.product.create({
@@ -83,6 +112,7 @@ describe('trade adapters (e2e)', () => {
   afterAll(async () => {
     await prisma.offer.deleteMany({});
     await prisma.product.deleteMany({});
+    await prisma.actor.deleteMany({});
     await prisma.$disconnect();
   });
 
@@ -136,7 +166,7 @@ describe('trade adapters (e2e)', () => {
           availableTo: '2027-01-31',
         },
         { clock, ids },
-        { catalog, sellers: inMemorySellers },
+        { catalog, sellers },
       );
       const offer = expectOk(created, 'createOffer');
       await offers.save(offer, 0);
@@ -148,6 +178,30 @@ describe('trade adapters (e2e)', () => {
       expect(loaded?.unitPrice.amountMinor).toBe(12_000);
       expect(loaded?.availability.availableTo).toBe('2027-01-31');
       expect(loaded?.expectedVersion).toBe(1);
+    });
+
+    it('refuses a seller the REAL registry does not confirm (invariant 2)', async () => {
+      // The reason ACTOR-002 existed. Until the actors table shipped this
+      // path could only be exercised against a double that always said yes,
+      // so the invariant was declared and never enforced end to end.
+      expect(await sellers.isActive(SELLER)).toBe(true);
+      expect(await sellers.isActive(PENDING_SELLER)).toBe(false);
+
+      const created = await createOffer(
+        {
+          sellerId: PENDING_SELLER,
+          productId: PRODUCT_ID,
+          quantityValue: 100,
+          unitCode: 'KG',
+          priceAmountMinor: 5_000,
+          currency: 'GNF',
+          pickupAreaId: null,
+          availableFrom: '2026-10-01',
+        },
+        { clock, ids },
+        { catalog, sellers },
+      );
+      expect(created.ok).toBe(false);
     });
 
     it('refuses an undeclared unit through the REAL catalog (invariant 5)', async () => {
@@ -163,7 +217,7 @@ describe('trade adapters (e2e)', () => {
           availableFrom: '2026-10-01',
         },
         { clock, ids },
-        { catalog, sellers: inMemorySellers },
+        { catalog, sellers },
       );
       expect(created.ok).toBe(false);
     });
@@ -182,7 +236,7 @@ describe('trade adapters (e2e)', () => {
             availableFrom: '2026-11-01',
           },
           { clock, ids },
-          { catalog, sellers: inMemorySellers },
+          { catalog, sellers },
         ),
         'create lifecycle offer',
       );

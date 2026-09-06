@@ -1,22 +1,25 @@
 import { Module } from '@nestjs/common';
-import { OFFER_REPOSITORY, PRODUCT_CATALOG } from '@nafa/trade';
+import {
+  OFFER_REPOSITORY,
+  PRODUCT_CATALOG,
+  SELLER_REGISTRY,
+} from '@nafa/trade';
 import { Clock, IdGenerator, SystemClock, UuidGenerator } from '@nafa/shared';
 import { PrismaProductCatalog } from './persistence/prisma/prisma-product-catalog.adapter';
 import { PrismaOfferRepository } from './persistence/prisma/prisma-offer.repository';
+import { PrismaSellerRegistry } from './persistence/prisma/prisma-seller-registry.adapter';
 import { PrismaModule } from './persistence/prisma/prisma.module';
 
 /**
  * Every outbound adapter the service owns, and the single place where ports
  * are bound to implementations. Only the port tokens leave this module.
  *
- * Deliberately NOT bound: SELLER_REGISTRY. There is no actors table
- * anywhere — the Actor Master's persistence does not exist (its domain
- * lives in @nafa/foundation, its storage is an open item from the ACTOR-001
- * review). Binding a stub that always refuses would brick offer creation
- * for a reason invisible in the logs; binding one that always accepts would
- * silently drop invariant 2. The token stays unbound — Nest fails loudly
- * the day someone requests it — until the Actor Master gets its table
- * (ADR-0011 §3: existence questions belong to the ports).
+ * SELLER_REGISTRY was deliberately left unbound until ACTOR-002: there was
+ * no actors table anywhere, and a stub that always refused would have
+ * bricked offer creation invisibly, while one that always accepted would
+ * have silently dropped invariant 2. The table now exists, so the token is
+ * bound to a real adapter and an offer can finally name a seller that the
+ * registry confirms (ADR-0011 §3, ADR-0012).
  */
 @Module({
   imports: [PrismaModule],
@@ -28,11 +31,13 @@ import { PrismaModule } from './persistence/prisma/prisma.module';
     // Adapters
     PrismaOfferRepository,
     PrismaProductCatalog,
+    PrismaSellerRegistry,
 
     // Port bindings
     { provide: OFFER_REPOSITORY, useExisting: PrismaOfferRepository },
     { provide: PRODUCT_CATALOG, useExisting: PrismaProductCatalog },
+    { provide: SELLER_REGISTRY, useExisting: PrismaSellerRegistry },
   ],
-  exports: [PrismaModule, OFFER_REPOSITORY, PRODUCT_CATALOG],
+  exports: [PrismaModule, OFFER_REPOSITORY, PRODUCT_CATALOG, SELLER_REGISTRY],
 })
 export class InfrastructureModule {}

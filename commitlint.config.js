@@ -23,8 +23,15 @@ module.exports = {
         'foundation',
         'geography',
         'products',
-        // First Masters service; distinct from the geography domain package.
+        'trade',
+        'actor',
+        // Masters services; each distinct from the domain package it serves.
+        // Every one of them warned on its own ticket's commits before being
+        // listed here.
         'geography-service',
+        'products-service',
+        'trade-service',
+        'actor-service',
         'packages',
         'database',
         'infra',
