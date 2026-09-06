@@ -30,7 +30,7 @@ Worktrees actuellement ouverts (`git worktree list`) :
 | ----------------------------------- | --------------------------------------------------------- | ---------------------------- |
 | `F:/NAFA`                           | `main` — **intégration uniquement, pas de développement** |                              |
 | `F:/NAFA/.worktrees/ai-readiness`   | `codex/ai-ready-development`                              | lane B                       |
-| `F:/NAFA/.worktrees/pr-8`           | `feature/actor-001-domain`                                | PR #15 en revue              |
+| `F:/NAFA/.worktrees/pr-8`           | `feature/actor-001-domain`                                | fusionnée, PR #15 fermée     |
 | `F:/NAFA/.worktrees/GEO-001`        | `feature/geo-001-geography`                               | lane E, PR #16               |
 | `F:/NAFA/.worktrees/GEO-001-2`      | `feature/geo-001-2-shared-isodate`                        | lane E, absorbée par GEO-001 |
 | `F:/NAFA/.worktrees/GEO-002`        | `feature/geo-002-import-pipeline`                         | lane E, PR #17               |
@@ -40,6 +40,8 @@ Worktrees actuellement ouverts (`git worktree list`) :
 | `F:/NAFA/.worktrees/SPR-0004`       | `fix/SPR-0004-docker-pnpm-cache`                          | posé sur `main`, rien en vol |
 | `F:/NAFA/.worktrees/SPR-0010`       | `feature/SPR-0010-ageroute-phase0`                        | posé sur `main`, rien en vol |
 | `F:/NAFA/.worktrees/CHORE-REGISTRY` | `chore/parallel-agents-registry-and-scopes`               | lane E, hygiène              |
+| `F:/NAFA/.worktrees/TRA-002`        | `feature/tra-002-offer-pipeline`                          | fusionnée, PR #22            |
+| `F:/NAFA/.worktrees/ACTOR-002`      | `feature/actor-002-persistence`                           | persistance du Master Actor  |
 
 ### Règle de recouvrement
 
