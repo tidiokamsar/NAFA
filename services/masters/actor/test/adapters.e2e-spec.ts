@@ -411,4 +411,77 @@ describe('actor adapters (e2e)', () => {
       expect(active).toBeGreaterThan(0);
     });
   });
+
+  // ------------------------------------------------------------------
+  // The outbox — the half of ADR-0008 that had no implementation
+  // ------------------------------------------------------------------
+
+  describe('the outbox', () => {
+    it('holds one row per event the aggregate emitted, unpublished', async () => {
+      const rows = await prisma.outboxEvent.findMany({
+        where: { aggregate: 'Actor' },
+        orderBy: [{ aggregateId: 'asc' }, { version: 'asc' }],
+      });
+
+      expect(rows.length).toBeGreaterThan(0);
+
+      // Unpublished is the queue: a relay has not run, and must still see
+      // every one of these.
+      expect(rows.every((r) => r.publishedAt === null)).toBe(true);
+      expect(rows.every((r) => r.attempts === 0)).toBe(true);
+
+      // The row id IS the event id the domain generated, so a consumer can
+      // deduplicate on it without a translation table.
+      expect(rows.every((r) => r.id.length === 36)).toBe(true);
+
+      // occurredAt comes from the domain clock, not from the write.
+      expect(rows.every((r) => r.occurredAt.includes('T'))).toBe(true);
+    });
+
+    it('never holds two rows for one aggregate version', async () => {
+      const rows = await prisma.outboxEvent.findMany({
+        where: { aggregate: 'Actor' },
+      });
+      const keys = rows.map((r) => `${r.aggregateId}#${r.version}`);
+
+      // Enforced by a unique index rather than trusted, so a repository
+      // that wrote the same drained buffer twice would fail loudly here
+      // instead of duplicating the event downstream.
+      expect(new Set(keys).size).toBe(keys.length);
+    });
+
+    it('rolls back with the write it belongs to', async () => {
+      const id = newId();
+      const doomed = register(
+        companyWith('GN-CKY-2024-B-01099', '100000099', 'Rollback SA'),
+        OWN_PHONE,
+        id,
+      );
+      await actors.save(doomed, 0);
+
+      // Two handles on the same version. The first write wins.
+      const one = await actors.findById(id);
+      const two = await actors.findById(id);
+
+      expectOk(one!.submitForVerification(), 'first submit');
+      await actors.save(one!, one!.expectedVersion);
+
+      const afterTheWinner = await prisma.outboxEvent.count({
+        where: { aggregate: 'Actor' },
+      });
+
+      expectOk(two!.submitForVerification(), 'second submit');
+      await expect(actors.save(two!, two!.expectedVersion)).rejects.toThrow(
+        StaleVersionError,
+      );
+
+      // The refused write had drained an event into its buffer, and none of
+      // it reached the outbox: throwing inside the transaction took the row
+      // and its events together. This is the half of ADR-0008 that a
+      // publish-after-commit design cannot offer.
+      expect(
+        await prisma.outboxEvent.count({ where: { aggregate: 'Actor' } }),
+      ).toBe(afterTheWinner);
+    });
+  });
 });

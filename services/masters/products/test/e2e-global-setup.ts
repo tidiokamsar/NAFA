@@ -56,7 +56,7 @@ async function truncateTestData(): Promise<void> {
   const client = new Client({ connectionString: E2E_DATABASE_URL });
   await client.connect();
   try {
-    await client.query('TRUNCATE TABLE products CASCADE');
+    await client.query('TRUNCATE TABLE products, outbox_events CASCADE');
   } finally {
     await client.end();
   }

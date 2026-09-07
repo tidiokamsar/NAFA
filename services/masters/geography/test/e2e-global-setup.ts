@@ -57,7 +57,7 @@ async function truncateTestData(): Promise<void> {
   await client.connect();
   try {
     await client.query(
-      'TRUNCATE TABLE administrative_areas, country_profiles CASCADE',
+      'TRUNCATE TABLE administrative_areas, country_profiles, outbox_events CASCADE',
     );
   } finally {
     await client.end();

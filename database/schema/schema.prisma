@@ -405,3 +405,63 @@ model CooperativeMembership {
   @@index([status])
   @@map("cooperative_memberships")
 }
+
+// ---------------------------------------------------------------------------
+// OUTBOX — the transactional bridge between a write and its publication
+//
+// ADR-0008 decided that an aggregate buffers its events and a repository
+// persists snapshot and events in the SAME transaction. This is that table.
+//
+// Deliberately NOT carrying the six audit columns every business table has.
+// It is not a business entity: it has no author, is never soft-deleted, and
+// its rows are consumed and purged rather than corrected. `version` here is
+// the aggregate's version at the event, not an optimistic-concurrency
+// counter — the one place in the schema where that word means something else.
+// ---------------------------------------------------------------------------
+
+/// One domain event, waiting to be published.
+///
+/// The primary key IS the eventId the domain generated, so a relay that
+/// republishes and a consumer that deduplicates agree on the same identity
+/// without a translation table.
+model OutboxEvent {
+  id          String @id @db.Uuid
+  eventType   String
+  aggregate   String
+  /// Plain text, not a UUID. Most aggregates are keyed by one, but
+  /// CountryProfile is keyed by its ISO country code — an outbox that
+  /// demanded UUIDs would refuse to carry a whole Master's events, and it
+  /// would refuse them inside the business transaction that produced them.
+  aggregateId String
+  /// The aggregate version this event produced.
+  version     Int
+  /// When it happened, not when it was written. ISO 8601, from the domain.
+  occurredAt  String
+  payload     Json
+
+  /// Also plain text: `DomainEvent` types these as strings and promises no
+  /// format. A technical log must not reject an event for a shape the domain
+  /// never guaranteed.
+  tenantId      String?
+  correlationId String?
+  causationId   String?
+
+  /// Null until a relay has published it. The queue is `publishedAt IS NULL`.
+  publishedAt DateTime?
+  /// Publication attempts, so a poisoned row can be found rather than
+  /// retried forever in silence.
+  attempts    Int       @default(0)
+  lastError   String?
+
+  createdAt DateTime @default(now())
+
+  /// One event per aggregate version, enforced by the database rather than
+  /// trusted. An aggregate advances its version once per event, so a
+  /// repository that wrote the same drained buffer twice would collide here
+  /// instead of duplicating the event downstream.
+  @@unique([aggregate, aggregateId, version])
+  /// The relay's only query: the oldest unpublished rows.
+  @@index([publishedAt, createdAt])
+  @@index([aggregate, aggregateId])
+  @@map("outbox_events")
+}

@@ -101,7 +101,9 @@ describe('geography adapters (e2e)', () => {
       ]);
       expect(loaded?.levels[0].label.singular).toBe('Région');
       // Rehydrated at the stored version — save must expect exactly that.
-      expect(loaded?.expectedVersion).toBe(1);
+      // Two events at registration — the factory creates then publishes —
+      // so the stored version is 2, not the number of saves (ADR-0012 §3).
+      expect(loaded?.expectedVersion).toBe(2);
     });
 
     it('updates through the version guard, then refuses a stale write', async () => {
@@ -568,6 +570,45 @@ describe('geography adapters (e2e)', () => {
       await areas.save(two.value, two.value.expectedVersion);
       const reloaded = await areas.findByCode('GH', 'GH');
       expect(reloaded?.status).toBe('SPLIT');
+    });
+  });
+
+  // ------------------------------------------------------------------
+  // The outbox — the half of ADR-0008 that had no implementation
+  // ------------------------------------------------------------------
+
+  describe('the outbox', () => {
+    it('holds one row per event the aggregates emitted, unpublished', async () => {
+      const rows = await prisma.outboxEvent.findMany({
+        where: { aggregate: { in: ['AdministrativeArea', 'CountryProfile'] } },
+      });
+
+      expect(rows.length).toBeGreaterThan(0);
+      // Unpublished is the queue: no relay has run, and one must still see
+      // every row here.
+      expect(rows.every((r) => r.publishedAt === null)).toBe(true);
+      expect(rows.every((r) => r.attempts === 0)).toBe(true);
+      // The row id IS the event id the domain generated, so a consumer
+      // deduplicates on it without a translation table.
+      expect(rows.every((r) => r.id.length === 36)).toBe(true);
+      // occurredAt comes from the domain clock, never from the write.
+      expect(rows.every((r) => r.occurredAt.includes('T'))).toBe(true);
+      // Both geography aggregates write to the one shared outbox table.
+      expect(new Set(rows.map((r) => r.aggregate)).size).toBe(2);
+    });
+
+    it('never holds two rows for one aggregate version', async () => {
+      const rows = await prisma.outboxEvent.findMany({
+        where: { aggregate: { in: ['AdministrativeArea', 'CountryProfile'] } },
+      });
+      const keys = rows.map(
+        (r) => `${r.aggregate}#${r.aggregateId}#${r.version}`,
+      );
+
+      // Enforced by a unique index rather than trusted: a repository that
+      // wrote the same drained buffer twice fails loudly here instead of
+      // duplicating the event downstream.
+      expect(new Set(keys).size).toBe(keys.length);
     });
   });
 });

@@ -7,6 +7,7 @@ import { Prisma } from '../../../generated/prisma/client';
 // still builds, and fails only when something actually boots the module.
 // Nothing did until the first HTTP e2e (ADR-0014 §4).
 import { Clock, IdGenerator, StaleVersionError } from '@nafa/shared';
+import { appendToOutbox } from '@nafa/platform';
 import {
   AdministrativeArea,
   type AdministrativeAreaRepository,
@@ -117,56 +118,73 @@ export class PrismaAdministrativeAreaRepository implements AdministrativeAreaRep
 
   async save(area: AdministrativeArea, expectedVersion: number): Promise<void> {
     const row = administrativeAreaToRow(area.snapshot());
+    // Drained before the transaction opens, and once. `pullEvents()`
+    // empties the buffer, so draining inside a callback that could run
+    // twice would lose the second half of the events.
+    const events = area.pullEvents();
 
-    if (expectedVersion === 0) {
-      await this.prisma.administrativeArea.create({
-        data: {
-          id: row.id,
-          countryCode: row.countryCode,
-          level: row.level as never,
-          code: row.code,
-          name: row.name,
-          parentId: row.parentId,
-          centroid: row.centroid ?? Prisma.JsonNull,
-          validFrom: row.validFrom,
-          validTo: row.validTo,
-          status: row.status as never,
-          successors: row.successors,
-          version: 1,
-        },
-      });
-      return;
-    }
+    // The row and its events in one transaction (ADR-0008). A
+    // successful write followed by a failed publication loses the
+    // event; the reverse order announces a write that never landed.
+    await this.prisma.$transaction(async (tx) => {
+      if (expectedVersion === 0) {
+        await tx.administrativeArea.create({
+          data: {
+            id: row.id,
+            countryCode: row.countryCode,
+            level: row.level as never,
+            code: row.code,
+            name: row.name,
+            parentId: row.parentId,
+            centroid: row.centroid ?? Prisma.JsonNull,
+            validFrom: row.validFrom,
+            validTo: row.validTo,
+            status: row.status as never,
+            successors: row.successors,
+            // The aggregate's own count here too, not a hardcoded 1. A
+            // factory that emits two events — create then publish — leaves
+            // the aggregate at 2, and storing 1 would make the next load
+            // hand back a version the domain never produced. The outbox's
+            // unique index on (aggregate, aggregateId, version) is what
+            // exposed this: the second save collided with the row the first
+            // had already written for that version (ADR-0012 §3).
+            version: row.version,
+          },
+        });
+      } else {
+        const result = await tx.administrativeArea.updateMany({
+          where: { id: row.id, version: expectedVersion, deletedAt: null },
+          data: {
+            level: row.level as never,
+            code: row.code,
+            name: row.name,
+            parentId: row.parentId,
+            centroid: row.centroid ?? Prisma.JsonNull,
+            validFrom: row.validFrom,
+            validTo: row.validTo,
+            status: row.status as never,
+            successors: row.successors,
+            // The aggregate's own count, not `increment: 1`. An aggregate can
+            // apply several mutations before a single save, and its version moves
+            // once per event: incrementing by one would store fewer than the
+            // aggregate counts, and the next load would hand a use case a version
+            // the domain never produced. The concurrency guard is unchanged — it
+            // is the WHERE clause above (ADR-0012 §3).
+            version: row.version,
+          },
+        });
 
-    const result = await this.prisma.administrativeArea.updateMany({
-      where: { id: row.id, version: expectedVersion, deletedAt: null },
-      data: {
-        level: row.level as never,
-        code: row.code,
-        name: row.name,
-        parentId: row.parentId,
-        centroid: row.centroid ?? Prisma.JsonNull,
-        validFrom: row.validFrom,
-        validTo: row.validTo,
-        status: row.status as never,
-        successors: row.successors,
-        // The aggregate's own count, not `increment: 1`. An aggregate can
-        // apply several mutations before a single save, and its version moves
-        // once per event: incrementing by one would store fewer than the
-        // aggregate counts, and the next load would hand a use case a version
-        // the domain never produced. The concurrency guard is unchanged — it
-        // is the WHERE clause above (ADR-0012 §3).
-        version: row.version,
-      },
+        if (result.count === 0) {
+          throw new StaleVersionError(
+            'AdministrativeArea',
+            expectedVersion,
+            area.version,
+          );
+        }
+      }
+
+      await appendToOutbox(tx, events);
     });
-
-    if (result.count === 0) {
-      throw new StaleVersionError(
-        'AdministrativeArea',
-        expectedVersion,
-        area.version,
-      );
-    }
   }
 
   private rehydrate(row: AdministrativeAreaPrismaRow): AdministrativeArea {

@@ -6,6 +6,7 @@ import { Injectable } from '@nestjs/common';
 // still builds, and fails only when something actually boots the module.
 // Nothing did until the first HTTP e2e (ADR-0014 §4).
 import { Clock, IdGenerator, StaleVersionError } from '@nafa/shared';
+import { appendToOutbox } from '@nafa/platform';
 import {
   Actor,
   type ActorId,
@@ -89,51 +90,63 @@ export class PrismaActorRepository implements ActorRepository {
 
   async save(actor: Actor, expectedVersion: number): Promise<void> {
     const row = actorToRow(actor.snapshot());
+    // Drained before the transaction opens, and once. `pullEvents()` empties
+    // the buffer, so draining inside a callback that could run twice would
+    // lose the second half of the events.
+    const events = actor.pullEvents();
 
-    if (expectedVersion === 0) {
-      await this.prisma.actor.create({
-        data: {
-          id: row.id,
-          nature: row.nature as never,
-          identity: row.identity as never,
-          address: row.address as never,
-          contacts: row.contacts as never,
-          roles: row.roles as never,
-          status: row.status as never,
-          verification: row.verification as never,
-          rccm: row.rccm,
-          nif: row.nif,
-          phoneNumbers: row.phoneNumbers,
-          version: row.version,
-        },
-      });
-      return;
-    }
+    // The row and its events in one transaction (ADR-0008). A successful
+    // write followed by a failed publication loses the event; the reverse
+    // order announces a write that never landed. Neither is possible here:
+    // the outbox row and the actor row commit together or not at all.
+    await this.prisma.$transaction(async (tx) => {
+      if (expectedVersion === 0) {
+        await tx.actor.create({
+          data: {
+            id: row.id,
+            nature: row.nature as never,
+            identity: row.identity as never,
+            address: row.address as never,
+            contacts: row.contacts as never,
+            roles: row.roles as never,
+            status: row.status as never,
+            verification: row.verification as never,
+            rccm: row.rccm,
+            nif: row.nif,
+            phoneNumbers: row.phoneNumbers,
+            version: row.version,
+          },
+        });
+      } else {
+        const result = await tx.actor.updateMany({
+          where: { id: row.id, version: expectedVersion, deletedAt: null },
+          data: {
+            identity: row.identity as never,
+            address: row.address as never,
+            contacts: row.contacts as never,
+            roles: row.roles as never,
+            status: row.status as never,
+            verification: row.verification as never,
+            rccm: row.rccm,
+            nif: row.nif,
+            phoneNumbers: row.phoneNumbers,
+            // The aggregate's own count, not `increment: 1`. An actor can
+            // apply several mutations before one save — verify, grant a
+            // role, activate — and its version moves once per event
+            // (ADR-0012 §3).
+            version: row.version,
+          },
+        });
 
-    const result = await this.prisma.actor.updateMany({
-      where: { id: row.id, version: expectedVersion, deletedAt: null },
-      data: {
-        identity: row.identity as never,
-        address: row.address as never,
-        contacts: row.contacts as never,
-        roles: row.roles as never,
-        status: row.status as never,
-        verification: row.verification as never,
-        rccm: row.rccm,
-        nif: row.nif,
-        phoneNumbers: row.phoneNumbers,
-        // The aggregate's own count, not `increment: 1`. An actor can apply
-        // several mutations before one save — verify, grant a role, activate
-        // — and its version moves once per event. Incrementing by one would
-        // store 3 where the aggregate says 5, so the next load would hand a
-        // use case a version the domain never produced.
-        version: row.version,
-      },
+        // Throwing rolls the transaction back, so the outbox rows go with
+        // it: a refused write publishes nothing.
+        if (result.count === 0) {
+          throw new StaleVersionError('Actor', expectedVersion, actor.version);
+        }
+      }
+
+      await appendToOutbox(tx, events);
     });
-
-    if (result.count === 0) {
-      throw new StaleVersionError('Actor', expectedVersion, actor.version);
-    }
   }
 
   private rehydrate(row: ActorPrismaRow): Actor {

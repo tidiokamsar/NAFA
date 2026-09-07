@@ -45,9 +45,15 @@ consommateurs doivent rester idempotents et dédupliquer sur `eventId`.
 l'attraper. C'est la contrepartie directe du fait que le domaine ne publie
 rien lui-même, et c'est le point à vérifier en revue du premier adaptateur.
 
-**Ce qui reste à faire.** Définir le schéma Outbox, son relais, la politique de
-reprise et la rétention — dans la couche infrastructure, quand un service Actor
-existera.
+**Ce qui reste à faire.** Le schéma Outbox et l'écriture transactionnelle sont
+livrés par [ADR-0013](0013-outbox-table-and-transactional-write.md) (OUT-001).
+Restent le relais, la politique de reprise et la rétention.
+
+> Note ajoutée par OUT-001 : le risque énoncé ci-dessus s'est réalisé. Entre
+> GEO-002 et OUT-001, **aucun des six dépôts n'appelait `pullEvents()`** et
+> tous les événements produits ont été perdus à l'écriture, exactement comme
+> annoncé et sans que rien ne le signale. ADR-0013 §6 décrit la sonde qui
+> attrape désormais cet oubli.
 
 ## Flux visé
 

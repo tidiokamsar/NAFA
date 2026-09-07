@@ -59,7 +59,7 @@ async function truncateTestData(): Promise<void> {
     // actors too: since ACTOR-002 this suite seeds two of them for the real
     // SellerRegistry, and a run that dies before afterAll would leave rows
     // whose unique RCCM blocks the next one.
-    await client.query('TRUNCATE TABLE offers, actors CASCADE');
+    await client.query('TRUNCATE TABLE offers, actors, outbox_events CASCADE');
   } finally {
     await client.end();
   }

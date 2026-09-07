@@ -6,6 +6,7 @@ import { Injectable } from '@nestjs/common';
 // still builds, and fails only when something actually boots the module.
 // Nothing did until the first HTTP e2e (ADR-0014 §4).
 import { Clock, IdGenerator, StaleVersionError } from '@nafa/shared';
+import { appendToOutbox } from '@nafa/platform';
 import {
   CooperativeMembership,
   MembershipStatus,
@@ -90,42 +91,59 @@ export class PrismaCooperativeMembershipRepository implements CooperativeMembers
     expectedVersion: number,
   ): Promise<void> {
     const row = membershipToRow(membership.snapshot());
+    // Drained before the transaction opens, and once. `pullEvents()`
+    // empties the buffer, so draining inside a callback that could run
+    // twice would lose the second half of the events.
+    const events = membership.pullEvents();
 
-    if (expectedVersion === 0) {
-      await this.prisma.cooperativeMembership.create({
-        data: {
-          id: row.id,
-          cooperativeId: row.cooperativeId,
-          memberId: row.memberId,
-          status: row.status as never,
-          admittedAt: row.admittedAt,
-          endedAt: row.endedAt,
-          version: 1,
-        },
-      });
-      return;
-    }
+    // The row and its events in one transaction (ADR-0008). A
+    // successful write followed by a failed publication loses the
+    // event; the reverse order announces a write that never landed.
+    await this.prisma.$transaction(async (tx) => {
+      if (expectedVersion === 0) {
+        await tx.cooperativeMembership.create({
+          data: {
+            id: row.id,
+            cooperativeId: row.cooperativeId,
+            memberId: row.memberId,
+            status: row.status as never,
+            admittedAt: row.admittedAt,
+            endedAt: row.endedAt,
+            // The aggregate's own count here too, not a hardcoded 1. A
+            // factory that emits two events — create then publish — leaves
+            // the aggregate at 2, and storing 1 would make the next load
+            // hand back a version the domain never produced. The outbox's
+            // unique index on (aggregate, aggregateId, version) is what
+            // exposed this: the second save collided with the row the first
+            // had already written for that version (ADR-0012 §3).
+            version: row.version,
+          },
+        });
+      } else {
+        // Only the status and its end date move after admission. The pair and
+        // the admission date are what the membership *is* — changing either
+        // would make it a different membership, not an updated one.
+        const result = await tx.cooperativeMembership.updateMany({
+          where: { id: row.id, version: expectedVersion, deletedAt: null },
+          data: {
+            status: row.status as never,
+            endedAt: row.endedAt,
+            // The aggregate's own count. See PrismaActorRepository.save.
+            version: row.version,
+          },
+        });
 
-    // Only the status and its end date move after admission. The pair and
-    // the admission date are what the membership *is* — changing either
-    // would make it a different membership, not an updated one.
-    const result = await this.prisma.cooperativeMembership.updateMany({
-      where: { id: row.id, version: expectedVersion, deletedAt: null },
-      data: {
-        status: row.status as never,
-        endedAt: row.endedAt,
-        // The aggregate's own count. See PrismaActorRepository.save.
-        version: row.version,
-      },
+        if (result.count === 0) {
+          throw new StaleVersionError(
+            'CooperativeMembership',
+            expectedVersion,
+            membership.version,
+          );
+        }
+      }
+
+      await appendToOutbox(tx, events);
     });
-
-    if (result.count === 0) {
-      throw new StaleVersionError(
-        'CooperativeMembership',
-        expectedVersion,
-        membership.version,
-      );
-    }
   }
 
   private rehydrate(row: MembershipPrismaRow): CooperativeMembership {
