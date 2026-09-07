@@ -65,7 +65,13 @@ export class PrismaCountryProfileRepository implements CountryProfileRepository 
       data: {
         status: data.status as never,
         levels: data.levels as unknown as Prisma.InputJsonValue,
-        version: { increment: 1 },
+        // The aggregate's own count, not `increment: 1`. An aggregate can
+        // apply several mutations before a single save, and its version moves
+        // once per event: incrementing by one would store fewer than the
+        // aggregate counts, and the next load would hand a use case a version
+        // the domain never produced. The concurrency guard is unchanged — it
+        // is the WHERE clause above (ADR-0012 §3).
+        version: data.version,
       },
     });
 

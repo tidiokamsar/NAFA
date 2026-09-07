@@ -8,6 +8,7 @@
 import { StaleVersionError, SystemClock, UuidGenerator } from '@nafa/shared';
 import {
   createProduct,
+  productName,
   ProductRule,
   ProductStatus,
   type Product,
@@ -126,6 +127,35 @@ describe('products adapters (e2e)', () => {
       await expect(
         products.save(loaded, loaded.expectedVersion),
       ).rejects.toThrow(StaleVersionError);
+    });
+
+    it('stores the version the aggregate reached, not the number of saves', async () => {
+      // The regression this ticket exists for. Renaming and deprecating
+      // before a single save moves the aggregate by two events, while
+      // `version: { increment: 1 }` moved the row by one — so the next load
+      // handed a use case a version the domain never produced.
+      const product = newProduct('E2VER', 'Sorgho e2e');
+      await products.save(product, 0);
+
+      const loaded = await products.findByCode('E2VER');
+      if (!loaded) throw new Error('E2VER not found');
+      const before = loaded.version;
+
+      const renamed = expectOk(
+        productName({ official: 'Sorgho révisé', aliases: ['sorgho e2e'] }),
+        'productName',
+      );
+      expectOk(loaded.rename(renamed, deps), 'rename');
+      expectOk(loaded.deprecate(deps), 'deprecate');
+      expect(loaded.version).toBe(before + 2);
+
+      await products.save(loaded, loaded.expectedVersion);
+
+      const reloaded = await products.findByCode('E2VER');
+      // The property, stated without a magic number: what the row holds is
+      // what the aggregate counted, whatever the registration path emitted.
+      expect(reloaded?.expectedVersion).toBe(loaded.version);
+      expect(reloaded?.status).toBe(ProductStatus.DEPRECATED);
     });
 
     it('deprecates and freezes — the lifecycle lands in the database', async () => {

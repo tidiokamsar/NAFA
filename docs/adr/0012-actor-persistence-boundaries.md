@@ -88,10 +88,11 @@ chargement suivant aurait rendu à un cas d'usage une version que le domaine
 n'a jamais produite. La garde d'optimistic concurrency ne change pas : elle
 est dans la clause `WHERE ... version = expectedVersion`.
 
-> **Écart connu** : `PrismaOfferRepository` (TRA-002) utilise toujours
-> `increment: 1`. Le défaut y est latent — sa suite e2e recharge entre les
-> écritures, sauf dans un cas qui n'assertit pas la version. Hors périmètre
-> d'ACTOR-002, à traiter séparément.
+> **Écart résorbé.** Cette ADR signalait `PrismaOfferRepository` comme le
+> seul dépôt resté sur `increment: 1`. C'était inexact : le défaut était dans
+> **quatre** dépôts, sur trois Masters — offres, produits, profils pays et
+> zones administratives. Tous corrigés, chacun avec un test e2e qui échoue
+> quand on rétablit `increment: 1`.
 
 ## Décision 4 — le Master Trade lit la table `actors` directement
 

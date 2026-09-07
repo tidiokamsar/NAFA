@@ -122,6 +122,44 @@ describe('geography adapters (e2e)', () => {
       ).rejects.toThrow(StaleVersionError);
     });
 
+    it('stores the version the aggregate reached, not the number of saves', async () => {
+      // Same regression as the area repository, and the fourth site that
+      // carried it. Two mutations before one save move the aggregate by two
+      // events; `version: { increment: 1 }` moved the row by one.
+      const profile = publishedProfile('GV');
+      await profiles.save(profile, 0);
+
+      const loaded = await profiles.findByCountry('GV');
+      if (!loaded) throw new Error('GV not found');
+      const before = loaded.version;
+
+      // changeLevels takes LevelDefinition, whose label is nested — the
+      // factory's input shape is flat, so the two are not interchangeable.
+      expectOk(
+        loaded.changeLevels(
+          [
+            ...loaded.levels,
+            {
+              level: AdministrativeLevel.LEVEL_3,
+              label: {
+                singular: 'Sous-préfecture',
+                plural: 'Sous-préfectures',
+              },
+            },
+          ],
+          new Set(),
+        ),
+        'changeLevels GV',
+      );
+      expectOk(loaded.deprecate(), 'deprecate GV');
+      expect(loaded.version).toBe(before + 2);
+
+      await profiles.save(loaded, loaded.expectedVersion);
+
+      const reloaded = await profiles.findByCountry('GV');
+      expect(reloaded?.expectedVersion).toBe(loaded.version);
+    });
+
     it('listPublished returns only PUBLISHED profiles', async () => {
       const published = publishedProfile('GC');
       await profiles.save(published, 0);
@@ -263,6 +301,37 @@ describe('geography adapters (e2e)', () => {
 
       const byAlias = await areas.findByName('GE', 'Kindya');
       expect(byAlias.map((a) => a.code)).toContain('GE-R1');
+    });
+
+    it('stores the version the aggregate reached, not the number of saves', async () => {
+      // The regression this ticket exists for. Two mutations before a single
+      // save move the aggregate by two events, while `version: { increment:
+      // 1 }` moved the row by one — so the next load handed a use case a
+      // version the domain never produced.
+      const loaded = await areas.findById(
+        prefecture.areaId as unknown as string,
+      );
+      if (!loaded) throw new Error('prefecture not found');
+      const before = loaded.version;
+
+      expectOk(
+        loaded.rename({ official: 'Préfecture révisée', aliases: [] }),
+        'rename',
+      );
+      expectOk(
+        loaded.setCentroid({ latitude: 10.05, longitude: -12.86 }),
+        'setCentroid',
+      );
+      expect(loaded.version).toBe(before + 2);
+
+      await areas.save(loaded, loaded.expectedVersion);
+
+      const reloaded = await areas.findById(
+        prefecture.areaId as unknown as string,
+      );
+      // The property, stated without a magic number: what the row holds is
+      // what the aggregate counted.
+      expect(reloaded?.expectedVersion).toBe(loaded.version);
     });
 
     it('save refuses a stale write with StaleVersionError', async () => {

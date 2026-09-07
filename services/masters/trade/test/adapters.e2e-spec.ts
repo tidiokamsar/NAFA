@@ -249,12 +249,22 @@ describe('trade adapters (e2e)', () => {
 
       const first = await offers.findById(created.offerId as unknown as string);
       if (!first) return;
+      const beforeTwoMutations = first.version;
       expectOk(first.publish(deps), 'publish');
       expectOk(
         first.revisePrice(expectOk(money(520_000, 'GNF'), 'revise'), deps),
         'revise',
       );
+      // Two mutations before one save. This is where `increment: 1` was
+      // wrong: the row moved by one while the aggregate moved by two, and
+      // the assertion below is what the suite was missing.
+      expect(first.version).toBe(beforeTwoMutations + 2);
       await offers.save(first, first.expectedVersion);
+
+      const afterTwoMutations = await offers.findById(
+        created.offerId as unknown as string,
+      );
+      expect(afterTwoMutations?.expectedVersion).toBe(first.version);
 
       const second = await offers.findById(
         created.offerId as unknown as string,
