@@ -11,6 +11,7 @@ import {
   RedisHealthIndicator,
 } from '@nafa/platform';
 import { join } from 'node:path';
+import { ProductsApiModule } from './api/products/products-api.module';
 import { PrismaHealthIndicator } from './infrastructure/health/prisma-health.indicator';
 import { InfrastructureModule } from './infrastructure/infrastructure.module';
 
@@ -29,6 +30,7 @@ const REPO_ROOT = join(__dirname, '../../../..');
     PlatformThrottlerModule.forRoot(),
 
     InfrastructureModule,
+    ProductsApiModule,
 
     PlatformHealthModule.forRoot({
       imports: [InfrastructureModule],

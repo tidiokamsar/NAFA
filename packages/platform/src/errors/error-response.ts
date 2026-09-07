@@ -14,6 +14,15 @@ export class ErrorResponse {
 
   @ApiProperty({
     description:
+      'Stable machine-readable code when the failure came from the domain. ' +
+      'Absent for framework-level errors. Branch on this, never on `message`.',
+    example: 'BUSINESS_RULE_VIOLATION',
+    required: false,
+  })
+  code?: string;
+
+  @ApiProperty({
+    description:
       'Human-readable cause. An array when validation reports several.',
     oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
     example: 'email must be an email',

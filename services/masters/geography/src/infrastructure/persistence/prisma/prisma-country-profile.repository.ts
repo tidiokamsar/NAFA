@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '../../../generated/prisma/client';
-import { StaleVersionError, type Clock, type IdGenerator } from '@nafa/shared';
+// `Clock` and `IdGenerator` are imported as VALUES, not types. They are
+// abstract classes used as DI tokens, and a `type` import is erased at
+// compile time — `emitDecoratorMetadata` then records `Function` instead of
+// the class, and Nest has no token to resolve. The service still typechecks,
+// still builds, and fails only when something actually boots the module.
+// Nothing did until the first HTTP e2e (ADR-0014 §4).
+import { Clock, IdGenerator, StaleVersionError } from '@nafa/shared';
 import { CountryProfile, type CountryProfileRepository } from '@nafa/geography';
 import { PrismaService } from './prisma.service';
 import {
