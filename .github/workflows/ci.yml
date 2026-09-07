@@ -1,16 +1,22 @@
 name: CI
 
 on:
+  # Deliberately no `feature/**` here. A feature branch with an open pull
+  # request was matched by both triggers and ran the whole suite twice; the
+  # `pull_request` event already covers every branch on its way to main.
   push:
     branches:
       - main
-      - "feature/**"
   pull_request:
     branches:
       - main
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # The two events name the same branch differently: a push reports
+  # refs/heads/feature/x while its own pull request reports refs/pull/N/merge.
+  # Keying on `github.ref` therefore built two distinct groups that could never
+  # cancel each other. Both expressions below resolve to the source branch name.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
   cancel-in-progress: true
 
 env:
@@ -41,6 +47,17 @@ jobs:
 
       - run: corepack enable
 
+      - name: Locate the pnpm store
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
       - run: pnpm install --frozen-lockfile
 
       - name: Validate commit messages
@@ -61,6 +78,24 @@ jobs:
           node-version: 22
 
       - run: corepack enable
+
+      - name: Locate the pnpm store
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
+      - name: Cache the Nx computation cache
+        uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: nx-${{ runner.os }}-${{ github.sha }}
+          restore-keys: nx-${{ runner.os }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -83,6 +118,10 @@ jobs:
   integration:
     name: Integration (Postgres + Redis)
     runs-on: ubuntu-latest
+    env:
+      # Every project that owns a `test:e2e` target. Declared once and reused by
+      # both steps below, so a new service is one edit rather than two.
+      E2E_PROJECTS: "@nafa/iam,@nafa/geography-service,@nafa/products-service,@nafa/trade-service,@nafa/actor-service"
     services:
       postgres:
         image: postgres:17-alpine
@@ -115,14 +154,33 @@ jobs:
 
       - run: corepack enable
 
+      - name: Locate the pnpm store
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache the pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
+      - name: Cache the Nx computation cache
+        uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: nx-${{ runner.os }}-${{ github.sha }}
+          restore-keys: nx-${{ runner.os }}-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate Prisma client
-        run: pnpm --filter @nafa/database run db:generate
-
-      - name: Build @nafa/platform (iam imports it from dist)
-        run: pnpm --filter @nafa/platform run build
+      - name: Build the suites under test and their workspace dependencies
+        # The `build` target declares dependsOn ["^build", @nafa/database:db:generate],
+        # so this one command generates the Prisma client and puts every workspace
+        # package these suites import into dist/. It replaces a hand-listed
+        # "build @nafa/platform" step that covered IAM and nothing else.
+        run: pnpm exec nx run-many -t build -p "$E2E_PROJECTS"
 
       - name: Apply migrations
         run: pnpm --filter @nafa/iam run db:deploy
@@ -131,7 +189,16 @@ jobs:
         run: pnpm --filter @nafa/iam run db:seed
 
       - name: End-to-end tests against real Postgres and Redis
-        run: pnpm --filter @nafa/iam run test:e2e
+        # Only IAM's suite ran here before. The other four were unreachable from
+        # CI: the default `test` target pins Jest's rootDir to src/, so
+        # `nx run-many -t test` never sees test/*.e2e-spec.ts, and nothing
+        # invoked the `test:e2e` target that owns them. Five of the six e2e
+        # suites in this repository had never run outside a developer's machine.
+        #
+        # --parallel=1 is a correctness requirement, not tuning: every suite
+        # provisions, pushes the schema to, and truncates the same nafa_test
+        # database, so two running at once would clobber each other.
+        run: pnpm exec nx run-many -t test:e2e -p "$E2E_PROJECTS" --parallel=1
 
   infra-manifests:
     name: Helm chart, Kubernetes manifests, Compose
