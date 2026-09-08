@@ -19,6 +19,7 @@ vrai, et pourquoi on a changé d'avis, vaut autant que la décision elle-même.
 | [0010](0010-product-master-boundaries.md)                    | Frontières du Product Master                         | Acceptée |
 | [0011](0011-trade-master-boundaries.md)                      | Frontières du Trade Master                           | Acceptée |
 | [0012](0012-actor-persistence-boundaries.md)                 | Frontières de persistance du Master Actor            | Acceptée |
+| [0013](0013-outbox-table-and-transactional-write.md)         | Table Outbox et écriture transactionnelle            | Acceptée |
 
 ## Format
 

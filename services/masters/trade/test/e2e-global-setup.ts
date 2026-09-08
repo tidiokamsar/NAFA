@@ -1,12 +1,15 @@
 // Runs once, before any e2e worker starts. Makes the suite reproducible from
 // a bare Postgres: create the test database if it is missing, put the schema
-// in sync, and start from empty products table.
+// in sync, and start from empty offer and actor tables.
 //
 // Nothing here touches nafa_dev — e2e-env.ts refuses any database whose name
 // does not end in "_test", and this file only ever connects to that database
 // (plus the `postgres` maintenance database, to issue CREATE DATABASE).
-// nafa_test is # shared with IAM and geography e2e suites; disjoint
-// tables, and this truncate list names only the geography ones.
+// nafa_test is shared with the IAM, geography, products and actor e2e suites,
+// and their tables are not disjoint: every Masters suite truncates
+// outbox_events, and this one truncates actors, which the actor suite owns.
+// Two suites running at once would clear rows the other is still using, so
+// they have to run one at a time.
 import { execSync } from 'node:child_process';
 import { join } from 'node:path';
 import { Client } from 'pg';
@@ -59,7 +62,7 @@ async function truncateTestData(): Promise<void> {
     // actors too: since ACTOR-002 this suite seeds two of them for the real
     // SellerRegistry, and a run that dies before afterAll would leave rows
     // whose unique RCCM blocks the next one.
-    await client.query('TRUNCATE TABLE offers, actors CASCADE');
+    await client.query('TRUNCATE TABLE offers, actors, outbox_events CASCADE');
   } finally {
     await client.end();
   }

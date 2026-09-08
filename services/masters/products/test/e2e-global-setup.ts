@@ -5,8 +5,10 @@
 // Nothing here touches nafa_dev — e2e-env.ts refuses any database whose name
 // does not end in "_test", and this file only ever connects to that database
 // (plus the `postgres` maintenance database, to issue CREATE DATABASE).
-// nafa_test is # shared with IAM and geography e2e suites; disjoint
-// tables, and this truncate list names only the geography ones.
+// nafa_test is shared with the IAM, geography, actor and trade e2e suites, and
+// their tables are not disjoint: every Masters suite truncates outbox_events.
+// Two suites running at once would clear rows the other is still using, so
+// they have to run one at a time.
 import { execSync } from 'node:child_process';
 import { join } from 'node:path';
 import { Client } from 'pg';
@@ -56,7 +58,7 @@ async function truncateTestData(): Promise<void> {
   const client = new Client({ connectionString: E2E_DATABASE_URL });
   await client.connect();
   try {
-    await client.query('TRUNCATE TABLE products CASCADE');
+    await client.query('TRUNCATE TABLE products, outbox_events CASCADE');
   } finally {
     await client.end();
   }

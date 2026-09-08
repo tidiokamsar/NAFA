@@ -93,7 +93,9 @@ describe('products adapters (e2e)', () => {
       expect(loaded?.name.official).toBe('Fonio e2e');
       expect(loaded?.units).toHaveLength(2);
       expect(loaded?.units[1].factorToBase).toBe(50);
-      expect(loaded?.expectedVersion).toBe(1);
+      // Two events at registration — the factory creates then publishes —
+      // so the stored version is 2, not the number of saves (ADR-0012 §3).
+      expect(loaded?.expectedVersion).toBe(2);
     });
 
     it('findByName matches official names and aliases, case-insensitively', async () => {
@@ -191,6 +193,44 @@ describe('products adapters (e2e)', () => {
         holder?.productId as never,
       );
       expect(excludingSelf.ok).toBe(true);
+    });
+  });
+
+  // ------------------------------------------------------------------
+  // The outbox — the half of ADR-0008 that had no implementation
+  // ------------------------------------------------------------------
+
+  describe('the outbox', () => {
+    it('holds one row per event the aggregates emitted, unpublished', async () => {
+      const rows = await prisma.outboxEvent.findMany({
+        where: { aggregate: { in: ['Product'] } },
+      });
+
+      expect(rows.length).toBeGreaterThan(0);
+      // Unpublished is the queue: no relay has run, and one must still see
+      // every row here.
+      expect(rows.every((r) => r.publishedAt === null)).toBe(true);
+      expect(rows.every((r) => r.attempts === 0)).toBe(true);
+      // The row id IS the event id the domain generated, so a consumer
+      // deduplicates on it without a translation table.
+      expect(rows.every((r) => r.id.length === 36)).toBe(true);
+      // occurredAt comes from the domain clock, never from the write.
+      expect(rows.every((r) => r.occurredAt.includes('T'))).toBe(true);
+      expect(rows.some((r) => r.eventType.startsWith('product.'))).toBe(true);
+    });
+
+    it('never holds two rows for one aggregate version', async () => {
+      const rows = await prisma.outboxEvent.findMany({
+        where: { aggregate: { in: ['Product'] } },
+      });
+      const keys = rows.map(
+        (r) => `${r.aggregate}#${r.aggregateId}#${r.version}`,
+      );
+
+      // Enforced by a unique index rather than trusted: a repository that
+      // wrote the same drained buffer twice fails loudly here instead of
+      // duplicating the event downstream.
+      expect(new Set(keys).size).toBe(keys.length);
     });
   });
 });

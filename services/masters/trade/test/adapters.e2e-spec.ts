@@ -304,4 +304,42 @@ describe('trade adapters (e2e)', () => {
       expect(revived.pullEvents()).toHaveLength(0);
     });
   });
+
+  // ------------------------------------------------------------------
+  // The outbox — the half of ADR-0008 that had no implementation
+  // ------------------------------------------------------------------
+
+  describe('the outbox', () => {
+    it('holds one row per event the aggregates emitted, unpublished', async () => {
+      const rows = await prisma.outboxEvent.findMany({
+        where: { aggregate: { in: ['Offer'] } },
+      });
+
+      expect(rows.length).toBeGreaterThan(0);
+      // Unpublished is the queue: no relay has run, and one must still see
+      // every row here.
+      expect(rows.every((r) => r.publishedAt === null)).toBe(true);
+      expect(rows.every((r) => r.attempts === 0)).toBe(true);
+      // The row id IS the event id the domain generated, so a consumer
+      // deduplicates on it without a translation table.
+      expect(rows.every((r) => r.id.length === 36)).toBe(true);
+      // occurredAt comes from the domain clock, never from the write.
+      expect(rows.every((r) => r.occurredAt.includes('T'))).toBe(true);
+      expect(rows.some((r) => r.eventType.startsWith('offer.'))).toBe(true);
+    });
+
+    it('never holds two rows for one aggregate version', async () => {
+      const rows = await prisma.outboxEvent.findMany({
+        where: { aggregate: { in: ['Offer'] } },
+      });
+      const keys = rows.map(
+        (r) => `${r.aggregate}#${r.aggregateId}#${r.version}`,
+      );
+
+      // Enforced by a unique index rather than trusted: a repository that
+      // wrote the same drained buffer twice fails loudly here instead of
+      // duplicating the event downstream.
+      expect(new Set(keys).size).toBe(keys.length);
+    });
+  });
 });
