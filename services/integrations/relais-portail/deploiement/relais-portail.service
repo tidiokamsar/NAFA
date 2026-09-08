@@ -1,0 +1,68 @@
+# =================================================================
+#  Unité systemd du relais du portail AGEROUTE
+# =================================================================
+#  Installation :
+#    sudo cp relais-portail.service /etc/systemd/system/
+#    sudo install -d -o relais -g relais -m 750 /etc/relais-portail
+#    sudo install -o relais -g relais -m 600 .env /etc/relais-portail/env
+#    sudo systemctl daemon-reload
+#    sudo systemctl enable --now relais-portail
+#
+#  Le fichier d'environnement contient les URL des déclencheurs
+#  Power Automate et la clé partagée : mode 600, propriétaire du
+#  service uniquement (CDC §7.3).
+# =================================================================
+[Unit]
+Description=Relais du portail des opportunites AGEROUTE
+Documentation=https://github.com/tidiokamsar/NAFA/tree/main/services/integrations/relais-portail
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=relais
+Group=relais
+WorkingDirectory=/opt/relais-portail
+ExecStart=/usr/bin/node src/index.js
+EnvironmentFile=/etc/relais-portail/env
+
+Restart=always
+RestartSec=5s
+# Le service refuse de demarrer si la configuration est invalide :
+# on evite alors une boucle de redemarrage silencieuse.
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+# Arret gracieux : index.js ferme le serveur sur SIGTERM.
+KillSignal=SIGTERM
+TimeoutStopSec=20
+
+# ---------------- Durcissement ----------------
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+# Le service n'ecrit rien sur disque : aucun chemin en lecture-ecriture.
+ReadOnlyPaths=/opt/relais-portail
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=relais-portail
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+test/
+deploiement/
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+README.md
+Dockerfile
+.dockerignore

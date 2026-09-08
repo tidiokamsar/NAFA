@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGEROUTE Guinée — Portail public des opportunités</title>
+<meta name="description" content="Appels d'offres, dossiers de consultation et offres d'emploi de l'Agence de Gestion des Routes de Guinée.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20100%20100%27%3E%3Crect%20width%3D%27100%27%20height%3D%27100%27%20fill%3D%27%232B3A4C%27%2F%3E%3Cpath%20d%3D%27M50%2014%20L88%2090%20H26%20Z%27%20fill%3D%27%23F3B218%27%2F%3E%3Cpath%20d%3D%27M63%2036%20C48%2050%2039%2072%2035%2090%20L48%2090%20C52%2068%2060%2050%2070%2039%20Z%27%20fill%3D%27%23FFFFFF%27%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/portail.css">
+</head>
+<body>
+
+<a class="lien-evitement" href="#opportunites">Aller au contenu principal</a>
+
+<!-- Barre officielle -->
+<div class="topbar">
+  <div class="conteneur">
+    <span>
+      <span class="drapeau" aria-hidden="true"><i class="r"></i><i class="j"></i><i class="v"></i></span>
+      République de Guinée — Travail · Justice · Solidarité
+    </span>
+    <span>📞 +224 612 78 33 33 &nbsp;·&nbsp; <a href="mailto:contact@ageroute.gov.gn">contact@ageroute.gov.gn</a></span>
+  </div>
+</div>
+
+<!-- En-tête -->
+<header class="principal">
+  <div class="conteneur entete">
+    <a class="logo" href="#accueil" aria-label="AGEROUTE Guinée — accueil">
+      <span class="embleme" aria-hidden="true">
+        <svg viewBox="0 0 100 100" role="presentation" focusable="false">
+          <path d="M50 1 L99 99 H24 Z" fill="#2B3A4C"/>
+          <path d="M2 99 C 11 86 16 76 19 63 L 21 99 Z" fill="#F3B218"/>
+          <path d="M67 31 C 47 45 32 68 26 99 L 43 99 C 47 71 57 49 71 34 Z" fill="#FFFFFF"/>
+          <path d="M64 37 C 49 51 40 74 36 99" stroke="#2B3A4C" stroke-width="2.8"
+                stroke-dasharray="6 5" stroke-linecap="butt" fill="none"/>
+        </svg>
+      </span>
+      <span class="logo-texte">
+        <b><span class="age">AGE</span><span class="route-mot">ROUTE</span></b>
+        <span>Agence de Gestion des Routes — Guinée</span>
+      </span>
+    </a>
+    <button class="burger" id="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="menu">☰</button>
+    <nav class="menu" id="menu" aria-label="Navigation principale">
+      <a href="#accueil" class="actif">Accueil</a>
+      <a href="#opportunites" data-onglet="ao">Appels d'offres</a>
+      <a href="#opportunites" data-onglet="rh">Recrutement</a>
+      <a href="#actualites">Actualités</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<!-- Héros -->
+<section class="heros" id="accueil">
+  <div class="conteneur">
+    <span class="eyebrow">Portail public des opportunités</span>
+    <h1>Des routes pour relier la Guinée,<br>des opportunités ouvertes à tous.</h1>
+    <p class="sous">Consultez en toute transparence les appels d'offres, téléchargez les dossiers de consultation et postulez aux offres d'emploi de l'Agence de Gestion des Routes.</p>
+    <div class="services">
+      <div class="service">
+        <h2>🏗 Appels d'offres</h2>
+        <ul>
+          <li>Avis de marché et DAO téléchargeables</li>
+          <li>Additifs et clarifications</li>
+          <li>Résultats d'attribution publiés</li>
+        </ul>
+        <button class="bouton jaune" type="button" data-onglet="ao">Consulter les appels d'offres</button>
+      </div>
+      <div class="service">
+        <h2>👥 Recrutement</h2>
+        <ul>
+          <li>Offres d'emploi et avis de recrutement</li>
+          <li>Dépôt de candidature en ligne</li>
+          <li>Résultats des recrutements</li>
+        </ul>
+        <button class="bouton contour" type="button" data-onglet="rh">Voir les offres d'emploi</button>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="route" aria-hidden="true"></div>
+
+<!-- Bornes / tableau de bord -->
+<div class="bornes">
+  <div class="conteneur">
+    <div class="grille" role="list" aria-label="Chiffres clés">
+      <div class="borne" role="listitem"><div class="pk">PK 01</div><div class="valeur" data-cible="0">0</div><div class="libelle">Appels d'offres ouverts</div></div>
+      <div class="borne rouge" role="listitem"><div class="pk">PK 02</div><div class="valeur" data-cible="0">0</div><div class="libelle">Recrutements ouverts</div></div>
+      <div class="borne" role="listitem"><div class="pk">PK 03</div><div class="valeur" data-cible="0">0</div><div class="libelle">DAO disponibles</div></div>
+      <div class="borne jaune" role="listitem"><div class="pk">PK 04</div><div class="valeur" data-cible="0">0</div><div class="libelle">Clôtures cette semaine</div></div>
+      <div class="borne" role="listitem"><div class="pk">PK 05</div><div class="valeur" data-cible="0">0</div><div class="libelle">Marchés attribués</div></div>
+      <div class="borne rouge" role="listitem"><div class="pk">PK 06</div><div class="valeur" data-cible="0">0</div><div class="libelle">Recrutements terminés</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Opportunités -->
+<main>
+<section class="opportunites" id="opportunites">
+  <div class="conteneur">
+    <div class="titre-section">
+      <div>
+        <h2>Opportunités en cours</h2>
+        <p>Recherchez par référence, mot-clé, région, bailleur ou statut. Les documents (DAO, TDR) sont téléchargeables librement.</p>
+      </div>
+      <div class="onglets" role="tablist" aria-label="Type d'opportunité">
+        <button role="tab" type="button" id="tab-ao" aria-selected="true" aria-controls="liste-cartes" data-onglet="ao">🏗 Appels d'offres</button>
+        <button role="tab" type="button" id="tab-rh" aria-selected="false" aria-controls="liste-cartes" data-onglet="rh">👥 Recrutement</button>
+      </div>
+    </div>
+
+    <p class="bandeau-sync" id="bandeau-sync" role="status"></p>
+
+    <form class="recherche" id="recherche" aria-label="Recherche et filtres">
+      <input type="search" id="q" placeholder="Rechercher : référence, objet, poste…" aria-label="Rechercher">
+      <select id="f-region" aria-label="Filtrer par région">
+        <option value="">Toutes régions</option>
+        <option>Conakry</option><option>Kindia</option><option>Boké</option>
+        <option>Labé</option><option>Mamou</option><option>Faranah</option>
+        <option>Kankan</option><option>N'Zérékoré</option><option>National</option>
+      </select>
+      <select id="f-bailleur" aria-label="Filtrer par bailleur ou direction">
+        <option value="">Tous bailleurs / directions</option>
+        <option>Banque mondiale</option><option>BAD</option><option>BID</option>
+        <option>Union européenne</option><option>Budget national</option><option>Autre</option>
+        <option>Direction Générale</option><option>Direction Technique</option><option>DAF</option>
+        <option>Passation des Marchés</option><option>Ressources Humaines</option>
+        <option>Communication</option><option>DSI</option>
+      </select>
+      <select id="f-statut" aria-label="Filtrer par statut">
+        <option value="">Tous statuts</option>
+        <option value="ouvert">Ouvert</option>
+        <option value="bientot">Clôture proche</option>
+        <option value="cloture">Clôturé</option>
+        <option value="attribue">Attribué</option>
+      </select>
+      <button class="bouton bleu" type="submit">Rechercher</button>
+    </form>
+
+    <p class="hors-ecran" id="compte-resultats" aria-live="polite"></p>
+    <div class="cartes" id="liste-cartes"></div>
+  </div>
+</section>
+
+<!-- Actualités -->
+<section class="actus" id="actualites">
+  <div class="conteneur">
+    <div class="titre-section">
+      <div>
+        <h2>Dernières publications</h2>
+        <p>Avis, résultats et annonces officielles publiés par l'Agence, dans l'ordre de mise en ligne.</p>
+      </div>
+      <p class="aide" id="horodatage"></p>
+    </div>
+    <div class="liste" id="liste-actus"></div>
+
+    <div class="abonnement" id="bloc-abonnement">
+      <div>
+        <h3>Restez informé des nouvelles publications</h3>
+        <p>Recevez par courriel les nouveaux avis de marché et offres d'emploi dès leur mise en ligne.</p>
+      </div>
+      <form id="abo-formulaire">
+        <label class="hors-ecran" for="abo-courriel">Adresse électronique</label>
+        <input type="email" id="abo-courriel" required placeholder="Votre adresse électronique" autocomplete="email">
+        <label class="hors-ecran" for="abo-theme">Thème</label>
+        <select id="abo-theme">
+          <option value="Les deux">Avis de marché et recrutements</option>
+          <option value="AO">Avis de marché uniquement</option>
+          <option value="Recrutement">Recrutements uniquement</option>
+        </select>
+        <button class="bouton jaune" type="submit" id="abo-envoyer">S'abonner</button>
+        <p class="mention">
+          <label>
+            <input type="checkbox" id="abo-consentement">
+            J'accepte de recevoir les publications de l'AGEROUTE à cette adresse. Un lien de
+            désabonnement figure dans chaque message.
+          </label>
+        </p>
+        <p class="retour" id="abo-retour" role="status"></p>
+      </form>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="route" aria-hidden="true"></div>
+
+<!-- Pied de page -->
+<footer id="contact">
+  <div class="conteneur">
+    <div class="haut">
+      <div>
+        <h4>AGEROUTE Guinée</h4>
+        <p class="intro">Agence de Gestion des Routes — chargée de l'entretien, de la réhabilitation et du développement du réseau routier national.</p>
+      </div>
+      <div>
+        <h4>Appels d'offres</h4>
+        <ul>
+          <li><a href="#opportunites" data-onglet="ao">Avis de marché</a></li>
+          <li><a href="#opportunites" data-onglet="ao">DAO &amp; additifs</a></li>
+          <li><a href="#opportunites" data-onglet="ao">Attributions</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Recrutement</h4>
+        <ul>
+          <li><a href="#opportunites" data-onglet="rh">Offres d'emploi</a></li>
+          <li><a href="#opportunites" data-onglet="rh">Résultats</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul>
+          <li>Boulbinet — Villa 5, Kaloum</li>
+          <li>Conakry, République de Guinée</li>
+          <li>+224 612 78 33 33</li>
+          <li><a href="mailto:contact@ageroute.gov.gn">contact@ageroute.gov.gn</a></li>
+          <li>Lun.–Ven. · 8h00–17h00</li>
+        </ul>
+      </div>
+    </div>
+    <div class="bas">
+      <span>© 2026 AGEROUTE Guinée — Tous droits réservés</span>
+      <span>Mentions légales · Politique de confidentialité · Transparence des marchés publics</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Fenêtre de détails -->
+<dialog id="dlg" aria-labelledby="dlg-titre">
+  <div class="dlg-entete">
+    <h3 id="dlg-titre">Détails</h3>
+    <button type="button" data-action="fermer" aria-label="Fermer">✕</button>
+  </div>
+  <div class="dlg-corps">
+    <dl id="dlg-infos"></dl>
+    <p id="dlg-desc"></p>
+    <div class="actions" id="dlg-actions"></div>
+  </div>
+</dialog>
+
+<!-- Fenêtre de dépôt de candidature -->
+<dialog id="cand-dialogue" aria-labelledby="cand-titre">
+  <div class="dlg-entete">
+    <h3 id="cand-titre">Candidature</h3>
+    <button type="button" data-action="fermer" aria-label="Fermer">✕</button>
+  </div>
+  <div class="dlg-corps">
+    <p class="aide" id="cand-offre"></p>
+    <p class="message" id="cand-message" role="status"></p>
+
+    <form id="cand-formulaire" novalidate>
+      <div class="champs">
+        <div class="champ">
+          <label for="cand-nom">Nom <span class="obligatoire">*</span></label>
+          <input type="text" id="cand-nom" required autocomplete="family-name" maxlength="80">
+        </div>
+        <div class="champ">
+          <label for="cand-prenom">Prénom <span class="obligatoire">*</span></label>
+          <input type="text" id="cand-prenom" required autocomplete="given-name" maxlength="80">
+        </div>
+        <div class="champ">
+          <label for="cand-courriel">Adresse électronique <span class="obligatoire">*</span></label>
+          <input type="email" id="cand-courriel" required autocomplete="email" maxlength="120">
+        </div>
+        <div class="champ">
+          <label for="cand-telephone">Téléphone</label>
+          <input type="tel" id="cand-telephone" autocomplete="tel" maxlength="30" placeholder="+224 6xx xx xx xx">
+        </div>
+        <div class="champ pleine-largeur">
+          <label for="cand-pieces">Pièces du dossier <span class="obligatoire">*</span></label>
+          <input type="file" id="cand-pieces" multiple accept=".pdf,.docx,.jpg,.jpeg,.png">
+          <span class="aide">CV, lettre de motivation, diplômes et attestations. Formats acceptés :
+            PDF, DOCX, JPG, PNG — 10 Mo par fichier, 30 Mo au total.</span>
+          <ul class="liste-pieces" id="cand-liste-pieces"></ul>
+          <span class="aide" id="cand-total"></span>
+        </div>
+      </div>
+
+      <label class="consentement">
+        <input type="checkbox" id="cand-consentement">
+        <span>J'autorise l'AGEROUTE Guinée à traiter les données et les pièces transmises aux
+        seules fins de l'examen de ma candidature. Elles sont conservées 24 mois après la clôture
+        du recrutement, puis supprimées.</span>
+      </label>
+
+      <div class="actions">
+        <button class="bouton rouge" type="submit" id="cand-envoyer">Déposer ma candidature</button>
+        <button class="bouton contour" type="button" data-action="fermer">Annuler</button>
+      </div>
+    </form>
+
+    <div class="bloc-recu" id="cand-recu" hidden>
+      <p class="message visible succes">Votre candidature a bien été enregistrée.</p>
+      <p>Conservez votre numéro de dossier : il vous sera demandé pour tout échange avec l'Agence.</p>
+      <strong class="numero" id="cand-numero"></strong>
+      <p class="aide">Un accusé de réception vient de vous être adressé par courriel.</p>
+      <div class="actions centrees">
+        <button class="bouton bleu" type="button" data-action="fermer">Fermer</button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script src="assets/config.js"></script>
+<script src="assets/portail.js"></script>
+</body>
+</html>

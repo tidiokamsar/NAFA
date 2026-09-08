@@ -1,0 +1,100 @@
+# sharepoint / portail-opportunites
+
+Scripts PnP.PowerShell du back-office SharePoint Online du portail des opportunités de l'AGEROUTE Guinée.
+
+| Script | Rôle |
+|---|---|
+| `00-demarrage.ps1` | Démarrage assisté : installe le module, crée l'inscription d'application Entra ID, enchaîne le provisionnement. **Point d'entrée conseillé.** |
+| `01-provision-sharepoint.ps1` | Provisionne le site de gestion : jeux de termes, bibliothèques, listes typées, validations, indexation, groupes et permissions. **Idempotent.** |
+| `02-export-publication.ps1` | Extrait les contenus publiables et génère `data/opportunites.json` + la copie des documents publics pour le front. |
+| `03-jeu-essai.ps1` | Insère un jeu d'essai couvrant tous les états d'affichage. Recette uniquement, réversible par `-Supprimer`. |
+| `04-peupler-groupes.ps1` | Applique les habilitations décrites dans un CSV aux six groupes de sécurité. `-Etat` affiche les membres actuels. |
+| `05-recette-wf05.ps1` | Joue les essais du CDC §12.2 directement contre le déclencheur de WF-05. |
+| `06-preparer-publication.ps1` | Assemble le dossier prêt à déposer sur l'hébergement public. Consultation seule par défaut. |
+| `08-importer-archives.ps1` | Verse dans les listes les douze avis réels réunis dans `archives/`, et téléverse les six PDF officiels. `-Simulation` montre ce qui serait fait, `-Retirer` défait. |
+| `07-mise-en-service.ps1` | Enchaîne toute la chaîne en une commande : prérequis, provisionnement, groupes, export, assemblage, dépôt et planification. **Ce qu'il ne peut pas faire, il le dit et le récapitule à la fin.** |
+
+## Démarrage
+
+`07-mise-en-service.ps1` enchaîne tout le reste. Il s'arrête à chaque étape
+qu'il ne peut pas franchir seul, l'explique, et récapitule le reste à faire.
+
+```powershell
+# 1er passage — enregistre l'application Entra ID puis s'arrête :
+#    le jeton doit être réémis avant de continuer.
+./07-mise-en-service.ps1 -Tenant "ageroutegn"
+
+# 2e passage — recette complète avec le ClientId obtenu
+./07-mise-en-service.ps1 -Tenant "ageroutegn" -ClientId "<GUID>" `
+   -Habilitations ".\habilitations.csv"
+
+# Production autonome — la tâche planifiée republie toutes les 15 minutes
+./07-mise-en-service.ps1 -Tenant "ageroutegn" -Production `
+   -ClientId "<GUID>" -Thumbprint "<empreinte>" `
+   -Habilitations "C:\hab\habilitations.csv" -Sortie "C:\publication\www" `
+   -CommandeDepot 'scp -r -i C:\cles\portail C:\publication\www\* depot@102.211.199.131:/opt/portail-opportunites/www/' `
+   -SansJeuEssai -Planifier
+```
+
+Deux refus volontaires, plutôt qu'une automatisation qui casserait en silence :
+
+- **sans `-Thumbprint`, pas de planification.** Une tâche s'exécute sans
+  personne devant l'écran ; elle ne peut pas ouvrir de fenêtre de connexion.
+  En installer une qui échouerait tous les quarts d'heure serait pire que
+  de ne rien installer.
+- **sans `-CommandeDepot`, pas de planification** non plus : une tâche qui
+  exporte sans déposer ne nourrit pas le portail.
+
+Les scripts individuels restent utilisables un par un :
+
+```powershell
+./00-demarrage.ps1 -Tenant "ageroutegn"
+./00-demarrage.ps1 -Tenant "ageroutegn" -Production -ClientId "<GUID>"
+```
+
+Ces scripts s'exécutent depuis un poste de l'Agence : ils exigent une
+authentification interactive auprès d'Entra ID et le rôle Administrateur
+SharePoint. Aucun outil externe ne peut s'y substituer — voir
+`docs/cahier-des-charges/portail-opportunites/INSCRIPTION-APPLICATION-ENTRA-ID.md`.
+
+Prérequis : PowerShell 7 et `Install-Module PnP.PowerShell -Scope CurrentUser`.
+
+La procédure complète (ordre des phases, recette, mise en production) figure dans
+`docs/cahier-des-charges/portail-opportunites/GUIDE-DEPLOIEMENT.md`.
+
+## Script 01 — points notables
+
+- Crée les 4 listes (`Liste-AppelsOffres`, `Liste-Recrutements`, `Liste-Candidatures`, `Liste-Abonnes`) et les 7 bibliothèques.
+- Pose la colonne `ReferenceMarche` sur les bibliothèques documentaires (rattachement lu par WF-02) et `GelArchivage` sur les appels d'offres (WF-04 n'archive pas un dossier gelé).
+- **Indexe** les colonnes filtrées en OData par les flux : sans index, les requêtes des flux tombent sous la limite d'affichage de 5 000 éléments dès la deuxième année d'exploitation.
+- Impose l'**unicité** de `ReferenceAO`, `ReferenceRH`, `NumeroDossier` et `CourrielAbonne`.
+- Rompt l'héritage de permissions sur les candidatures (EXG-25) **et** sur la liste des abonnés, qui porte elle aussi des données personnelles.
+- Applique la validation du format des références au niveau du champ. La formule s'écrit avec le **nom d'affichage** de la colonne (`[Référence]`), pas son nom interne.
+
+`-ConserverPartageExterne` empêche le script de modifier le paramètre de partage de la collection, utile lorsque le site est provisionné dans un tenant mutualisé.
+
+## Script 02 — points notables
+
+- Lecture défensive : une date ou une URL vide écarte l'élément concerné au lieu d'interrompre tout l'export. Les éléments écartés sont comptés et journalisés.
+- Écriture **atomique** du JSON (fichier temporaire puis renommage) : le front ne peut pas lire un fichier à moitié écrit.
+- **Code de sortie** 0/1 et journal `journal-synchronisation.log` : ce sont les deux signaux du contrôle quotidien de cohérence (CDC §9.2) et de l'étape de vérification de WF-07.
+- Les descriptions en champ enrichi sont converties en texte brut (balises retirées, entités décodées).
+- Les candidatures ne sont **jamais** exportées : ni la liste, ni la bibliothèque ne sont dans le périmètre du script (EXG-25).
+
+```powershell
+# Exécution planifiée (production) — identité applicative par certificat
+./02-export-publication.ps1 `
+   -SiteUrl "https://ageroutegn.sharepoint.com/sites/AGR-PRT-Opportunites" `
+   -ClientId "<GUID>" -Thumbprint "<empreinte>" `
+   -Tenant "ageroutegn.onmicrosoft.com" -Sortie "C:\publication\www"
+
+# Export manuel de recette — connexion interactive, aucun certificat
+./02-export-publication.ps1 `
+   -SiteUrl "https://ageroutegn.sharepoint.com/sites/AGR-PRT-Opportunites-Recette" `
+   -ClientId "<GUID>" -Interactif -Sortie "C:\publication\recette"
+```
+
+`-Interactif` est réservé aux essais : l'exécution planifiée ne doit dépendre
+d'aucun compte nominatif (CDC §7.3).
+
+`-SansDocuments` limite l'export au JSON — utile pour un rafraîchissement rapide déclenché par WF-07 lorsque seuls des métadonnées ont changé.

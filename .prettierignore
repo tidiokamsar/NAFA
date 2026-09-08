@@ -12,3 +12,13 @@ database/migrations
 next-env.d.ts
 # Helm templates are Go templates, not valid YAML on their own.
 infrastructure/helm/**/templates
+# Portail AGEROUTE : arrivé avec sa propre chaîne, en JavaScript nu et sans
+# dépendance, comme `apps/web/ageroute` que pnpm-workspace.yaml traite déjà à
+# part. Le reformater noierait le code d'origine sous un diff mécanique sans
+# rien apprendre à personne. À retirer d'ici le jour où ces deux projets
+# rejoignent la chaîne TypeScript du dépôt.
+apps/web/portail-opportunites
+services/integrations/relais-portail
+docs/cahier-des-charges/portail-opportunites
+infrastructure/docker/portail-opportunites
+infrastructure/sharepoint/portail-opportunites

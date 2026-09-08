@@ -1,0 +1,166 @@
+{
+  "genereLe": "2026-08-05T00:00:00Z",
+  "source": "Archives publiques — avis AGEROUTE Guinée S.A. repris de leurs publications officielles (PDF signés) et de la presse guinéenne. Toutes les procédures ci-dessous sont closes. En cas d'écart, les pièces détenues par la Direction des Marchés et Contrats font foi.",
+  "stats": {
+    "aoOuverts": 0,
+    "rhOuverts": 0,
+    "daoDisponibles": 6,
+    "cloturesSemaine": 0,
+    "marchesAttribues": 0,
+    "recrutTermines": 6
+  },
+  "appelsOffres": [
+    {
+      "ref": "AOON N° 002T/DAO/AGEROUTE/DMC/2026",
+      "titre": "Travaux de construction et bitumage de routes en cinq (05) lots",
+      "desc": "Avis d'appel d'offres national clôturé. Lot 1 : aménagement de 8,7 km de voiries autour du camp Alpha Yaya Diallo et autres axes de Conakry. Lot 2 : aménagement de 6,30 km de voiries sur le même périmètre. Lot 3 : 1 830 ml de routes en béton bitumineux dans la voirie urbaine de Labé. Lot 4 : entretien mécanisé de la route N'zoo centre – Pora – Gaah sur 73,262 km et construction d'un pont en béton armé de 30 ml de long, 5 ml de hauteur et 7,50 ml de largeur au pk 9+000 sur le cours d'eau Cavally, CR de Guéasso, préfecture de Lola. Lot 5 : réhabilitation de la route préfectorale Koubia – Lougamme – Dile – Konah sur 25 km. Délai d'exécution : six (06) mois. Dossier d'appel d'offres : 3 000 000 GNF non remboursables, à compter du 5 avril 2026. Marge de préférence nationale de 15 %. Garantie de soumission de 1,5 % du montant TTC, valable 180 jours. Offres valables 150 jours. Ouverture des plis le 5 juin 2026 à 10h30 en salle de réunion de l'AGEROUTE. Signé par le Directeur Général, Moïse Sidibé. Avis n° 0692/MI/AGEROUTE/DGA/DMC/2026 du 6 mai 2026.",
+      "type": "Travaux",
+      "region": null,
+      "bailleur": "Budget AGEROUTE — exercice 2026",
+      "pub": "2026-05-06",
+      "cloture": "2026-06-05T10:00",
+      "statut": "Clôturé",
+      "dao": "documents/AvisMarches/AOON-002T-DAO-AGEROUTE-DMC-2026.pdf",
+      "resultat": null
+    },
+    {
+      "ref": "AOON N° 001T/DAO/AGEROUTE/DMC/2026",
+      "titre": "Travaux de construction et bitumage de routes en quatre (04) lots",
+      "desc": "Avis d'appel d'offres national clôturé. Lot 1 : travaux d'urgence de modernisation de la transversale T4 Sud, entre le carrefour de Sangoyah (autoroute Fidel Castro) et le rond-point ENCO 5 (Route Le Prince). Lot 2 : travaux d'urgence de modernisation de la transversale T4 Nord, entre le rond-point ENCO 5 et le carrefour de Lambangny (Corniche Nord, Hamdallaye – Sonfonia). Lot 3 : réparation des nids de poule, réfections localisées, point à temps et resurfaçage des voies de la cité des nations. Lot 4 : reprofilage d'une route d'accès de 7 km à Friguiyagbé et bitumage de 423 ml de voies dans la cour intérieure de l'hôpital régional de Kindia. Délai d'exécution : six (06) mois pour les lots 1, 3 et 4 ; douze (12) mois pour le lot 2. Dossier d'appel d'offres : 3 000 000 GNF non remboursables, à compter du 27 avril 2026. Marge de préférence nationale de 15 %. Garantie de soumission de 1,5 % du montant TTC, valable 150 jours. Ouverture des plis le 27 mai 2026 à 10h30. Signé par le Directeur Général Adjoint, Moussa Camara. Avis n° 0653/MI/AGEROUTE/DGA/DMC/2026 du 27 avril 2026.",
+      "type": "Travaux",
+      "region": null,
+      "bailleur": "Budget National de Développement (BND)",
+      "pub": "2026-04-27",
+      "cloture": "2026-05-27T10:00",
+      "statut": "Clôturé",
+      "dao": "documents/AvisMarches/AOON-001T-DAO-AGEROUTE-DMC-2026.pdf",
+      "resultat": null
+    },
+    {
+      "ref": "PV/AOON 001T/DAO/AGEROUTE/DMC/2026",
+      "titre": "Procès-verbal d'ouverture des plis — appel d'offres en quatre (04) lots",
+      "desc": "Procès-verbal de la séance publique d'ouverture des plis relative à l'appel d'offres ouvert n° 001T/DAO/AGEROUTE/DMC/2026, financé sur Budget National de Développement. Séance tenue le 2 juin 2026 en salle de réunion de la Direction Générale de l'AGEROUTE Guinée S.A., 1er étage de la Villa 05. Commission présidée par Mohamed Lamine Keita, Directeur des Marchés et Contrats, rapporteur Alpha Ibrahima Diallo, en présence de deux observateurs de la DGCMP. Plis reçus dans les délais : 5 pour le lot 1, 5 pour le lot 2, 1 pour le lot 3 et 9 pour le lot 4. Ce document est le compte rendu d'ouverture ; il ne vaut pas décision d'attribution.",
+      "type": "Résultat",
+      "region": null,
+      "bailleur": "Budget National de Développement (BND)",
+      "pub": "2026-06-02",
+      "cloture": "2026-06-02T10:30",
+      "statut": "Clôturé",
+      "dao": null,
+      "resultat": null
+    },
+    {
+      "ref": "Relance AO — Siguiri (30 km)",
+      "titre": "Construction et bitumage de 30 km de route en béton bitumineux à Siguiri",
+      "desc": "Relance d'un appel d'offres ouvert pour la construction et le bitumage de 30 kilomètres de route en béton bitumineux dans la commune urbaine de Siguiri, région de Kankan. Opération inscrite au programme d'investissement de l'exercice budgétaire 2025 du Ministère des Infrastructures et des Travaux Publics, exécutée par l'AGEROUTE Guinée S.A. La date limite de dépôt et la référence complète de l'avis ne figurent pas dans la source consultée : elles sont à demander à la Direction des Marchés et Contrats.",
+      "type": "Travaux",
+      "region": "Kankan",
+      "bailleur": "Budget National de Développement (BND)",
+      "pub": "2025-10-22",
+      "cloture": null,
+      "statut": "Archivé",
+      "dao": null,
+      "resultat": null
+    },
+    {
+      "ref": "AMI N° 0764/MITP/AGEROUTE/DGA/DMC/2023",
+      "titre": "Sélection d'un consultant pour l'élaboration du manuel de gestion administrative, comptable et financière",
+      "desc": "Avis d'appel à manifestation d'intérêt clôturé, pour la sélection d'un consultant chargé d'élaborer un manuel de gestion administrative, comptable et financière ainsi que les procédures techniques adaptées aux activités de l'AGEROUTE Guinée S.A. Prestations attendues : manuel de gestion et de contrôle des marchés ; manuel de gestion et de contrôle des dépenses ; manuel de gestion et de contrôle des projets ; manuel de gestion des données techniques ; manuel de gestion administrative. Les candidats devaient présenter leurs références en dix pages au plus et pouvaient s'associer. Liste restreinte limitée à six (06) candidats. Avis établi à Conakry le 10 octobre 2023.",
+      "type": "Services",
+      "region": null,
+      "bailleur": "Budget AGEROUTE — exercice 2023",
+      "pub": "2023-10-16",
+      "cloture": "2023-11-02T00:00",
+      "statut": "Clôturé",
+      "dao": null,
+      "resultat": null
+    },
+    {
+      "ref": "AAO N° 001/DMC/DG/2022",
+      "titre": "Accord-cadre — travaux d'urgence relatifs aux routes et ouvrages",
+      "desc": "Appel d'offres ouvert clôturé, pour la constitution d'une base de données d'entreprises et de cabinets spécialisés dans la réalisation des études et des travaux en accord-cadre, conformément à l'article 47 du Code des Marchés Publics, pour une durée de deux (02) ans. L'avis portait exclusivement sur les travaux d'urgence relatifs aux routes et ouvrages — ouvrages d'art, hydrauliques et assainissement — nécessitant une intervention rapide de l'État. Qualifications exigées : capacité de mobilisation des financements, assise financière de 10 milliards GNF pour les entreprises de travaux, expérience avérée sur des travaux similaires aux normes internationales, capacité à mobiliser un personnel de qualité. Offres en quatre (04) exemplaires, dont un original. Ouverture des plis le 13 janvier 2023 à 10h30, en présence de la DNCMP et d'un observateur indépendant de l'ARMP. Offres engageantes pendant 90 jours.",
+      "type": "Travaux",
+      "region": null,
+      "bailleur": "Budget AGEROUTE",
+      "pub": "2022-12-12",
+      "cloture": "2023-01-13T10:00",
+      "statut": "Clôturé",
+      "dao": null,
+      "resultat": null
+    }
+  ],
+  "recrutements": [
+    {
+      "ref": "N° 1227(bis)/MI/AGEROUTE/DGA/DACH/2026",
+      "titre": "Ingénieur homologue en génie civil, génie rural ou discipline équivalente — six (06) postes",
+      "desc": "Appel à candidatures lancé dans le cadre des projets routiers financés par la Banque Islamique de Développement et la Banque Africaine de Développement, pour renforcer le suivi technique des Unités de Gestion des Projets. Statut : personnel national de droit guinéen. Lieu : sites des projets routiers concernés, avec missions éventuelles à Conakry. Contrat : CDD de 12 mois renouvelable. Prise de fonction prévue le 10 août 2026. Rattachement au Coordonnateur de l'UGP, supervision technique par le Chef de Projet / DTIR. Profil : diplôme d'ingénieur BAC+4 minimum en génie civil, génie rural ou équivalent ; au moins trois (3) ans d'expérience en réalisation, études ou supervision de travaux routiers ; bonne connaissance des normes, méthodes de contrôle et procédures de métrés ; maîtrise de Microsoft Office, AutoCAD ou Civil 3D appréciée ; la connaissance des exigences BID/BAD constitue un atout. Dossier en un seul PDF nommé NOM_PRENOMS_Ingenieur_Homologue_BID/BAD, à recrutement@ageroute.gov.gn. Les ingénieurs homologues ne disposent d'aucun pouvoir d'approbation, de validation, d'engagement ou de signature. La date limite de dépôt n'est pas fixée dans cet avis : elle devait être précisée dans l'avis définitif. Signé à Conakry le 17 juillet 2026 par le Directeur Général.",
+      "type": "CDD 12 mois",
+      "direction": "UGP BID/BAD",
+      "lieu": "Sites des projets routiers",
+      "pub": "2026-07-17",
+      "cloture": null,
+      "statut": "Archivé",
+      "tdr": "documents/RecrutementTDR/Ingenieurs-homologues-UGP-BID-BAD-2026.pdf"
+    },
+    {
+      "ref": "N° 1229(bis)/MI/AGEROUTE/DGA/DACH/2026",
+      "titre": "Assistant en passation des marchés — quatre (04) postes",
+      "desc": "Appel à candidatures lancé face à l'augmentation du portefeuille et du volume des activités de passation des marchés des Unités de Gestion des Projets financés par la BID et la BAD. Statut : personnel national de droit guinéen. Lieu : Conakry, avec déplacements éventuels sur les sites des projets. Contrat : CDD de 12 mois renouvelable. Prise de fonction prévue le 10 août 2026. Rattachement au Coordonnateur de l'UGP, supervision technique directe par le Spécialiste en passation des marchés. Mission : appuyer la planification, la préparation, le suivi et l'archivage des procédures de passation des marchés. Les assistants n'exercent aucun pouvoir d'approbation, de validation, d'engagement ou de signature. Signé à Conakry le 17 juillet 2026.",
+      "type": "CDD 12 mois",
+      "direction": "UGP BID/BAD",
+      "lieu": "Conakry",
+      "pub": "2026-07-17",
+      "cloture": null,
+      "statut": "Archivé",
+      "tdr": "documents/RecrutementTDR/Assistants-passation-marches-UGP-BID-BAD-2026.pdf"
+    },
+    {
+      "ref": "RH/2025/COORD",
+      "titre": "Coordonnateur de Projets Routiers — cinq (05) postes",
+      "desc": "Termes de référence publiés dans le cadre du renforcement du dispositif de suivi, de coordination et de contrôle de l'exécution des projets routiers sur l'ensemble du territoire national. L'AGEROUTE Guinée S.A. intervient comme maître d'ouvrage délégué du Ministère des Infrastructures et des Travaux Publics. Le détail des missions, du profil et des modalités de dépôt figure dans les termes de référence joints.",
+      "type": "Contrat de projet",
+      "direction": "Direction Générale",
+      "lieu": "Territoire national",
+      "pub": "2025-07-08",
+      "cloture": null,
+      "statut": "Archivé",
+      "tdr": "documents/RecrutementTDR/Coordonnateurs-projets-routiers-2025.pdf"
+    },
+    {
+      "ref": "N° 675 — poste 1",
+      "titre": "Directeur des Marchés et Contrats",
+      "desc": "Poste ouvert à l'interne et à l'externe dans le cadre du renforcement des structures organisationnelles et de l'opérationnalisation du cadre organique de l'AGEROUTE Guinée S.A. Responsabilités : pilotage du processus de passation et de gestion des marchés (travaux, fournitures, services) ; suivi de la conformité des procédures ; bonne exécution des contrats. Dossier en un seul PDF comportant une lettre de motivation adressée au Directeur Général, un curriculum vitae détaillé avec trois références professionnelles vérifiables, et les copies des diplômes et attestations, à transmettre à recrutement2025@ageroute.gov.gn. Les candidatures féminines étaient fortement encouragées. Avis établi à Conakry le 23 septembre 2025.",
+      "type": "Cadre de direction",
+      "direction": "Direction des Marchés et Contrats",
+      "lieu": "Conakry",
+      "pub": "2025-09-23",
+      "cloture": "2025-10-10T17:00",
+      "statut": "Clôturé",
+      "tdr": "documents/RecrutementTDR/Avis-recrutement-personnel-cle-2025.pdf"
+    },
+    {
+      "ref": "N° 675 — poste 4",
+      "titre": "Directeur des Travaux d'Investissements Routiers",
+      "desc": "Poste ouvert à l'interne et à l'externe dans le cadre du renforcement des structures organisationnelles de l'AGEROUTE Guinée S.A. Responsabilités : pilotage des projets de construction des routes nationales, des routes préfectorales et des voiries urbaines. Dossier en un seul PDF comportant une lettre de motivation adressée au Directeur Général, un curriculum vitae détaillé avec trois références professionnelles vérifiables, et les copies des diplômes et attestations, à transmettre à recrutement2025@ageroute.gov.gn. Avis établi à Conakry le 23 septembre 2025.",
+      "type": "Cadre de direction",
+      "direction": "Direction des Travaux d'Investissements Routiers",
+      "lieu": "Conakry",
+      "pub": "2025-09-23",
+      "cloture": "2025-10-10T17:00",
+      "statut": "Clôturé",
+      "tdr": "documents/RecrutementTDR/Avis-recrutement-personnel-cle-2025.pdf"
+    },
+    {
+      "ref": "N° 675 — poste 6",
+      "titre": "Contrôleur de Gestion",
+      "desc": "Poste ouvert à l'interne et à l'externe dans le cadre du renforcement des structures organisationnelles de l'AGEROUTE Guinée S.A. Responsabilités : suivi budgétaire, analyse des coûts, élaboration des tableaux de bord financiers, reporting financier. Dossier en un seul PDF comportant une lettre de motivation adressée au Directeur Général, un curriculum vitae détaillé avec trois références professionnelles vérifiables, et les copies des diplômes et attestations, à transmettre à recrutement2025@ageroute.gov.gn. Avis établi à Conakry le 23 septembre 2025.",
+      "type": "Cadre",
+      "direction": "Direction Générale",
+      "lieu": "Conakry",
+      "pub": "2025-09-23",
+      "cloture": "2025-10-10T17:00",
+      "statut": "Clôturé",
+      "tdr": "documents/RecrutementTDR/Avis-recrutement-personnel-cle-2025.pdf"
+    }
+  ]
+}

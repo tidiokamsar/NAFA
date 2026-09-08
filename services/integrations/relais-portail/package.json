@@ -1,0 +1,14 @@
+{
+  "name": "@nafa/relais-portail",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AGEROUTE Guinée — relais sécurisé entre le portail public et les flux Power Automate (WF-05, WF-08)",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

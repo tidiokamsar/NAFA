@@ -1,0 +1,115 @@
+# =================================================================
+#  Portail des opportunités AGEROUTE — déploiement derrière Traefik
+# =================================================================
+#  Variante pour les serveurs dont le routeur de bord est Traefik.
+#  Les certificats sont obtenus par le résolveur ACME de Traefik :
+#  ni certbot, ni hôte virtuel nginx à installer.
+#
+#  PRÉREQUIS sur le serveur
+#    - Traefik en service, avec un point d'entrée « websecure » sur
+#      443 et un résolveur ACME (adapter les noms plus bas si les
+#      vôtres diffèrent : voir traefik.yml ou la ligne de commande
+#      du conteneur Traefik) ;
+#    - un réseau Docker partagé avec Traefik, nommé ici « traefik » ;
+#    - les fichiers du site déposés dans /var/www/opportunites.
+#
+#  MISE EN SERVICE
+#    docker compose up -d portail
+#
+#  Le relais de candidature n'est démarré que lorsque le flux WF-05
+#  est en service :
+#    docker compose --profile candidatures up -d
+# =================================================================
+
+services:
+
+  # ---------------------------------------------------------------
+  # Site public — contenu statique produit par 06-preparer-publication.ps1
+  # ---------------------------------------------------------------
+  portail:
+    image: nginx:alpine
+    container_name: portail-opportunites
+    restart: unless-stopped
+    volumes:
+      # Lecture seule : le conteneur n'a aucune raison d'écrire dans
+      # le contenu publié.
+      - /var/www/opportunites:/usr/share/nginx/html:ro
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${RESEAU_TRAEFIK:-traefik}"
+
+      - "traefik.http.routers.portail.rule=Host(`opportunites.ageroute.gov.gn`)"
+      - "traefik.http.routers.portail.entrypoints=websecure"
+      - "traefik.http.routers.portail.tls=true"
+      - "traefik.http.routers.portail.tls.certresolver=${CERTRESOLVER:-letsencrypt}"
+      - "traefik.http.routers.portail.middlewares=portail-entetes@docker"
+      - "traefik.http.services.portail.loadbalancer.server.port=80"
+
+      # Redirection HTTP vers HTTPS, si Traefik ne l'applique pas
+      # déjà globalement.
+      - "traefik.http.routers.portail-http.rule=Host(`opportunites.ageroute.gov.gn`)"
+      - "traefik.http.routers.portail-http.entrypoints=web"
+      - "traefik.http.routers.portail-http.middlewares=portail-https@docker"
+      - "traefik.http.middlewares.portail-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.portail-https.redirectscheme.permanent=true"
+
+      # En-têtes de sécurité. La CSP est celle du mode consultation
+      # seule : le site ne charge que ses propres ressources et les
+      # polices Google. Ajouter les domaines du CAPTCHA le jour où le
+      # dépôt de candidature est ouvert (voir nginx-opportunites.conf
+      # pour la version complète).
+      - "traefik.http.middlewares.portail-entetes.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.portail-entetes.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.portail-entetes.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.portail-entetes.headers.frameDeny=true"
+      - "traefik.http.middlewares.portail-entetes.headers.referrerPolicy=strict-origin-when-cross-origin"
+      - "traefik.http.middlewares.portail-entetes.headers.customResponseHeaders.Content-Security-Policy=default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'"
+      - "traefik.http.middlewares.portail-entetes.headers.customResponseHeaders.Permissions-Policy=geolocation=(), microphone=(), camera=(), interest-cohort=()"
+
+  # ---------------------------------------------------------------
+  # Relais de candidature — profil « candidatures »
+  # ---------------------------------------------------------------
+  #  À n'activer qu'une fois le flux WF-05 en service et le fichier
+  #  d'environnement renseigné. Tant qu'il est arrêté, le portail
+  #  reste en consultation seule et masque le bouton « Postuler ».
+  relais:
+    build:
+      context: ../../../services/integrations/relais-portail
+    container_name: relais-portail
+    restart: unless-stopped
+    profiles:
+      - candidatures
+    env_file:
+      # Mode 600, propriétaire root. Contient les URL des
+      # déclencheurs Power Automate et la clé partagée (CDC §7.3).
+      - /etc/relais-portail/env
+    environment:
+      # Traefik est le proxy de confiance : sans cela, la limitation
+      # de débit compterait toutes les requêtes sur son adresse.
+      PROXY_DE_CONFIANCE: "true"
+      PORT: "8080"
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${RESEAU_TRAEFIK:-traefik}"
+      - "traefik.http.routers.relais.rule=Host(`opportunites.ageroute.gov.gn`) && PathPrefix(`/api/`)"
+      - "traefik.http.routers.relais.entrypoints=websecure"
+      - "traefik.http.routers.relais.tls=true"
+      - "traefik.http.routers.relais.tls.certresolver=${CERTRESOLVER:-letsencrypt}"
+      # Priorité supérieure à celle du site : /api/ doit gagner sur la
+      # règle Host seule, qui sert tout le reste.
+      - "traefik.http.routers.relais.priority=10"
+      - "traefik.http.services.relais.loadbalancer.server.port=8080"
+
+      # Un dossier de 30 Mo encodé en base64 pèse environ 41 Mo.
+      - "traefik.http.middlewares.relais-taille.buffering.maxRequestBodyBytes=50000000"
+      - "traefik.http.middlewares.relais-taille.buffering.memRequestBodyBytes=2000000"
+      - "traefik.http.routers.relais.middlewares=relais-taille@docker"
+
+networks:
+  traefik:
+    external: true
+    name: ${RESEAU_TRAEFIK:-traefik}

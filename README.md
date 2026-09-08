@@ -106,7 +106,7 @@ NAFA/
 │   ├── platform/       # socle NestJS partagé (config, logs, santé, erreurs, cache, télémétrie)
 │   └── ...             # design-system, ui, auth, workflow, ...
 ├── database/           # schéma Prisma, migrations, seed, scripts
-├── infrastructure/     # docker, kubernetes, helm, terraform, monitoring, security
+├── infrastructure/     # docker, kubernetes, helm, terraform, monitoring, security, sharepoint
 ├── docs/               # documentation projet
 ├── prompts/            # prompts des fonctionnalités IA
 ├── tests/              # tests transverses
@@ -114,6 +114,28 @@ NAFA/
 ```
 
 Chaque dossier contient un `README.md` décrivant son rôle.
+
+## Portail des opportunités AGEROUTE
+
+Premier composant applicatif livré. Portail public des appels d'offres et des
+recrutements de l'AGEROUTE Guinée, adossé à un back-office SharePoint Online
+et à des flux Power Automate.
+
+| Composant                                      | Emplacement                                       |
+| ---------------------------------------------- | ------------------------------------------------- |
+| Front public (statique, sans build)            | `apps/web/portail-opportunites/`                  |
+| Relais sécurisé candidatures / abonnements     | `services/integrations/relais-portail/`           |
+| Provisioning et publication SharePoint         | `infrastructure/sharepoint/portail-opportunites/` |
+| Guide de déploiement et spécification des flux | `docs/cahier-des-charges/portail-opportunites/`   |
+
+Le guide de déploiement décrit l'ensemble de la procédure, de la création du
+site SharePoint à la recette. Les deux composants Node fonctionnent sans
+dépendance externe :
+
+```bash
+cd services/integrations/relais-portail && npm test   # contrôles serveur et relais
+cd apps/web/portail-opportunites && npm run demo && npm run dev
+```
 
 ## Documentation
 
