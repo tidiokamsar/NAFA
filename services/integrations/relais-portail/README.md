@@ -35,12 +35,16 @@ Un refus **métier** du flux (4xx) est retransmis tel quel au candidat ; une err
 ```bash
 cp .env.example .env    # puis renseigner les valeurs issues du coffre
 npm start
-npm test                # 37 tests, sans réseau
+npm test                # 44 tests, sans réseau
 ```
 
 La suite comprend un test de bout en bout (`test/bout-en-bout.test.js`) qui démarre le vrai point d'entrée devant un faux déclencheur Power Automate et sert le vrai front : il couvre le démarrage, la configuration, le service des fichiers statiques, la CSP, le dépôt de candidature et le refus d'une offre clôturée.
 
-Le service refuse de démarrer si `URL_FLUX_CANDIDATURES` manque, ou si un fournisseur CAPTCHA est déclaré sans secret. Les fonctions non configurées (abonnements par exemple) répondent proprement `503` au lieu de tomber en erreur.
+Le service refuse de démarrer si `URL_FLUX_CANDIDATURES` manque, si un fournisseur CAPTCHA est déclaré sans secret, ou s'il n'y a **aucun** CAPTCHA sans que personne l'ait assumé.
+
+Ce dernier point mérite d'être dit : `CAPTCHA_FOURNISSEUR` vaut `aucun` par défaut, parce qu'une recette n'a pas de clé à donner. Sans garde, ce même défaut faisait servir un formulaire public sans protection à quiconque oubliait la variable, et la seule trace en était une ligne de journal. Tourner sans CAPTCHA se demande donc explicitement, par `AUTORISER_SANS_CAPTCHA=true` — et le service continue de le signaler au démarrage.
+
+Les fonctions non configurées (abonnements par exemple) répondent proprement `503` au lieu de tomber en erreur.
 
 ## Déploiement
 

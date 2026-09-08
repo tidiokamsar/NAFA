@@ -49,7 +49,13 @@ const config = {
   captcha: {
     fournisseur: texte('CAPTCHA_FOURNISSEUR', 'aucun').toLowerCase(),
     secret: texte('CAPTCHA_SECRET'),
-    delaiMs: nombre('CAPTCHA_DELAI_MS', 8000)
+    delaiMs: nombre('CAPTCHA_DELAI_MS', 8000),
+    /* Tourner sans CAPTCHA se demande, ça ne se subit pas. Le défaut
+       du fournisseur est « aucun » parce qu'une recette n'a pas de clé
+       à donner ; sans cette autorisation explicite, ce même défaut
+       ferait servir un formulaire public sans protection à qui oublie
+       la variable. */
+    desactivationAutorisee: booleen('AUTORISER_SANS_CAPTCHA', false)
   },
 
   /* Catalogue publié : sert au contrôle d'existence et de clôture
@@ -99,6 +105,17 @@ function verifier(cfg = config) {
   if (!['turnstile', 'recaptcha', 'hcaptcha', 'aucun'].includes(cfg.captcha.fournisseur)) {
     anomalies.push(`CAPTCHA_FOURNISSEUR inconnu : ${cfg.captcha.fournisseur}.`);
   }
+  if (cfg.captcha.fournisseur === 'aucun' && !cfg.captcha.desactivationAutorisee) {
+    /* Fatal, et non un simple avertissement. Un déploiement qui oublie
+       CAPTCHA_FOURNISSEUR ouvrait un formulaire public sans protection,
+       et la seule trace en était une ligne de journal que personne ne
+       lit après coup. Refuser de démarrer met le choix devant celui qui
+       déploie, au moment où il peut encore le corriger. */
+    anomalies.push(
+      'CAPTCHA désactivé sans autorisation : renseignez CAPTCHA_FOURNISSEUR, ' +
+        'ou AUTORISER_SANS_CAPTCHA=true pour l\'assumer en recette.'
+    );
+  }
   if (cfg.depot.tailleMaxFichierOctets > cfg.depot.tailleMaxTotalOctets) {
     anomalies.push('TAILLE_MAX_FICHIER_MO ne peut pas dépasser TAILLE_MAX_TOTAL_MO.');
   }
@@ -113,7 +130,7 @@ function avertissements(cfg = config) {
   if (!cfg.flux.confirmation) messages.push('URL_FLUX_CONFIRMATION absente : les confirmations seront refusées (503).');
   if (!cfg.flux.desabonnement) messages.push('URL_FLUX_DESABONNEMENT absente : les désabonnements seront refusés (503).');
   if (!cfg.clePartagee) messages.push('CLE_PARTAGEE absente : les appels aux flux ne seront pas signés.');
-  if (cfg.captcha.fournisseur === 'aucun') messages.push('CAPTCHA désactivé : à ne pas laisser en production.');
+  if (cfg.captcha.fournisseur === 'aucun') messages.push('CAPTCHA désactivé, et assumé par AUTORISER_SANS_CAPTCHA : à ne pas laisser en production.');
   if (!cfg.catalogue.source) messages.push('SOURCE_CATALOGUE absente : le contrôle de clôture repose uniquement sur WF-05.');
   return messages;
 }

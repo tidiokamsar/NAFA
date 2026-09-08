@@ -78,6 +78,10 @@ test('parcours complet : front servi et candidature relayée', async (t) => {
       URL_FLUX_ABONNEMENT: `http://127.0.0.1:${portFlux}/wf08a`,
       CLE_PARTAGEE: 'cle-de-test',
       CAPTCHA_FOURNISSEUR: 'aucun',
+      // Le relais refuse désormais de démarrer sans CAPTCHA tant que
+      // personne ne l'assume. Un test de bout en bout est précisément
+      // le cas où on l'assume.
+      AUTORISER_SANS_CAPTCHA: 'true',
       SOURCE_CATALOGUE: catalogue,
       RACINE_STATIQUE: FRONT
     }),

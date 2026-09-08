@@ -336,6 +336,7 @@ cd services/integrations/relais-portail
 URL_FLUX_CANDIDATURES="<url du declencheur>" \
 CLE_PARTAGEE="<cle du coffre>" \
 CAPTCHA_FOURNISSEUR=aucun \
+AUTORISER_SANS_CAPTCHA=true \
 SOURCE_CATALOGUE=../../../apps/web/portail-opportunites/public/data/opportunites.json \
 RACINE_STATIQUE=../../../apps/web/portail-opportunites/public \
 npm start

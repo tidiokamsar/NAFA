@@ -95,6 +95,7 @@ jobs:
           docker run -d --name relais -p 8080:8080 \
             -e URL_FLUX_CANDIDATURES=https://exemple.invalid/wf05 \
             -e CAPTCHA_FOURNISSEUR=aucun \
+            -e AUTORISER_SANS_CAPTCHA=true \
             relais-portail:${{ github.sha }}
           for i in $(seq 1 30); do
             if curl -sf http://127.0.0.1:8080/api/sante > /dev/null; then
