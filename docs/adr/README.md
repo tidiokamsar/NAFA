@@ -20,6 +20,8 @@ vrai, et pourquoi on a changé d'avis, vaut autant que la décision elle-même.
 | [0011](0011-trade-master-boundaries.md)                      | Frontières du Trade Master                           | Acceptée |
 | [0012](0012-actor-persistence-boundaries.md)                 | Frontières de persistance du Master Actor            | Acceptée |
 | [0013](0013-outbox-table-and-transactional-write.md)         | Table Outbox et écriture transactionnelle            | Acceptée |
+| [0014](0014-masters-read-api.md)                             | API de lecture des Masters de référence              | Acceptée |
+| [0015](0015-outbox-relay-and-retry-policy.md)                | Relais d'Outbox et politique de reprise              | Acceptée |
 
 ## Format
 
