@@ -12,6 +12,12 @@ database/migrations
 next-env.d.ts
 # Helm templates are Go templates, not valid YAML on their own.
 infrastructure/helm/**/templates
+# Prettier infers `jsonc` from the extension, so `trailingComma: "all"` applies
+# and it wants to add trailing commas. The file carries no comments and parses
+# as strict JSON today; accepting that edit would trade "any JSON tool can read
+# it" for a style rule, and VS Code is equally happy either way. This is the
+# only file in the repository where formatting it would make it less portable.
+nafa.code-workspace
 # Portail AGEROUTE : arrivé avec sa propre chaîne, en JavaScript nu et sans
 # dépendance, comme `apps/web/ageroute` que pnpm-workspace.yaml traite déjà à
 # part. Le reformater noierait le code d'origine sous un diff mécanique sans
