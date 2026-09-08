@@ -22,6 +22,7 @@ vrai, et pourquoi on a changé d'avis, vaut autant que la décision elle-même.
 | [0013](0013-outbox-table-and-transactional-write.md)         | Table Outbox et écriture transactionnelle            | Acceptée |
 | [0014](0014-masters-read-api.md)                             | API de lecture des Masters de référence              | Acceptée |
 | [0015](0015-outbox-relay-and-retry-policy.md)                | Relais d'Outbox et politique de reprise              | Acceptée |
+| [0016](0016-outbox-transport-kafka.md)                       | Transport de l'Outbox : Kafka via Redpanda           | Acceptée |
 
 ## Format
 
