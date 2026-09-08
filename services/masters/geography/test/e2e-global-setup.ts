@@ -5,8 +5,10 @@
 // Nothing here touches nafa_dev — e2e-env.ts refuses any database whose name
 // does not end in "_test", and this file only ever connects to that database
 // (plus the `postgres` maintenance database, to issue CREATE DATABASE).
-// nafa_test is shared with IAM's e2e suite; the two suites touch disjoint
-// tables, and this truncate list names only the geography ones.
+// nafa_test is shared with the IAM, actor, products and trade e2e suites, and
+// their tables are not disjoint: every Masters suite truncates outbox_events.
+// Two suites running at once would clear rows the other is still using, so
+// they have to run one at a time.
 import { execSync } from 'node:child_process';
 import { join } from 'node:path';
 import { Client } from 'pg';
