@@ -121,12 +121,12 @@ Premier composant applicatif livré. Portail public des appels d'offres et des
 recrutements de l'AGEROUTE Guinée, adossé à un back-office SharePoint Online
 et à des flux Power Automate.
 
-| Composant | Emplacement |
-|---|---|
-| Front public (statique, sans build) | `apps/web/portail-opportunites/` |
-| Relais sécurisé candidatures / abonnements | `services/integrations/relais-portail/` |
-| Provisioning et publication SharePoint | `infrastructure/sharepoint/portail-opportunites/` |
-| Guide de déploiement et spécification des flux | `docs/cahier-des-charges/portail-opportunites/` |
+| Composant                                      | Emplacement                                       |
+| ---------------------------------------------- | ------------------------------------------------- |
+| Front public (statique, sans build)            | `apps/web/portail-opportunites/`                  |
+| Relais sécurisé candidatures / abonnements     | `services/integrations/relais-portail/`           |
+| Provisioning et publication SharePoint         | `infrastructure/sharepoint/portail-opportunites/` |
+| Guide de déploiement et spécification des flux | `docs/cahier-des-charges/portail-opportunites/`   |
 
 Le guide de déploiement décrit l'ensemble de la procédure, de la création du
 site SharePoint à la recette. Les deux composants Node fonctionnent sans
