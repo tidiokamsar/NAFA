@@ -255,6 +255,182 @@ services:
     networks:
       - nafa-dev
 
+  # ---------------------------------------------------------------- Masters
+  # The four Masters share one schema, one database and therefore one set of
+  # migrations: `iam-migrate` already applies `database/migrations` in full, so
+  # none of them carries a migrator of its own. They only wait for it.
+  #
+  # Ports continue the 3000 / 3100 spacing rather than the 40xx lane ranges,
+  # which PARALLEL-AGENTS.md reserves for processes started outside Docker.
+
+  geography:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/geography/Dockerfile
+      target: runtime
+    image: nafa/geography:dev
+    container_name: nafa-geography
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      iam-migrate:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: nafa-geography
+      PORT: "3200"
+      DATABASE_URL: postgresql://nafa:nafa_dev_password@postgres:5432/nafa_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: local-dev-secret-not-for-any-deployed-environment
+      KAFKA_BROKERS: redpanda:29092
+      LOG_PRETTY: "false"
+      OTEL_ENABLED: "true"
+    ports:
+      - "3200:3200" # API + Swagger at http://localhost:3200/api/docs
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3200/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - nafa-dev
+
+  products:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/products/Dockerfile
+      target: runtime
+    image: nafa/products:dev
+    container_name: nafa-products
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      iam-migrate:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: nafa-products
+      PORT: "3300"
+      DATABASE_URL: postgresql://nafa:nafa_dev_password@postgres:5432/nafa_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: local-dev-secret-not-for-any-deployed-environment
+      KAFKA_BROKERS: redpanda:29092
+      LOG_PRETTY: "false"
+      OTEL_ENABLED: "true"
+    ports:
+      - "3300:3300" # API + Swagger at http://localhost:3300/api/docs
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3300/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - nafa-dev
+
+  trade:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/trade/Dockerfile
+      target: runtime
+    image: nafa/trade:dev
+    container_name: nafa-trade
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      iam-migrate:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: nafa-trade
+      PORT: "3400"
+      DATABASE_URL: postgresql://nafa:nafa_dev_password@postgres:5432/nafa_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: local-dev-secret-not-for-any-deployed-environment
+      KAFKA_BROKERS: redpanda:29092
+      LOG_PRETTY: "false"
+      OTEL_ENABLED: "true"
+    ports:
+      - "3400:3400" # API + Swagger at http://localhost:3400/api/docs
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3400/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - nafa-dev
+
+  actor:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/actor/Dockerfile
+      target: runtime
+    image: nafa/actor:dev
+    container_name: nafa-actor
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      iam-migrate:
+        condition: service_completed_successfully
+    environment:
+      NODE_ENV: production
+      SERVICE_NAME: nafa-actor
+      PORT: "3500"
+      DATABASE_URL: postgresql://nafa:nafa_dev_password@postgres:5432/nafa_dev
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: local-dev-secret-not-for-any-deployed-environment
+      KAFKA_BROKERS: redpanda:29092
+      LOG_PRETTY: "false"
+      OTEL_ENABLED: "true"
+    ports:
+      - "3500:3500" # API + Swagger at http://localhost:3500/api/docs
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3500/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - nafa-dev
+
 volumes:
   pg_data:
   redis_data:
