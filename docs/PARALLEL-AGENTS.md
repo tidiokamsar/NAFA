@@ -11,37 +11,91 @@ ou dans la même base.
 Une _lane_ = un agent actif = un worktree + une plage de ports + une base + un index Redis.
 Tenir ce tableau à jour est la responsabilité de la personne qui lance l'agent.
 
-| Lane | Agent       | Ticket                        | Worktree                                                                                  | Périmètre exclusif                                                                                                   | Ports | Base     | Redis |
-| ---- | ----------- | ----------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----- | -------- | ----- |
-| A    | Claude Code | portails candidature / relais | `.worktrees/portail`, `.worktrees/relais`                                                 | docs portails                                                                                                        | 40xx  | `nafa_a` | db 1  |
-| B    | Codex       | —                             | `.worktrees/ai-readiness`                                                                 | —                                                                                                                    | 41xx  | `nafa_b` | db 2  |
-| C    | Copilot     | —                             | —                                                                                         | —                                                                                                                    | 42xx  | `nafa_c` | db 3  |
-| D    | —           | —                             | —                                                                                         | —                                                                                                                    | 43xx  | `nafa_d` | db 4  |
-| E    | ZCode       | GEO-001, GEO-002, PROD-001    | `.worktrees/GEO-001`, `.worktrees/GEO-001-2`, `.worktrees/GEO-002`, `.worktrees/PROD-001` | `packages/geography`, `packages/products`, `services/masters/geography`, `database/schema` (une migration à la fois) | 44xx  | `nafa_e` | db 5  |
+L'attribution d'une lane est une décision humaine : les colonnes ci-dessous ne
+se déduisent d'aucune commande. Elles ne sont donc **pas** régénérées, et une
+ligne vide veut dire lane libre, pas lane inconnue.
+
+| Lane | Agent       | Ticket    | Worktree                  | Périmètre exclusif       | Ports | Base     | Redis |
+| ---- | ----------- | --------- | ------------------------- | ------------------------ | ----- | -------- | ----- |
+| A    | Claude Code | portails  | `.worktrees/relais`       | docs portails            | 40xx  | `nafa_a` | db 1  |
+| B    | Codex       | —         | `.worktrees/ai-readiness` | —                        | 41xx  | `nafa_b` | db 2  |
+| C    | —           | —         | —                         | —                        | 42xx  | `nafa_c` | db 3  |
+| D    | Claude Code | INFRA-001 | `.worktrees/INFRA-001`    | `infrastructure/docker/` | 43xx  | `nafa_d` | db 4  |
+| E    | —           | —         | —                         | —                        | 44xx  | `nafa_e` | db 5  |
 
 > Lane libre = cellules vides. **Ne jamais démarrer un agent sans lui attribuer une ligne.**
-> Lane E : les branches GEO-001 (PR #16), GEO-002 (PR #17, empilée) et
-> PROD-001 (PR #18) sont en revue — toute nouvelle migration Prisma attend
-> le merge de GEO-002 (règle « une migration en vol », AGENTS.md §2).
 
-Worktrees actuellement ouverts (`git worktree list`) :
+La lane E était attribuée à GEO-001, GEO-002 et PROD-001, décrites ici comme
+« en revue » avec les PR #16, #17 et #18. Ces trois PR sont mergées depuis
+longtemps et leurs worktrees ont été supprimés. La mention est retirée plutôt
+que corrigée : il n'y a plus rien à suivre.
 
-| Worktree                            | Branche                                                   | Remarque                     |
-| ----------------------------------- | --------------------------------------------------------- | ---------------------------- |
-| `F:/NAFA`                           | `main` — **intégration uniquement, pas de développement** |                              |
-| `F:/NAFA/.worktrees/ai-readiness`   | `codex/ai-ready-development`                              | lane B                       |
-| `F:/NAFA/.worktrees/pr-8`           | `feature/actor-001-domain`                                | fusionnée, PR #15 fermée     |
-| `F:/NAFA/.worktrees/GEO-001`        | `feature/geo-001-geography`                               | lane E, PR #16               |
-| `F:/NAFA/.worktrees/GEO-001-2`      | `feature/geo-001-2-shared-isodate`                        | lane E, absorbée par GEO-001 |
-| `F:/NAFA/.worktrees/GEO-002`        | `feature/geo-002-import-pipeline`                         | lane E, PR #17               |
-| `F:/NAFA/.worktrees/PROD-001`       | `feature/prod-001-products`                               | lane E, PR #18               |
-| `F:/NAFA/.worktrees/portail`        | `travail/portail-candidatures`                            | lane A                       |
-| `F:/NAFA/.worktrees/relais`         | `travail/portail-partage-et-referencement`                | lane A                       |
-| `F:/NAFA/.worktrees/SPR-0004`       | `fix/SPR-0004-docker-pnpm-cache`                          | posé sur `main`, rien en vol |
-| `F:/NAFA/.worktrees/SPR-0010`       | `feature/SPR-0010-ageroute-phase0`                        | posé sur `main`, rien en vol |
-| `F:/NAFA/.worktrees/CHORE-REGISTRY` | `chore/parallel-agents-registry-and-scopes`               | lane E, hygiène              |
-| `F:/NAFA/.worktrees/TRA-002`        | `feature/tra-002-offer-pipeline`                          | fusionnée, PR #22            |
-| `F:/NAFA/.worktrees/ACTOR-002`      | `feature/actor-002-persistence`                           | persistance du Master Actor  |
+### Worktrees ouverts
+
+Régénérable, contrairement au tableau des lanes — voir « Tenir ce fichier à
+jour » plus bas. État au 8 septembre 2026, `main` sur `fea3e6c`.
+
+| Worktree                  | Branche                                    | État                                         |
+| ------------------------- | ------------------------------------------ | -------------------------------------------- |
+| `F:/NAFA`                 | `main`                                     | **intégration uniquement, pas de dev**       |
+| `.worktrees/ai-readiness` | `codex/ai-ready-development`               | lane B, 12 fichiers non commités             |
+| `.worktrees/relais`       | `travail/portail-partage-et-referencement` | lane A, seule branche pas encore dans `main` |
+| `.worktrees/portail`      | `travail/portail-candidatures`             | contenu arrivé dans `main` par la PR #9      |
+| `.worktrees/PR9`          | `claude/files-sharepoint-access-48juys`    | PR #9 mergée, worktree à supprimer           |
+| `.worktrees/SPR-0010`     | `feature/SPR-0010-ageroute-phase0`         | 5 fichiers non commités                      |
+| `.worktrees/INFRA-001`    | `feature/infra-001-masters-images`         | lane D, en cours                             |
+| `.worktrees/OUT-003`      | `feature/out-003-transport`                | ouvert, rien d'écrit                         |
+| `.worktrees/REGISTRY`     | `chore/parallel-agents-registry`           | ce ticket                                    |
+| `.worktrees/OUT-002`      | `feature/out-002-outbox-relay`             | PR #29 mergée, worktree à supprimer          |
+| `.worktrees/FMT`          | `fix/format-code-workspace`                | PR #30 mergée, worktree à supprimer          |
+
+Aucune PR n'est ouverte à cette date.
+
+`.worktrees/` contient aussi des répertoires qui ne sont plus des worktrees
+git : `git worktree remove` supprime les fichiers suivis et laisse les
+`node_modules` derrière. Ils ne portent aucune source et se suppriment à la
+main.
+
+### Tenir ce fichier à jour
+
+Ce registre est arrivé dans cet état pour une raison mécanique, et la corriger
+demande de séparer deux choses que la version précédente mélangeait.
+
+**Le tableau des lanes est une décision.** Qui travaille sur quoi, avec quel
+périmètre exclusif, sur quels ports et quelle base : rien de tout cela ne se
+lit dans le dépôt. Aucune commande ne peut le produire, et il doit rester tenu
+à la main. C'est aussi la partie qui compte, puisque c'est elle qui empêche
+deux agents d'écrire au même endroit.
+
+**Le tableau des worktrees est une observation.** Il se déduit entièrement de
+`git worktree list` et de `gh pr list`. C'est lui qui se périme à chaque merge,
+et c'est lui qui a rendu le fichier faux : neuf worktrees supprimés y étaient
+encore listés, et trois PR mergées y figuraient « en revue ».
+
+La proposition tient en deux lignes de marqueurs et une commande. Encadrer la
+section régénérable :
+
+```markdown
+<!-- BEGIN worktrees -->
+
+... tableau ...
+<!-- END worktrees -->
+```
+
+et la reconstruire avec :
+
+```bash
+git worktree list --porcelain \
+  | awk '/^worktree /{w=$2} /^branch /{sub("refs/heads/","",$2); print "| `" w "` | `" $2 "` |"}'
+```
+
+Reste à décider **quand** la lancer, et c'est là que se joue l'efficacité : un
+script que personne n'exécute ne vaut pas mieux que le tableau qu'il remplace.
+Un hook `post-merge` est le déclencheur naturel, puisque c'est un merge qui
+périme la liste. Le dépôt utilise déjà Husky, donc l'endroit existe.
+
+Ce ticket ne le met pas en place : son périmètre exclusif est ce fichier, et le
+script vivrait ailleurs. C'est une proposition, à valider avant d'être écrite.
 
 ### Règle de recouvrement
 
