@@ -18,18 +18,28 @@ import {
   type OutboxRelayOptions,
   type OutboxRelayResult,
 } from './outbox-relay';
+import {
+  DEFAULT_RETENTION_OPTIONS,
+  purgePublished,
+  type OutboxRetentionOptions,
+} from './outbox-retention';
 
 export const OUTBOX_RELAY_CLIENT = Symbol('OUTBOX_RELAY_CLIENT');
 export const OUTBOX_RELAY_OPTIONS = Symbol('OUTBOX_RELAY_OPTIONS');
 
-export interface OutboxRelayRuntimeOptions extends OutboxRelayOptions {
+export interface OutboxRelayRuntimeOptions
+  extends OutboxRelayOptions, OutboxRetentionOptions {
   /** Pause between passes once the queue has been drained. */
   readonly pollIntervalMs: number;
+  /** How often the purge runs, alongside the relay loop. */
+  readonly purgeIntervalMs: number;
 }
 
 export const DEFAULT_RELAY_RUNTIME_OPTIONS: OutboxRelayRuntimeOptions = {
   ...DEFAULT_RELAY_OPTIONS,
+  ...DEFAULT_RETENTION_OPTIONS,
   pollIntervalMs: 1_000,
+  purgeIntervalMs: 60 * 60 * 1_000,
 };
 
 /**
@@ -48,6 +58,7 @@ export class OutboxRelayService
   private timer: ReturnType<typeof setTimeout> | undefined;
   private inFlight: Promise<unknown> = Promise.resolve();
   private stopping = false;
+  private lastPurgeAt = 0;
 
   constructor(
     @Inject(OUTBOX_RELAY_CLIENT) private readonly client: OutboxRelayClient,
@@ -88,6 +99,24 @@ export class OutboxRelayService
     this.timer.unref?.();
   }
 
+  /**
+   * Deletes published rows past the retention window, at most once per
+   * `purgeIntervalMs`. Returns the number deleted, or -1 when it was not due.
+   *
+   * Carried by the relay's loop rather than a timer of its own, and that is a
+   * decision rather than a shortcut (ADR-0017). The relay is already the only
+   * thing touching this table on a schedule, and an hourly job does not earn
+   * forty lines of duplicated lifecycle machinery. The coupling is also
+   * correct on its own terms: nothing becomes purgeable until something
+   * publishes, so a service with no transport has nothing to purge.
+   */
+  async maybePurge(now = Date.now()): Promise<number> {
+    if (now - this.lastPurgeAt < this.options.purgeIntervalMs) return -1;
+    this.lastPurgeAt = now;
+
+    return purgePublished(this.client, new Date(now), this.options);
+  }
+
   private async tick(): Promise<void> {
     try {
       const result = await this.relay();
@@ -96,6 +125,21 @@ export class OutboxRelayService
         this.logger.warn(
           `Outbox relay: ${result.failed} event(s) failed to publish`,
         );
+      }
+
+      // Purge failures must not stop the relay: an outbox that publishes but
+      // never trims is a disk problem, one that stops publishing is an outage.
+      const purged = await this.maybePurge().catch((error: unknown) => {
+        this.logger.error(
+          `Outbox purge failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+        return 0;
+      });
+
+      if (purged > 0) {
+        this.logger.log(`Outbox purge: ${purged} published row(s) removed`);
       }
 
       // A full batch means there is almost certainly more behind it, so drain
