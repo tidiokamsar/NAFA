@@ -24,6 +24,7 @@ vrai, et pourquoi on a changé d'avis, vaut autant que la décision elle-même.
 | [0015](0015-outbox-relay-and-retry-policy.md)                | Relais d'Outbox et politique de reprise              | Acceptée |
 | [0016](0016-outbox-transport-kafka.md)                       | Transport de l'Outbox : Kafka via Redpanda           | Acceptée |
 | [0017](0017-outbox-retention.md)                             | Rétention de l'Outbox                                | Acceptée |
+| [0018](0018-outbox-review-remarks.md)                        | Trois réserves de la revue Outbox                    | Acceptée |
 
 ## Format
 

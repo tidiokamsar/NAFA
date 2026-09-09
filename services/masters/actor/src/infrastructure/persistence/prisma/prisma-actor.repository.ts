@@ -93,6 +93,13 @@ export class PrismaActorRepository implements ActorRepository {
     // Drained before the transaction opens, and once. `pullEvents()` empties
     // the buffer, so draining inside a callback that could run twice would
     // lose the second half of the events.
+    //
+    // The consequence, which ADR-0018 chose to document rather than prevent:
+    // if the transaction below fails, these events are already gone from the
+    // aggregate while its row was never written. Nothing is lost silently —
+    // the caller gets the exception — but this instance must not be saved
+    // again. A retry on it would write the row with no events at all. Reload
+    // the aggregate instead.
     const events = actor.pullEvents();
 
     // The row and its events in one transaction (ADR-0008). A successful
